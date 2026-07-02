@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "prompt": "帮我复现这篇 PINN 论文的实验：https://arxiv.org/abs/2301.00001。我用的是 Windows 11 + NVIDIA RTX 3060，有 Conda 环境。论文有 GitHub 仓库。我需要完整的复现报告，中英双语。",
+    "expected": "触发完整 8 阶段流水线：GPU 检测(CUDA on WSL)→MinerU 解析 PDF→三方视角审阅→环境重建→基线验证→实验运行→统计验证→双语报告",
+    "domain": "AI4Math",
+    "complexity": "full_pipeline"
+  },
+  {
+    "id": 2,
+    "prompt": "这有一篇纯代数几何论文的 PDF，只有伪码没有开源代码，想从零实现它的 Groebner basis 算法然后验证结果。PDF 在 C:\\papers\\groebner.pdf，我本地有 SageMath。",
+    "expected": "触发 Phase 1.4 导师视角评估→G01 门禁标记 needs_confirmation→Phase 4 增量实现→符号等价性验证→双语报告",
+    "domain": "symbolic_algebra",
+    "complexity": "no_code_implementation"
+  },
+  {
+    "id": 3,
+    "prompt": "帮我从三方视角审阅这篇计量经济学论文：C:\\papers\\did_analysis.pdf。重点关注它的 DID 识别策略是否可信，以及复现难度有多大。我是研究生，正在考虑要不要 follow 这篇做毕业论文。",
+    "expected": "触发 Phase 1.4 三方视角分析（研究生+导师+审稿人）→reproducibility_assessment.json→G01 门禁→最终给出 follow 建议和复现路线图",
+    "domain": "economics",
+    "complexity": "three_perspective_focus"
+  }
+]
