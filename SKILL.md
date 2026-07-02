@@ -192,11 +192,12 @@ Phase 0:      Phase 0.5:       Phase 1:          G01               Phase 2:
     └── 产出: infra/gpu_manifest.json (GPU类型/驱动/框架可用性/显存)
 ```
 
-### 质量门禁 / Quality Gate
+### 🔴 CHECKPOINT G0: 质量门禁 / Quality Gate
 - 基础设施检测完成，与论文需求一致
 - `infra/infra_manifest.json` 已验证写入
 - GPU配置完成: `infra/gpu_manifest.json` 记录GPU信息
 - 对应环境配置文件就绪
+- 🛑 STOP: 任一条件不满足 → 返回 Phase 0 对应子步骤修复
 
 ---
 
@@ -282,10 +283,11 @@ Phase 0:      Phase 0.5:       Phase 1:          G01               Phase 2:
     └── 对比 version_spec.json 与实际版本，记录差异
 ```
 
-### 质量门禁 / Quality Gate
+### 🔴 CHECKPOINT G1: 质量门禁 / Quality Gate
 - 所有语言运行时和编译器版本与 `version_spec.json` 一致
 - 锁定文件已写入 `env/` 目录
 - 版本一致性验证通过
+- 🛑 STOP: 版本不匹配 → 先修复版本冲突再进入 Phase 1
 
 ---
 
@@ -486,6 +488,12 @@ PDF文件路径 / arXiv链接。
     └── 锁定: conda-lock / pip freeze > env/requirements-locked.txt
 ```
 
+### 🔴 CHECKPOINT G3: 环境就绪门禁 / Environment Readiness Gate
+- 基础导入测试通过 (python -c "import torch; import numpy")
+- 所有依赖锁定文件已写入 `env/` 目录
+- GPU 可用性已确认 (或已降级 CPU 模式)
+- 🛑 STOP: 任一条件不满足 → 返回 2.4 修复后重验
+
 ---
 
 ## 阶段 3：基线验证 / Baseline Verification
@@ -545,6 +553,12 @@ PDF文件路径 / arXiv链接。
     │   └── env/system-packages.txt
     └── 产出 reproducibility_manifest.json (更新)
 ```
+
+### 🔴 CHECKPOINT G4: 基线门禁 / Baseline Gate
+- 基线指标已记录到 `results/baseline_metrics.json`
+- tolerance_spec.json 已设定 (默认 5% 容差, 95% CI)
+- 若基线未建立 (not_testable) → 输出完整诊断, 用户决定是否继续
+- 🛑 STOP: 基线不可用时进入 Phase 4 增量实现前需用户明确同意
 
 ---
 
