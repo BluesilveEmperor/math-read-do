@@ -1006,7 +1006,7 @@ reproduction/
 |------------------|---------------|-------------------|
 | mineru-open-sdk | PDF → Markdown 解析 (含公式/表格识别) | `pip install mineru-open-sdk` |
 | openai | 三方视角审阅的 LLM 调用后端 | `pip install openai` |
-| pyyaml | MinerU 配置文件解析 | `pip install pyyaml` (建议) |
+| pyyaml | MinerU 配置文件解析 | `pip install pyyaml` |
 
 LLM 调用通过环境变量配置:
 
