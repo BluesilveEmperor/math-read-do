@@ -19,5 +19,19 @@
     "expected": "触发 Phase 1.4 三方视角分析（研究生+导师+审稿人）→reproducibility_assessment.json→G01 门禁→最终给出 follow 建议和复现路线图",
     "domain": "economics",
     "complexity": "three_perspective_focus"
+  },
+  {
+    "id": 4,
+    "prompt": "我复现这篇 CFD 论文（C:\\papers\\cfd_2024.pdf）时基线验证一直失败，运行官方代码得到的 lift 系数是 0.312±0.008，论文声称 0.328。误差超 5% 容忍度。代码是 Python + OpenFOAM wrapper，环境已经用 conda 配置好了。帮我诊断并给出修复方案。",
+    "expected": "触发 Phase 3.3 基线失败处理流程→环境诊断→Top-12 失败模式匹配→gray_areas.md 偏离记录→生成诊断报告→用户决策继续/放弃",
+    "domain": "numerical_computing",
+    "complexity": "baseline_failure_diagnosis"
+  },
+  {
+    "id": 5,
+    "prompt": "这篇优化论文（optimization_paper.pdf）的数值实验声称 SQP 算法比 ADMM 快 3 倍。我用论文给出的代码跑了 10 个种子，发现 SQP 只在 6/10 个种子上更快，而且方差很大。帮我做完整的统计验证，包括 95% CI 计算、效果量分析，并给出是否符合论文声明的判决。",
+    "expected": "触发 Phase 5 完整统计验证流程：5.1 多轮运行→5.2 统计计算(95% CI + effect size)→5.3 五态判决→5.4 诊断输出→5.5 图表+代码导出→Phase 6 双语报告",
+    "domain": "optimization",
+    "complexity": "statistical_verification"
   }
 ]
