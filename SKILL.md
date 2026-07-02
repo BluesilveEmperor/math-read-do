@@ -583,21 +583,23 @@ PDF文件路径 / arXiv链接。
 4.1 模块拆解 / Module Decomposition
     ├── 将方法拆分为功能模块 (DAG依赖图)
     ├── 定义每个模块的输入/输出接口
-    └── 拓扑排序确定实现顺序
+    ├── 拓扑排序确定实现顺序
+    └── 产出: implementation/modules_dag.json (模块依赖图)
 
 4.2 增量实现循环 / Incremental Implementation Loop
-    └── 每步循环:
-        1. 实现一个模块 (指向论文公式/算法编号)
-        2. 快速验证 (小规模测试)
-        3. 对比基线
-        4. 记录增量偏差 delta
-        5. 如 delta 异常 → 排查 → 修复 → 重测
-        6. 确认后进入下一模块
+    ├── 每步循环 (按拓扑序):
+    │   1. 实现当前模块 (指向论文公式/算法编号)
+    │   2. 快速验证: python -c "from module import *; test_small()"
+    │   3. 对比基线:  python analysis/compare.py --module <name> --baseline results/baseline_metrics.json
+    │   4. 记录增量偏差到 implementation/delta_report.json
+    │   5. 若 delta > 容忍度 → 排查 → 修复 → 回到第 2 步
+    │   6. 确认后 git commit → 记录到 implementation/implementation_log.md → 下一模块
+    └── 产出: implementation/delta_report.json (含每个模块的偏差记录)
 
 4.3 代码管理 / Code Management
-    ├── Git 版本控制 (每个模块独立 commit)
-    ├── 每个函数/类添加 docstring 标注论文出处
-    └── 命名规范遵循领域习惯
+    ├── Git 版本控制 (每个模块独立 commit, message 含论文公式/算法编号)
+    ├── 每个函数/类添加 docstring 标注论文出处 (格式: `# Ref: Section X.Y, Eq.(Z)`)
+    └── 命名规范遵循领域习惯 (如数学/经济/物理领域前缀约定)
 ```
 
 ---
