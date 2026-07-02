@@ -324,8 +324,8 @@ PDF文件路径 / arXiv链接。
     ├── 公式提取:
     │   ├── MinerU → 自动提取 LaTeX 格式公式
     │   ├── LaTeXML → 保留 LaTeX 格式
-    │   ├── Mathpix / LaTeX-OCR 辅助 (必要时)
-    │   └── 手动提取复杂公式 (必要时)
+    │   ├── Mathpix / LaTeX-OCR 辅助 (若 MinerU 公式识别不全)
+    │   └── 手动提取复杂公式 (若自动解析结果不可用)
     └── 产出: analysis/parsed_text.md + analysis/formulas.tex
     └── 注: MinerU 解析后自动报告 API 当日用量
 
@@ -649,7 +649,7 @@ PDF文件路径 / arXiv链接。
     │   │   ├── 数据来源: 从 results/raw_metrics.csv 读取或硬编码关键数据
     │   │   ├── 可重现: 固定随机种子, 记录 matplotlib/seaborn 版本
     │   │   ├── 注释: 标注论文对应图号/表号
-    │   │   └── 样式: 与论文风格尽可能一致 (配色/字体/线型)
+    │   │   └── 样式: 对齐论文的配色/字体/线型 (从论文截取风格采样)
     │   └── 验证: python results/figures/code/plot_convergence.py → 输出一致
     └── 产出:
         ├── results/figures/*.png / *.pdf (图表)
@@ -721,7 +721,7 @@ reports/
 #### 格式要求 / Format Requirements
 
 1. **标题**: 英文标题 + 空行 + 中文标题
-2. **表格**: 列标题用英文，必要时括号附中文
+2. **表格**: 列标题用英文，主表格列头含双语括号注释: `Metric / 指标`
 3. **数值**: 统一格式，小数位数一致
 4. **图表标题**: 英文在上/中文在下，或使用 `(EN) / (ZH)` 标注
 
