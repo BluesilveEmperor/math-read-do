@@ -956,7 +956,24 @@ reproduction/
 
 ---
 
-## 依赖清单 / Dependency Inventory
+## 反例与黑名单 / Anti-Patterns & Blacklist (dim9)
+
+以下是在复现流程中反复踩到的陷阱，必须避免：
+
+| # | 反模式 / Anti-Pattern | 后果 / Consequence | 正确做法 / Correct Approach |
+|---|----------------------|-------------------|---------------------------|
+| 1 | **MinerU token 未配置就执行 Phase 1.1** | 脚本报 401 错误，用户困惑 | 先检查 `~/.mineru/config.yaml`，未配置则引导用户前往 https://mineru.net/apiManage/token 获取 |
+| 2 | **Windows 上直跑 Linux 路径的脚本** | `\r\n` 换行符破坏 shell 脚本，路径分隔符不兼容 | 使用 WSL2 或 `scripts/enable_gpu.ps1` 等 Windows 原生脚本 |
+| 3 | **Phase 0.5 先装包再装语言运行时** | Conda/pip SAT 求解器死锁，版本冲突 | 严格按 语言运行时 → 版本管理器 → 锁定 → 包的顺序 |
+| 4 | **Phase 5.1 只跑一个种子就下判决** | 非确定性被忽略，判决不可信 | 至少 N=5 个种子，用 95% CI 做统计判决，不用单次结果 |
+| 5 | **Phase 6 只生成英文报告** | 中文用户/审稿人无法阅读 | 每份报告必须同时生成 `.md`(EN) 和 `.zh.md`(ZH)，双语表格表头用 `Metric / 指标` 格式 |
+| 6 | **Phase 1.4 跳过三方审阅直接进 Phase 2** | 论文理解不充分，复现方向错误 | 必须跑完 Phase 1.4，至少获得 reproducibility_assessment.json 后再过 G01 门禁 |
+| 7 | **Phase 5.5 导出图表时不导出生成代码** | 图表无法独立复现，违背 FAIR 原则 | 每张图必须附带可独立运行的 `results/figures/code/plot_*.py` |
+| 8 | **Phase 0.2 跳过可行性预判直接上环境** | 遇到私有数据/专利代码/特定硬件时大量浪费 | Phase 0.2 先做快速可行性标记，Phase 1.4 再做精确的可复现性评估 |
+| 9 | **Phase 3.4 不生成锁文件** | 环境漂移后无法精确重建，复现失败 | 每步环境配置后必须产生锁文件 (conda-lock / Manifest.toml / renv.lock) |
+| 10 | **Phase 2 依赖用 pip 和 conda 混合一次性安装** | SAT 求解器死锁，或隐式覆盖 | 严格 conda → pip 顺序，单步验证，锁定后再安装下一个 |
+
+---
 
 | 依赖 / Dependency | 用途 / Purpose | 安装方式 / Install |
 |------------------|---------------|-------------------|
