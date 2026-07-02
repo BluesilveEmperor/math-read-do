@@ -1,3 +1,18 @@
+---
+name: math-paper-reproduction
+description: >-
+  数学文献实验复现标准化工作流 / Standardized Math Paper Reproduction Pipeline
+  8阶段全链路：宿主检测 → 版本管理 → MinerU PDF解析 → 三方视角审阅(研究生/导师/审稿人) →
+  环境重建 → 基线验证 → 增量实现 → 统计验证 → 双语报告 → 制品打包。
+  支持数值计算/符号代数/AI4Math/统计/优化/经济学。每份报告必须中英双语。
+  Triggers: 复现, reproduction, 实验复现, reproduce paper, 复现论文, 重现实验,
+  reproduce experiment, 复现报告, reproduction report, PDF解析, paper parsing, 实验重现
+compatibility:
+  - python3 (mineru-open-sdk >= 0.2.5, openai)
+  - 配置文件: ~/.mineru/config.yaml (MinerU token)
+  - 环境变量: LLM_API_KEY, LLM_API_BASE, LLM_MODEL
+---
+
 # Mathematical Literature Experiment Reproduction Standardized Workflow
 # 数学文献实验复现标准化流程
 
