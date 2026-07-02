@@ -1,11 +1,17 @@
----
-name: math-read-do
+import sys, os
+sys.stdout.reconfigure(encoding='utf-8')
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+path = os.path.join(script_dir, 'SKILL.md')
+
+content = r'''---
+name: math-paper-reproduction
 description: >-
   数学文献实验复现标准化工作流 / Standardized Math Paper Reproduction Pipeline
   8阶段全链路：宿主检测 → 版本管理 → MinerU PDF解析(含公式/表格/图表) →
   三方视角审阅(研究生深度理解/导师可复现性评估/审稿人批判审查) →
   环境重建 → 基线验证 → 增量实现 → 统计验证(五态判决+95%CI) → 双语报告 → 制品打包。
-  覆盖数学全领域：纯数学、应用数学、统计学、运筹学、计算数学、AI4Math等。每份报告必须中英双语。
+  支持数值计算/符号代数/AI4Math/统计/优化/经济学。每份报告必须中英双语。
   Triggers: 复现, reproduction, 实验复现, reproduce paper, 复现论文, 重现实验,
   reproduce experiment, 复现报告, reproduction report, PDF解析, paper parsing, 实验重现,
   重现论文, 论文重现, 数值复现, 论文复现, paper reproduction, experiment reproduction,
@@ -316,3 +322,20 @@ export LLM_API_KEY='your-key'
 - MaRDIFlow: A Workflow Framework for Documentation and Integration of FAIR Computational Experiments
 - repo2docker. https://repo2docker.readthedocs.io/
 - Apptainer. https://apptainer.org/
+'''
+
+with open(path, 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print(f"Written {len(content)} bytes to SKILL.md")
+
+# Verify
+with open(path, 'rb') as f:
+    raw = f.read()
+decoded = raw.decode('utf-8')
+good_keywords = ['宿主检测', '版本管理', '三方视角审阅', '可复现性评估', '复现验证']
+for kw in good_keywords:
+    if kw in decoded:
+        print(f"  OK: '{kw}' found")
+    else:
+        print(f"  BAD: '{kw}' NOT found")
