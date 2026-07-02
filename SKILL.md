@@ -30,17 +30,6 @@ This skill defines a standardized workflow for reproducing experiments from math
 - 优化 / Optimization (convex, non-convex, combinatorial)
 - **经济学 / Economics (计量/DID/IV/DSGE)** ← 新增经济类论文支持
 
-### PDF解析方式 / PDF Parsing Methods
-- **MinerU SDK (首选)** — 原生数学公式/表格/图表识别 (pip install mineru-open-sdk)
-- arXiv LaTeXML — 后备 (arXiv论文最佳公式保留)
-- PyMuPDF — 二级后备
-- Tesseract OCR — 最终后备 (扫描件)
-
-### 三方视角审阅 / Three-Perspective Review
-- **研究生视角** — 深度理解模型/公式/方法，指导复现计划
-- **导师视角** — 可复现性评估，决定 G0 门禁
-- **审稿人视角** — 批判性审查，辅助判决与诊断
-
 ### 核心原则 / Core Principles
 1. **双语输出** / **Bilingual Output**: 所有报告文档必须有中英文双版本，文件命名 `.md`(英文) / `.zh.md`(中文)
 2. **增量验证** / **Incremental Validation**: 每添加一个模块即验证一次
@@ -74,13 +63,15 @@ Phase 0:      Phase 0.5:       Phase 1:          G01               Phase 2:
                                         │
                     ┌───────────────────┼───────────────────┐
                     ▼                   ▼                   ▼
-              Phase 5:            Phase 6:             Phase 7:
-              实验验证             双语报告              制品打包
-              ├─ 多轮运行           ├─ 数据报告.en.md    ├─ 证据包
-              ├─ 统计验证           ├─ 数据报告.zh.md    ├─ 溯源链
-              ├─ 结果判决           ├─ 对比表.en.md      └─ 可选上链
-              ├─ 诊断输出           ├─ 对比表.zh.md
-              └─ 图表+代码导出       └─ 图表源码清单
+               Phase 5:            Phase 6:             Phase 7:
+               实验验证             双语报告              制品打包
+               ├─ 多轮运行           ├─ 复现报告(中+英)   ├─ 证据包
+               ├─ 统计验证           ├─ 对比表(中+英)     ├─ 溯源链
+               ├─ 结果判决 ← 引用    ├─ 诊断(中+英)       └─ 三方审阅纳入
+               │  审稿人视角          ├─ RUN_SUMMARY(中+英)
+               ├─ 诊断输出 ← 引用    └─ 图表源码清单
+               │  审稿人问题点
+               └─ 图表+代码导出
 ```
 
 ---
