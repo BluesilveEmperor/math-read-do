@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Version Specification / 版本规格",
+  "description": "声明论文复现所需的所有语言运行时和编译器版本 / Declares all language runtime and compiler versions required for reproduction",
+  "type": "object",
+  "required": ["python"],
+  "properties": {
+    "python": {
+      "type": "string",
+      "description": "Python version / Python版本, e.g. 3.10.14",
+      "examples": ["3.8.18", "3.10.14", "3.11.9", "3.12.3"]
+    },
+    "julia": {
+      "type": "string",
+      "description": "Julia version / Julia版本, e.g. 1.6.7",
+      "examples": ["1.6.7", "1.9.4", "1.10.2"]
+    },
+    "r": {
+      "type": "string",
+      "description": "R version / R版本, e.g. 4.3.3"
+    },
+    "node": {
+      "type": "string",
+      "description": "Node.js version / Node.js版本, e.g. 20.11.0"
+    },
+    "java": {
+      "type": "string",
+      "description": "Java version / Java版本, e.g. 17.0.9"
+    },
+    "cuda": {
+      "type": "string",
+      "description": "CUDA version / CUDA版本, e.g. 11.8",
+      "examples": ["11.8", "12.3", "12.4"]
+    },
+    "gcc": {
+      "type": "string",
+      "description": "GCC version / GCC版本, e.g. 11.4.0",
+      "examples": ["9.5.0", "11.4.0", "12.3.0"]
+    },
+    "gfortran": {
+      "type": "string",
+      "description": "GFortran version / GFortran版本 (usually matches GCC)"
+    },
+    "cudnn": {
+      "type": "string",
+      "description": "cuDNN version / cuDNN版本, e.g. 8.9.7"
+    },
+    "mpi": {
+      "type": "string",
+      "description": "MPI implementation and version / MPI实现和版本, e.g. openmpi-4.1.5"
+    },
+    "blas": {
+      "type": "string",
+      "description": "BLAS implementation / BLAS实现, e.g. openblas, mkl, blis",
+      "enum": ["openblas", "mkl", "blis", "atlas", "accelerate"]
+    }
+  },
+  "additionalProperties": {
+    "type": "string",
+    "description": "Additional language or tool version / 额外的语言或工具版本"
+  }
+}

@@ -1,0 +1,137 @@
+schema_version: 2.0
+default_entrypoint: math_reproduction_workflow_skill
+
+metadata:
+  name: Math Paper Reproduction Workflow
+  description: 数学文献实验复现标准化流程 / Standardized Math Paper Reproduction Pipeline
+  domain: mathematics
+  subdomains: [numerical_computing, symbolic_algebra, ai4math, statistics, optimization]
+  languages: [zh, en]
+
+skills:
+  - name: infrastructure_orchestration_skill
+    phase: infrastructure
+    path: skills/infrastructure_orchestration_skill
+    description: 宿主环境检测与VM/容器编排 / Host detection and VM/container orchestration
+    risk_level: medium
+    requires_approval_for: [vm_provisioning, docker_build, wsl_setup]
+    output_artifacts:
+      - infra/infra_manifest.json
+      - infra/gpu_manifest.json
+      - infra/Vagrantfile
+      - infra/Dockerfile
+    requires_skills: []
+
+  - name: version_management_skill
+    phase: environment
+    path: skills/version_management_skill
+    description: 语言运行时与编译器版本管理 / Language runtime and compiler version management
+    risk_level: medium
+    requires_approval_for: [install_language_runtime, change_compiler_version, install_cuda]
+    output_artifacts:
+      - env/version_spec.json
+      - env/reproduction_manifest.json
+      - env/conda-lock.yml
+    requires_skills: [infrastructure_orchestration_skill]
+
+  - name: paper_parsing_skill
+    phase: analysis
+    path: skills/paper_parsing_skill
+    description: 论文解析与三方视角深度分析 / Paper parsing with three-perspective deep analysis
+    risk_level: low
+    requires_approval_for: [llm_api_call]
+    output_artifacts:
+      - analysis/paper_summary.json
+      - analysis/parsed_text.md
+      - analysis/formulas.tex
+      - analysis/gray_areas.md
+      - analysis/*_student_review.md
+      - analysis/*_advisor_review.md
+      - analysis/*_reviewer_review.md
+      - analysis/reproducibility_assessment.json
+      - analysis/review_manifest.json
+    requires_skills: []
+
+  - name: environment_setup_skill
+    phase: environment
+    path: skills/environment_setup_skill
+    description: 依赖管理与环境构建 / Dependency management and environment building
+    risk_level: medium
+    requires_approval_for: [dependency_change, system_package_install]
+    output_artifacts:
+      - env/environment.yml
+      - env/requirements-locked.txt
+    requires_skills: [version_management_skill]
+
+  - name: baseline_verification_skill
+    phase: verification
+    path: skills/baseline_verification_skill
+    description: 基线验证 / Baseline verification
+    risk_level: medium
+    requires_approval_for: [modify_source_code, run_experiment]
+    output_artifacts:
+      - results/baseline_metrics.json
+      - results/tolerance_spec.json
+    requires_skills: [environment_setup_skill, paper_parsing_skill]
+
+  - name: incremental_implementation_skill
+    phase: implementation
+    path: skills/incremental_implementation_skill
+    description: 增量实现 / Incremental implementation
+    risk_level: high
+    requires_approval_for: [write_code, modify_source, add_dependency]
+    output_artifacts:
+      - implementation/implementation_log.md
+      - implementation/delta_report.json
+    requires_skills: [baseline_verification_skill]
+
+  - name: experiment_execution_skill
+    phase: execution
+    path: skills/experiment_execution_skill
+    description: 实验运行与结果收集 / Experiment execution and result collection
+    risk_level: medium
+    requires_approval_for: [run_multi_seed, extend_budget]
+    output_artifacts:
+      - results/raw_metrics.csv
+      - logs/run.log
+      - results/figures/*.png
+      - results/figures/code/plot_*.py
+    requires_skills: [incremental_implementation_skill]
+
+  - name: statistical_verification_skill
+    phase: verification
+    path: skills/statistical_verification_skill
+    description: 统计验证与判决 / Statistical verification and verdict
+    risk_level: low
+    requires_approval_for: []
+    output_artifacts:
+      - reports/verdict.json
+      - reports/reproduction_report.md
+      - reports/reproduction_report.zh.md
+    requires_skills: [experiment_execution_skill]
+
+  - name: bilingual_report_skill
+    phase: reporting
+    path: skills/bilingual_report_skill
+    description: 中英双语报告生成 / Bilingual report generation (zh + en)
+    risk_level: low
+    requires_approval_for: []
+    output_artifacts:
+      - reports/reproduction_report.md
+      - reports/reproduction_report.zh.md
+      - reports/comparison_table.md
+      - reports/comparison_table.zh.md
+      - reports/RUN_SUMMARY.md
+      - reports/RUN_SUMMARY.zh.md
+    requires_skills: [statistical_verification_skill]
+
+  - name: artifact_packaging_skill
+    phase: packaging
+    path: skills/artifact_packaging_skill
+    description: 制品打包与溯源 / Artifact packaging and provenance
+    risk_level: low
+    requires_approval_for: [publish_artifact, sign_attestation]
+    output_artifacts:
+      - dist/artifact_bundle.zip
+      - dist/provenance_chain.json
+    requires_skills: [bilingual_report_skill]

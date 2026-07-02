@@ -1,0 +1,13 @@
+{
+  "python": "3.10.14",
+  "julia": "",
+  "r": "",
+  "node": "",
+  "java": "",
+  "cuda": "",
+  "gcc": "11.4.0",
+  "gfortran": "11.4.0",
+  "cudnn": "",
+  "mpi": "",
+  "blas": "openblas"
+}

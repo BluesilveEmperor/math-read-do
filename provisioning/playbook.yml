@@ -1,0 +1,213 @@
+---
+# Ansible Playbook - Math Reproduction VM Provisioning
+# Ansible剧本 - 数学复现VM配置
+- name: Provision Math Reproduction VM / 配置数学复现虚拟机
+  hosts: all
+  become: yes
+  vars:
+    paper_domain: "numerical"
+    python_version: "3.10.14"
+    julia_version: ""
+    cuda_required: false
+    gcc_version: "11"
+    create_user: "vagrant"
+    user_home: "/home/{{ create_user }}"
+
+  tasks:
+    # ========== System packages / 系统包 ==========
+    - name: Update apt cache / 更新apt缓存
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install essential system packages / 安装基础系统包
+      apt:
+        name:
+          - build-essential
+          - git
+          - curl
+          - wget
+          - vim
+          - htop
+          - bc
+          - unzip
+          - pkg-config
+        state: present
+
+    - name: Install HPC libraries / 安装HPC库
+      apt:
+        name:
+          - libopenmpi-dev
+          - libfftw3-dev
+          - libhdf5-dev
+          - liblapack-dev
+          - libblas-dev
+        state: present
+      when: paper_domain == "numerical"
+
+    # ========== GCC version management / GCC版本管理 ==========
+    - name: Install specific GCC version / 安装特定GCC版本
+      apt:
+        name:
+          - "gcc-{{ gcc_version }}"
+          - "g++-{{ gcc_version }}"
+          - "gfortran-{{ gcc_version }}"
+        state: present
+
+    - name: Set GCC alternatives / 设置GCC优先级
+      shell: |
+        update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-{{ gcc_version }} 100
+        update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-{{ gcc_version }} 100
+        update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-{{ gcc_version }} 100
+        update-alternatives --set gcc /usr/bin/gcc-{{ gcc_version }}
+        update-alternatives --set g++ /usr/bin/g++-{{ gcc_version }}
+        update-alternatives --set gfortran /usr/bin/gfortran-{{ gcc_version }}
+      when: gcc_version != ""
+
+    # ========== Python (pyenv) ==========
+    - name: Install pyenv dependencies / 安装pyenv依赖
+      apt:
+        name:
+          - libssl-dev
+          - zlib1g-dev
+          - libbz2-dev
+          - libreadline-dev
+          - libsqlite3-dev
+          - libncursesw5-dev
+          - xz-utils
+          - tk-dev
+          - libxml2-dev
+          - libxmlsec1-dev
+          - libffi-dev
+          - liblzma-dev
+        state: present
+
+    - name: Install pyenv / 安装pyenv
+      become: yes
+      become_user: "{{ create_user }}"
+      shell: |
+        if [ ! -d "{{ user_home }}/.pyenv" ]; then
+          curl https://pyenv.run | bash
+        fi
+        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> {{ user_home }}/.bashrc
+        echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> {{ user_home }}/.bashrc
+        echo 'eval "$(pyenv init -)"' >> {{ user_home }}/.bashrc
+      args:
+        executable: /bin/bash
+        creates: "{{ user_home }}/.pyenv/bin/pyenv"
+
+    - name: Install Python version via pyenv / 通过pyenv安装Python
+      become: yes
+      become_user: "{{ create_user }}"
+      shell: |
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init -)"
+        pyenv install {{ python_version }} --skip-existing
+        pyenv global {{ python_version }}
+      args:
+        executable: /bin/bash
+      when: python_version != ""
+
+    - name: Install Miniconda / 安装Miniconda
+      become: yes
+      become_user: "{{ create_user }}"
+      shell: |
+        if [ ! -d "{{ user_home }}/miniconda3" ]; then
+          mkdir -p {{ user_home }}/miniconda3
+          curl -fsSL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o {{ user_home }}/miniconda3/miniconda.sh
+          bash {{ user_home }}/miniconda3/miniconda.sh -b -u -p {{ user_home }}/miniconda3
+          rm {{ user_home }}/miniconda3/miniconda.sh
+        fi
+        echo '. "{{ user_home }}/miniconda3/etc/profile.d/conda.sh"' >> {{ user_home }}/.bashrc
+        echo 'conda activate base' >> {{ user_home }}/.bashrc
+      args:
+        executable: /bin/bash
+        creates: "{{ user_home }}/miniconda3/bin/conda"
+
+    # ========== Julia (juliaup) ==========
+    - name: Install juliaup / 安装juliaup
+      become: yes
+      become_user: "{{ create_user }}"
+      shell: |
+        curl -fsSL https://install.julialang.org | sh -s -- -y
+      args:
+        executable: /bin/bash
+        creates: "{{ user_home }}/.juliaup/bin/juliaup"
+      when: julia_version != ""
+
+    - name: Install Julia version / 安装指定Julia版本
+      become: yes
+      become_user: "{{ create_user }}"
+      shell: |
+        export PATH="$HOME/.juliaup/bin:$PATH"
+        juliaup add {{ julia_version }}
+        juliaup default {{ julia_version }}
+      args:
+        executable: /bin/bash
+      when: julia_version != ""
+
+    # ========== CUDA ==========
+    - name: Install CUDA toolkit / 安装CUDA工具包
+      shell: |
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+        dpkg -i cuda-keyring_1.1-1_all.deb
+        apt-get update
+        apt-get -y install cuda-toolkit-12-4
+      args:
+        executable: /bin/bash
+        creates: /usr/local/cuda-12.4
+      when: cuda_required
+
+    - name: Set CUDA environment variables / 设置CUDA环境变量
+      lineinfile:
+        path: "{{ user_home }}/.bashrc"
+        line: "{{ item }}"
+      with_items:
+        - "export PATH=/usr/local/cuda/bin:$PATH"
+        - "export CUDA_VISIBLE_DEVICES=0"
+        - "export CUDA_DEVICE_ORDER=PCI_BUS_ID"
+      when: cuda_required
+
+    - name: Configure GPU performance mode / GPU性能模式配置
+      shell: |
+        nvidia-smi -pm 1  # persistence mode
+        nvidia-smi -ac 5001,1590  # max clock (adjust per GPU model)
+      when: cuda_required
+      ignore_errors: yes
+
+    - name: Add GPU env script to profile / GPU环境脚本加入profile
+      copy:
+        dest: "{{ user_home }}/gpu_env.sh"
+        content: |
+          export CUDA_DEVICE_ORDER="PCI_BUS_ID"
+          export CUDA_VISIBLE_DEVICES="0"
+          export PYTORCH_CUDA_ALLOC_CONF="max_split_size_mb:128"
+        owner: "{{ create_user }}"
+        mode: '0644'
+      when: cuda_required
+
+    - name: Source GPU env in bashrc / bashrc中引用GPU环境
+      lineinfile:
+        path: "{{ user_home }}/.bashrc"
+        line: "[ -f ~/gpu_env.sh ] && source ~/gpu_env.sh"
+      when: cuda_required
+
+    # ========== Final verification / 最终验证 ==========
+    - name: Verify installations / 验证安装
+      become: yes
+      become_user: "{{ create_user }}"
+      shell: |
+        echo "=== Verification / 验证 ==="
+        echo "Python: $(python3 --version 2>&1)"
+        echo "GCC: $(gcc --version 2>&1 | head -1)"
+        echo "Julia: $(julia --version 2>&1 || echo 'NOT_INSTALLED')"
+        echo "CUDA: $(nvcc --version 2>&1 | grep release || echo 'NOT_INSTALLED')"
+        echo "MPI: $(mpirun --version 2>&1 | head -1 || echo 'NOT_INSTALLED')"
+      args:
+        executable: /bin/bash
+      register: verify_output
+
+    - name: Print verification / 打印验证结果
+      debug:
+        msg: "{{ verify_output.stdout_lines }}"
