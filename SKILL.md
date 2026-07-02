@@ -137,14 +137,23 @@ Phase 0:      Phase 0.5:       Phase 1:          G01               Phase 2:
     │   ├── wsl --install -d Ubuntu-24.04
     │   ├── (如已安装) wsl --set-version <distro> 2
     │   ├── CUDA on WSL: 安装 NVIDIA CUDA on WSL driver
-    │   └── 文件系统建议: 代码放在 \\wsl$\Ubuntu\home\<user>\ 避免跨FS性能损失
+    │   ├── 文件系统建议: 代码放在 \\wsl$\Ubuntu\home\<user>\ 避免跨FS性能损失
+    │   └── 失败处理:
+    │       ├── wsl --install 失败 → 检查 BIOS 虚拟化开启 + Hyper-V 启用
+    │       └── 仍失败 → 切换到 Vagrant VM (路径B)
     ├── 路径B - Vagrant VM:
     │   ├── vagrant init ubuntu/noble64
     │   ├── vagrant up --provider virtualbox
-    │   └── vagrant ssh 进入VM
+    │   ├── vagrant ssh 进入VM
+    │   └── 失败处理:
+    │       ├── vagrant up 超时 → vagrant destroy -f && vagrant up --no-provision
+    │       └── 仍失败 → 使用 Vagrantfile 中备用 provider (vmware/hyperv)
     ├── 路径C - Docker:
     │   ├── docker pull ubuntu:24.04
-    │   └── docker compose up -d
+    │   ├── docker compose up -d
+    │   └── 失败处理:
+    │       ├── docker pull 超时 → 配置国内镜像源 (/etc/docker/daemon.json registry-mirrors)
+    │       └── 仍失败 → 切换到 Native (路径D)
     └── 路径D - Native:
         └── 直接使用宿主包管理器
 
@@ -447,13 +456,25 @@ PDF文件路径 / arXiv链接。
 
 2.2 环境构建 / Environment Build
     ├── Conda/Mamba:
-    │   └── mamba env create -f env/environment.yml
+    │   ├── mamba env create -f env/environment.yml
+    │   └── 失败处理:
+    │       ├── 依赖冲突 → mamba clean --all && mamba env create --force
+    │       └── 仍失败 → 逐个安装核心包，跳过冲突依赖，记录排除项
     ├── Python venv:
-    │   └── python -m venv .venv && pip install -r requirements.txt
+    │   ├── python -m venv .venv && pip install -r requirements.txt
+    │   └── 失败处理:
+    │       ├── pip install 超时 → pip --default-timeout=120 install -r requirements.txt
+    │       └── 仍失败 → 分批次安装: 先核心(科学计算)再领域包
     ├── Julia:
-    │   └── julia --project -e 'using Pkg; Pkg.instantiate()'
+    │   ├── julia --project -e 'using Pkg; Pkg.instantiate()'
+    │   └── 失败处理:
+    │       ├── 注册表问题 → julia -e 'using Pkg; Pkg.Registry.add("General")'
+    │       └── 仍失败 → 使用 Manifest.toml 精确版本
     └── 系统级库:
-        └── apt install / yum install (在VM/容器内)
+        ├── apt install / yum install (在VM/容器内)
+        └── 失败处理:
+            ├── apt install 权限 → sudo 或无密码 sudo 配置
+            └── 仍失败 → 使用 conda 安装替代包
 
 2.3 确定性配置 / Deterministic Configuration
     ├── 随机种子固定:
@@ -505,10 +526,25 @@ PDF文件路径 / arXiv链接。
     └── 记录 tolerance_spec.json
 
 3.3 基线失败处理 / Baseline Failure Handling
-    ├── 环境诊断: 依赖缺失/版本冲突/路径问题
+    ├── 环境诊断:
+    │   ├── 依赖缺失 → pip list / conda list 对比 requirements
+    │   ├── 版本冲突 → conda env export 查看实际版本 vs paper 声明
+    │   ├── 路径问题 → 检查 PYTHONPATH / LD_LIBRARY_PATH / JULIA_LOAD_PATH
+    │   └── GPU 不可用 → 检查 nvidia-smi + CUDA_VISIBLE_DEVICES + framework 版本
     ├── 代码修复: 仅必要的最小改动
+    │   ├── import 路径修正 → 修复相对/绝对路径
+    │   ├── API 变更适配 → 查阅 changelog，仅替换已废弃 API
+    │   └── Python 2/3 差异 → 使用 six/future 兼容层
+    │   └── 规则: 不做功能扩展，只做最小化兼容修复
     ├── 记录所有偏离到 analysis/gray_areas.md
-    └── 如基线无法建立, 标记为不可复现并停止
+    │   ├── 环境差异: 原始版本 vs 实际版本
+    │   ├── 代码改动: 原始代码 vs 适配后代码 (git diff)
+    │   └── 参数假设: 论文未明确参数 vs 本次使用的值
+    ├── 失败处理:
+    │   ├── 代码 bug 无法绕过 → 创建 issue 记录，标记为 not_testable
+    │   ├── 环境不可重建 → 切换到不同 OS/容器重试
+    │   └── 如基线无法建立 → 标记为 not_testable，输出完整诊断
+    └── 产出: analysis/gray_areas.md (含所有偏离记录)
 
 3.4 基线锁定 / Baseline Lock
     ├── 记录 commit SHA / 代码快照
