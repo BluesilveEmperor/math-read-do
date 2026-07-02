@@ -304,6 +304,10 @@ PDF文件路径 / arXiv链接。
 
 ```
 1.1 PDF解析 / PDF Parsing
+    ├── 🔴 CHECKPOINT: 确认 MinerU token 已配置 (检查 ~/.mineru/config.yaml)
+    │   ├── 已配置 → 使用 MinerU SDK (首选)
+    │   ├── 未配置 → 引导用户创建配置文件，或降级到 LaTeXML/PyMuPDF
+    │   └── 降级后果: 公式/表格识别精度下降
     ├── 解析方法 (按优先级降序尝试):
     │   1. MinerU SDK (mineru-open-sdk) ← 首选 (含公式/表格/图表识别)
     │      ├── 安装: pip install mineru-open-sdk
@@ -408,6 +412,12 @@ PDF文件路径 / arXiv链接。
     │   ├── reproducibility_assessment.json    # 可复现性评估 (G0门禁输入)
     │   └── review_manifest.json               # 审阅清单
     └── 门禁: G2 论文理解门禁扩展 — paper_summary.json 审查 + reproducibility_assessment.json 可用
+
+    └── 🔴 G01 门禁: 审查 reproducibility_assessment.json 决定是否继续
+        ├── recommendation=proceed → 直接进入 Phase 2
+        ├── recommendation=proceed_with_caution → 进入 Phase 2，记录已知风险
+        ├── recommendation=needs_confirmation → 🛑 STOP: 向用户展示风险标记，获取确认
+        └── recommendation=discourage → 🛑 STOP: 不建议复现，展示理由供用户决策
 ```
 
 ---
@@ -562,6 +572,11 @@ PDF文件路径 / arXiv链接。
 
 ```
 5.1 多轮运行 / Multi-Seed Execution
+    ├── 🔴 CHECKPOINT: 确认实验参数和运行次数
+    │   ├── 基线代码可用? (Phase 3 已通过 → 继续)
+    │   ├── 随机种子数: 默认 N=5 (可自定义)
+    │   ├── 预期运行时间: 根据测试运行估算
+    │   └── GPU 已启用? (检查 infra/gpu_manifest.json)
     ├── 设置 N 个随机种子 (默认 N=5)
     ├── 每轮独立执行
     └── 记录所有指标到 results/raw_metrics.csv
@@ -643,6 +658,16 @@ PDF文件路径 / arXiv链接。
 
 ### 输出 / Output
 `reports/` 目录下的中英双语文档。
+
+### 步骤 / Steps
+
+```
+🔴 CHECKPOINT: 确认所有数据就绪再生成报告
+├── Phase 5 判决产出? (reports/verdict.json)
+├── Phase 5.5 图表就绪? (results/figures/*.png)
+├── Phase 1.4 三方审阅就绪? (analysis/*_review.md)
+└── 所有路径正确? (检查 relative path 一致性)
+```
 
 ### 文档清单 / Document Inventory
 
@@ -775,12 +800,19 @@ Status / 状态: ✅ Reproduced / 复现成功
 
 ```
 7.1 证据包构建 / Artifact Bundle
+    ├── 🔴 CHECKPOINT: 确认证据包完整性
+    │   ├── 代码快照就绪? (git commit SHA)
+    │   ├── 环境锁文件完整? (env/conda-lock.yml + requirements-locked.txt)
+    │   ├── 三方审阅已包含? (analysis/*_review.md)
+    │   ├── 中英双语报告配对? (reports/*.md + *.zh.md)
+    │   └── 图表代码自包含? (results/figures/code/plot_*.py)
     ├── 代码快照 (Git commit SHA + diff)
     ├── 环境锁定文件 (conda-lock / Manifest.toml / system-packages)
     ├── 基础设施检测 (infra/infra_manifest.json)
     ├── 版本锁定 (env/reproduction_manifest.json)
     ├── 运行日志 (logs/)
     ├── 原始结果 (results/raw_metrics.csv + 图)
+    ├── 三方审阅 (analysis/*_review.md + reproducibility_assessment.json)
     ├── 双语报告 (reports/*.md + reports/*.zh.md)
     └── 打包: dist/reproduction_<paper>_<date>.zip
 
