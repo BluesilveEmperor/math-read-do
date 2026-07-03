@@ -6,15 +6,46 @@ description: >-
   三方视角审阅(研究生深度理解/导师可复现性评估/审稿人批判审查) →
   环境重建 → 基线验证 → 增量实现 → 统计验证(五态判决+95%CI) → 双语报告 → 制品打包。
   覆盖数学全领域：纯数学、应用数学、统计学、运筹学、计算数学、AI4Math等。每份报告必须中英双语。
+<<<<<<< HEAD
+=======
+
+  集成三大 Nature 子技能：
+  - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
+  - nature-figure/：出版级图表生成 (Python/R, Nature/CNS 风格)
+  - nature-paper2ppt/：论文一键转为中文组会PPT (6类论文叙事弧)
+
+>>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
   Triggers: 复现, reproduction, 实验复现, reproduce paper, 复现论文, 重现实验,
   reproduce experiment, 复现报告, reproduction report, PDF解析, paper parsing, 实验重现,
   重现论文, 论文重现, 数值复现, 论文复现, paper reproduction, experiment reproduction,
   reproduce results, reproduce figures, 重现结果, 重现图表, 复现结果, 复现图表,
   reproducibility check, 可复现性评估, 复现验证
+<<<<<<< HEAD
+=======
+
+  # nature-reader triggers
+  读论文, 读文献, 论文阅读, 论文分析, read paper, read article, 审阅论文, extract paper,
+  understand paper, 文献分析, 论文理解, 文章解读, 解析文献, 科研论文阅读
+
+  # nature-figure triggers
+  nature figure, 论文配图, 学术图表, 科研绘图, 作图, figure, plot for paper,
+  publication figure, 出版级图表, 杂志图, 论文图, figure for paper, scientific figure,
+  journal figure, figure generation, 图表生成, 可视化论文, 数据可视化
+
+  # nature-paper2ppt triggers
+  论文做PPT, 论文汇报, 组会PPT, 文献汇报, 学术汇报, 做幻灯片, 讲paper,
+  读书报告PPT, paper to slides, journal club, 论文转PPT, 学术演讲
+>>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 compatibility:
   - python3 (mineru-open-sdk >= 0.2.5, openai)
   - 配置文件: ~/.mineru/config.yaml (MinerU token)
   - 环境变量: LLM_API_KEY, LLM_API_BASE, LLM_MODEL
+<<<<<<< HEAD
+=======
+  - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
+  - nature-figure: Python (matplotlib/seaborn) 或 R (ggplot2/patchwork/ComplexHeatmap)
+  - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
+>>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 ---
 
 # Mathematical Literature Experiment Reproduction Standardized Workflow
@@ -258,8 +289,41 @@ compatibility:
 ## 文件结构 / Directory Structure
 
 ```
+<<<<<<< HEAD
 reproduction/
 ├── SKILL.md
+=======
+math-read-do/
+├── SKILL.md                     # 主 skill 入口
+├── nature-reader/               # 子技能：论文阅读与结构化提取
+│   ├── SKILL.md
+│   ├── README.md
+│   ├── manifest.yaml
+│   ├── static/
+│   │   ├── core/                # 核心原则、工作流、输出协议
+│   │   └── fragments/source/    # 来源格式路由 (pdf-text/scanned-pdf/html/doi-arxiv/pasted-text)
+│   └── references/              # 图提取、接地规则、输出规范、论文解剖
+├── nature-figure/               # 子技能：出版级图表生成
+│   ├── SKILL.md
+│   ├── README.md
+│   ├── manifest.yaml
+│   ├── static/
+│   │   ├── core/                # 核心契约、立场声明
+│   │   └── fragments/backend/   # 后端选择 (python/r)
+│   └── references/              # 图表契约、后端选择、设计理论、通用模式等
+├── nature-paper2ppt/            # 子技能：论文→PPTX
+│   ├── SKILL.md
+│   ├── README.md
+│   ├── manifest.yaml
+│   ├── static/
+│   │   ├── core/                # 原则、工具链、工作流、输出质量
+│   │   └── fragments/paper_type/# 论文类型叙事弧 (discovery/methods/resource/clinical/materials/review)
+│   └── references/              # 设计与布局、图表资产、自审校
+├── _shared/                     # 共享层
+│   ├── README.md
+│   ├── core/                    # 伦理、论文类型分类、阅读工作流、术语账本
+│   └── journal-formats/         # 期刊格式参考 (nat-comms)
+>>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 ├── skills/registry.yaml
 ├── infra/              # 基础设施 (manifest/Vagrantfile/Dockerfile/apptainer)
 ├── provisioning/       # 配置脚本 (ansible/版本管理器/CUDA/HPC)
@@ -305,6 +369,36 @@ export LLM_API_KEY='your-key'
 
 **风险分级**: 低(只读分析, 无需审批) / 中(运行前计划审批) / 高(逐条审批)
 
+<<<<<<< HEAD
+=======
+---
+
+## 集成 Nature 子技能 / Integrated Nature Skills
+
+本 skill 集成了三个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
+
+### 子技能路由
+
+| 子技能 | 目录 | 入口文件 | 主要用途 |
+|--------|------|---------|---------|
+| nature-reader | `nature-reader/` | `SKILL.md` + `manifest.yaml` | 科研论文智能阅读、结构化提取、6种来源格式路由 |
+| nature-figure | `nature-figure/` | `SKILL.md` + `manifest.yaml` | 出版级图表生成，Python/R 双后端，含 QA 循环 |
+| nature-paper2ppt | `nature-paper2ppt/` | `SKILL.md` + `manifest.yaml` | 论文→中文 PPTX，6类论文叙事弧，自审校循环 |
+| _shared | `_shared/` | 无入口，被子技能引用 | 术语账本、论文类型分类法、伦理规范、Nat Communs 格式 |
+
+### 与主流程的协同
+
+- **nature-reader** 可增强 Phase 1 (论文解析与三方审阅)，提供替代 PDF 解析策略和结构化输出格式。
+- **nature-figure** 可增强 Phase 5 (图表导出)，提供出版级图表样式和质量门禁。
+- **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
+
+### 调用方式
+
+每个子技能有独立的 `SKILL.md` + `manifest.yaml`，通过 load_skill 加载后自动读取对应的 static/fragments/references。子技能之间的共享内容通过 `_shared/` 目录引用，无需重复加载。
+
+---
+
+>>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 ## 参考文献 / References
 
 - MaRDI Mathematical Research Data Initiative. https://www.mardi4nfdi.de/
@@ -316,3 +410,9 @@ export LLM_API_KEY='your-key'
 - MaRDIFlow: A Workflow Framework for Documentation and Integration of FAIR Computational Experiments
 - repo2docker. https://repo2docker.readthedocs.io/
 - Apptainer. https://apptainer.org/
+<<<<<<< HEAD
+=======
+- nature-reader. https://github.com/Yuan1z0825/nature-skills
+- nature-figure. https://github.com/Yuan1z0825/nature-skills
+- nature-paper2ppt. https://github.com/Yuan1z0825/nature-skills
+>>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)

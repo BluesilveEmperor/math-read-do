@@ -33,5 +33,12 @@
     "expected": "触发 Phase 5 完整统计验证流程：5.1 多轮运行→5.2 统计计算(95% CI + effect size)→5.3 五态判决→5.4 诊断输出→5.5 图表+代码导出→Phase 6 双语报告",
     "domain": "optimization",
     "complexity": "statistical_verification"
+  },
+  {
+    "id": 6,
+    "prompt": "我刚刚复现完一篇机器学习论文，现在需要三件事：(1) 用 nature-reader 把论文 PDF（C:\\papers\\ml_methods_2025.pdf）做一次结构化阅读，提取核心方法、公式和实验设计；(2) 用 nature-figure 生成一张复现结果对比图（Python 后端），展示我的复现 vs 论文声称的 F1 值差异；(3) 用 nature-paper2ppt 把复现结果做一份组会汇报 PPT。这篇论文是 methods 类型的，提出了一个新的损失函数。",
+    "expected": "依次触发三个 nature 子技能：nature-reader→结构化阅读输出；nature-figure→Python matplotlib 对比图；nature-paper2ppt→methods 类型 PPTX，含 nature-reader 输出和 nature-figure 生成的图作为素材",
+    "domain": "cross_skill",
+    "complexity": "nature_skills_integration"
   }
 ]
