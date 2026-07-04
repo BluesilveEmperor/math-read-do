@@ -132,7 +132,7 @@
 | Output / 产出 | Consumed By / 消费方 | Purpose / 用途 |
 |--------------|---------------------|---------------|
 | Student Review / 研究生审阅 | Phase 2-4 (Plan + Implement) | 深度理解模型/方法，指导复现计划 |
-| Advisor Review / 导师审阅 | G0 Gate (Phase 1→2) | 可复现性评级决定是否继续 |
+| Advisor Review / 导师审阅 | G01 Gate (Phase 1→2) | 可复现性评级决定是否继续 |
 | Reviewer Review / 审稿人审阅 | Phase 5 (Verdict) | 批判性审查辅助判决和诊断 |
 
 ---

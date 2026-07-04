@@ -7,16 +7,20 @@
 reporting
 
 ## Mandatory Rule / 强制规则
-所有报告文档必须同时生成 `.md` (英文) 和 `.zh.md` (中文) 两个版本。
+所有报告文档必须同时生成 `.md` (英文) 和 `-CN.md` (中文) 两个版本。
 
 ## 文档清单 / Document Inventory
 
 | Doc | EN file | ZH file | Source Template |
 |-----|---------|---------|----------------|
-| 完整复现报告 | `reports/reproduction_report.md` | `reports/reproduction_report.zh.md` | `templates/reproduction_report.template.md` |
-| 实验结果对比表 | `reports/comparison_table.md` | `reports/comparison_table.zh.md` | `templates/comparison_table.template.md` |
-| 运行摘要 | `reports/RUN_SUMMARY.md` | `reports/RUN_SUMMARY.zh.md` | `templates/RUN_SUMMARY.template.md` |
-| 诊断分析 | `reports/diagnosis.md` | `reports/diagnosis.zh.md` | `templates/diagnosis.template.md` |
+| 完整复现报告 | `实验复刻结果汇总/实验报告/复现报告.md` | `实验复刻结果汇总/实验报告/复现报告-CN.md` | `templates/reproduction_report.template.md` |
+| 实验结果对比表 | `实验复刻结果汇总/实验结果对比表/实验结果对比表.md` | `实验复刻结果汇总/实验结果对比表/实验结果对比表-CN.md` | `templates/comparison_table.template.md` |
+| 运行摘要 | `实验复刻结果汇总/实验报告/运行摘要.md` | `实验复刻结果汇总/实验报告/运行摘要-CN.md` | `templates/RUN_SUMMARY.template.md` |
+| 诊断分析 | `实验复刻结果汇总/实验报告/诊断分析.md` | `实验复刻结果汇总/实验报告/诊断分析-CN.md` | `templates/diagnosis.template.md` |
+| 图表源码 (Python) | `实验复刻结果汇总/实验图表（含代码）/code/python/plot_*.py` | — | 必选, 含 [A][B] 区域注释 |
+| 图表源码 (LaTeX) | `实验复刻结果汇总/实验图表（含代码）/code/latex/plot_*.tex` | — | 必选, 含 [A][B] 区域注释 |
+| 图表源码 (MATLAB) | `实验复刻结果汇总/实验图表（含代码）/code/matlab/plot_*.m` | — | 可选 |
+| 图表源码 (Tableau) | `实验复刻结果汇总/实验图表（含代码）/code/tableau/plot_*.twb` | — | 可选 |
 
 ## 报告规范 / Report Specifications
 
@@ -47,17 +51,17 @@ reporting
 | 🔧 | Config error | 配置错误 |
 
 ### 5. 文件命名 / File Naming
-- 英文版: `document_name.md`
-- 中文版: `document_name.zh.md`
-- JSON 数据: `document_name.json` (字段含 `_en` / `_zh` 后缀)
+- 英文版: `文件名.md`
+- 中文版: `文件名-CN.md`
+- JSON 数据: `文件名.json` (字段含 `_en` / `_zh` 后缀)
 
 ## Step-by-Step Process / 执行步骤
 
 ### Step 1: Gather Data / 收集数据
 从各阶段产物中提取:
-- `results/verdict.json` - 判决结果
-- `results/raw_metrics.csv` - 原始指标
-- `results/statistical_summary.json` - 统计分析
+- `实验复刻结果汇总/实验报告/判决结果.json` - 判决结果
+- `results/raw_metrics.csv` - 原始指标 (中间产物)
+- `results/statistical_summary.json` - 统计分析 (中间产物)
 - `infra/infra_manifest.json` - 基础设施
 - `env/reproduction_manifest.json` - 环境清单
 
@@ -66,13 +70,12 @@ reporting
 
 ### Step 3: Cross-Validation / 交叉验证
 - 中英文版本数据一致
-- 数值与 `verdict.json` 一致
+- 数值与 `判决结果.json` 一致
 - 图表引用正确
 
 ## Outputs / 产出
-- `reports/reproduction_report.md` + `.zh.md`
-- `reports/comparison_table.md` + `.zh.md`
-- `reports/RUN_SUMMARY.md` + `.zh.md`
-- `reports/diagnosis.md` + `.zh.md`
-- `reports/verdict.json` (含中英文双字段)
-- `reports/html/` (可选HTML版本)
+- `实验复刻结果汇总/实验报告/复现报告.md` + `-CN.md`
+- `实验复刻结果汇总/实验结果对比表/实验结果对比表.md` + `-CN.md`
+- `实验复刻结果汇总/实验报告/运行摘要.md` + `-CN.md`
+- `实验复刻结果汇总/实验报告/诊断分析.md` + `-CN.md`
+- `实验复刻结果汇总/实验报告/判决结果.json` (含中英文双字段)

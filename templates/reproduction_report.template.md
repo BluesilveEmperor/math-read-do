@@ -17,23 +17,11 @@
 | GPU Mode / GPU模式 | {{GPU_MODE}} (Discrete / 独显) |
 | Total Wall Time / 总耗时 | {{WALL_TIME}} |
 
-## 2. 判决结果 / Verdict
+## 2. 论文深度分析 / Paper Deep Analysis
 
-| Metric / 指标 | Paper Claim / 论文值 | Reproduced Mean / 复现均值 | 95% CI | Δ(%) | Verdict / 判决 |
-|---------------|---------------------|--------------------------|--------|------|---------------|
-{% for metric in metrics %}
-| {{metric.name}} | {{metric.paper_value}} | {{metric.reproduced_mean}} | {{metric.ci_lower}} ~ {{metric.ci_upper}} | {{metric.delta_pct}} | {{metric.verdict_icon}} {{metric.verdict}} |
-{% endfor %}
+{% if PERSPECTIVE_TYPE == 'advisor' %}
 
-**整体判决 / Overall Verdict**: {{OVERALL_VERDICT_ICON}} {{OVERALL_VERDICT_EN}} / {{OVERALL_VERDICT_ZH}}
-
-## 3. 论文深度分析 / Paper Deep Analysis
-
-### 3.1 研究生视角 — 方法理解 / Student Perspective — Method Understanding
-
-{{STUDENT_ANALYSIS}}
-
-### 3.2 导师视角 — 可复现性评估 / Advisor Perspective — Reproducibility Assessment
+### 导师视角 — 可复现性评估 / Advisor Perspective — Reproducibility Assessment
 
 | Dimension / 维度 | Rating / 评级 |
 |-----------------|--------------|
@@ -43,7 +31,9 @@
 | Environment Specified / 环境说明 | {{ENV_SPEC}} |
 | Recommendation / 建议 | {{REPRO_RECOMMENDATION}} |
 
-### 3.3 审稿人视角 — 批判性审查 / Reviewer Perspective — Critical Review
+{% elif PERSPECTIVE_TYPE == 'reviewer' %}
+
+### 审稿人视角 — 批判性审查 / Reviewer Perspective — Critical Review
 
 | Dimension / 维度 | Finding / 发现 |
 |-----------------|---------------|
@@ -52,47 +42,15 @@
 | Key Concerns / 主要担忧 | {{REVIEWER_CONCERNS}} |
 | Methodological Issues Found / 发现的方法论问题 | {{REVIEWER_ISSUES}} |
 
-> 三方审阅详情见 `analysis/<paper>_student_review.md` / `_advisor_review.md` / `_reviewer_review.md`
+{% else %}
 
-## 4. 判决含义 / Verdict Definitions
+### 研究生视角 — 方法理解 / Student Perspective — Method Understanding
 
-| 判决 / Verdict | 含义 / Meaning |
-|---------------|---------------|
-| ✅ within_ci | 论文声称值在复现的95%置信区间内 / Paper claim falls within the 95% CI of reproduced runs |
-| ⚠️ close_outside_ci | 在CI外但在容忍度内 / Outside CI but within tolerance band |
-| ❌ outside_tolerance | 超出容忍度范围 / Outside both CI and tolerance |
-| 🚫 not_testable | 无法完整运行实验 / Could not complete execution |
-| 🔧 static_check_failed | 静态检查未通过 / Static analysis check failed |
+{{STUDENT_ANALYSIS}}
 
-## 5. 环境摘要 / Environment Summary
+{% endif %}
 
-### 宿主系统 / Host System
-
-| Property / 属性 | Value / 值 |
-|----------------|-----------|
-| Operating System / 操作系统 | {{HOST_OS_DETAIL}} |
-| Kernel / 内核 | {{KERNEL}} |
-| CPU / 处理器 | {{CPU_INFO}} |
-| Memory / 内存 | {{MEMORY}} |
-| GPU | {{GPU_DETAIL}} |
-
-### 运行环境 / Runtime Environment
-
-| Property / 属性 | Value / 值 |
-|----------------|-----------|
-| Python | {{PYTHON_VERSION}} |
-| Julia | {{JULIA_VERSION}} |
-| CUDA | {{CUDA_VERSION}} |
-| GCC | {{GCC_VERSION}} |
-| Conda Env | {{CONDA_ENV_NAME}} |
-
-### 锁定文件 / Lock Files
-
-- `env/conda-lock.yml`: {{CONDA_LOCK_HASH}}
-- `env/requirements-locked.txt`: {{PIP_LOCK_HASH}}
-- `env/reproduction_manifest.json`: {{MANIFEST_HASH}}
-
-## 6. 实验结果对比 / Results Comparison
+## 3. 实验结果对比 / Results Comparison
 
 ### 主要指标 / Primary Metrics
 
@@ -108,7 +66,7 @@
 | {{sec.name_en}} / {{sec.name_zh}} | {{sec.paper_value}} | {{sec.reproduced_value}} | {{sec.delta_pct}} |
 {% endfor %}
 
-## 7. 诊断与讨论 / Diagnosis & Discussion
+## 4. 诊断与讨论 / Diagnosis & Discussion
 
 ### 复现质量评估 / Reproduction Quality Assessment
 
@@ -134,40 +92,39 @@ The following details were not explicitly specified in the paper; assumptions we
 - {{gray.en}} / {{gray.zh}}
 {% endfor %}
 
-## 8. 复现结论 / Reproduction Conclusion
+## 5. 复现结论 / Reproduction Conclusion
 
 **{{CONCLUSION_EN}}**
 
 **{{CONCLUSION_ZH}}**
 
-## 9. 图表与源码清单 / Figures & Source Code
+## 6. 图表与源码清单 / Figures & Source Code
 
-| Figure / 图 | File / 文件 | Source Code / 源码 | Paper Ref / 论文引用 |
-|------------|------------|-------------------|-------------------|
+| Figure / 图 | File / 文件 | Python | LaTeX | MATLAB | Tableau | Paper Ref / 论文引用 |
+|------------|------------|--------|-------|--------|---------|-------------------|
 {% for fig in figures %}
-| {{fig.title_en}} / {{fig.title_zh}} | `results/figures/{{fig.filename}}` | `results/figures/code/plot_{{fig.code_name}}.py` | {{fig.paper_ref}} |
+| {{fig.title_en}} / {{fig.title_zh}} | `实验复刻结果汇总/实验图表（含代码）/{{fig.filename}}` | `code/python/plot_{{fig.code_name}}.py` | `code/latex/plot_{{fig.code_name}}.tex` | {% if fig.has_matlab %}`code/matlab/plot_{{fig.code_name}}.m`{% else %}—{% endif %} | {% if fig.has_tableau %}`code/tableau/plot_{{fig.code_name}}.twb`{% else %}—{% endif %} | {{fig.paper_ref}} |
 {% endfor %}
 
 验证所有图表可独立复现:
+
 ```bash
-cd results/figures/code
-python -m pip install -r requirements.txt
-python plot_convergence.py   # 应输出 convergence.png
-python plot_comparison.py    # 应输出 comparison.png
+# Python (必选)
+cd 实验复刻结果汇总/实验图表（含代码）/code/python
+pip install -r requirements.txt
+python plot_convergence.py
+
+# LaTeX (必选)
+cd ../latex
+pdflatex plot_convergence.tex
+
+# MATLAB (若适用)
+cd ../matlab
+matlab -batch "plot_convergence"
+
+# Tableau (若适用)
+cd ../tableau && open plot_convergence.twb
 ```
-
-## 10. 附件 / Attachments
-
-- `results/raw_metrics.csv`: 所有种子的原始指标 / Raw metrics from all seeds
-- `results/figures/`: 实验结果图表 / Experiment figures
-- `results/figures/code/`: 图表生成代码 (自包含, 可独立运行) / Figure generation code (self-contained, standalone)
-- `logs/run_experiment_*.log`: 完整运行日志 / Full execution logs
-- `env/reproduction_manifest.json`: 复现环境清单 / Reproduction manifest
-- `infra/gpu_manifest.json`: GPU检测与配置记录 / GPU detection and configuration
-- `analysis/*_student_review.md`: 研究生视角审阅报告 / Student perspective review
-- `analysis/*_advisor_review.md`: 导师视角审阅报告 / Advisor perspective review
-- `analysis/*_reviewer_review.md`: 审稿人视角审阅报告 / Reviewer perspective review
-- `analysis/reproducibility_assessment.json`: 可复现性评估 / Reproducibility assessment
 
 ---
 

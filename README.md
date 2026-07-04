@@ -12,17 +12,17 @@
 |------|------|----------|
 | Phase 0 | 基础设施检测 | `infra_manifest.json` |
 | Phase 0.5 | 版本管理 | `version_spec.json` |
-| Phase 1 | 论文解析 & 三方审阅 | `reproducibility_assessment.json` |
+| Phase 1 | 论文解析 & 视角审阅 | `reproducibility_assessment.json` |
 | Phase 2 | 环境重建 | `conda-lock.yml` |
 | Phase 3 | 基线验证 | `baseline_metrics.json` |
 | Phase 4 | 增量实现（按需） | `delta_report.json` |
-| Phase 5 | 统计判决 & 图表导出 | `verdict.json` |
-| Phase 6 | 双语报告生成 | `reproduction_report.md/zh.md` |
-| Phase 7 | 制品打包 & 溯源 | `artifact_bundle.zip` |
+| Phase 5 | 统计判决 & 图表导出 | `判决结果.json` |
+| Phase 6 | 双语报告生成 | `复现报告.md / -CN.md` |
+| Phase 7 | 最终整理与完整性确认 | `实验复刻结果汇总/` |
 
-## 三方视角审阅
+## 视角审阅
 
-论文解析后自动执行三个视角的深度分析：
+按用户指定视角输出审阅报告，用户未指定时主动询问：
 
 - **研究生视角** — 深度理解论文方法、公式、实验设计
 - **导师视角** — 可复现性评级与教学建议
@@ -41,13 +41,9 @@ echo "token: 'your-api-key'" > ~/.mineru/config.yaml
 # 获取 Token：https://mineru.net/apiManage/token
 
 # 2. 安装依赖
-pip install mineru-open-sdk openai pyyaml
+pip install mineru-open-sdk pyyaml
 
-# 3. 配置 LLM API（用于三方审阅）
-export LLM_API_KEY='your-key'
-export LLM_MODEL='gpt-4o'
-
-# 4. 运行复现
+# 3. 运行复现
 python scripts/math_pdf_extract.py paper.pdf --output-dir analysis/
 python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/
 ```
@@ -81,7 +77,6 @@ reproduction/
 | 包 | 用途 |
 |---|------|
 | mineru-open-sdk | PDF → Markdown（含公式、表格、图表） |
-| openai | LLM 三方审阅后端 |
 | pyyaml | MinerU 配置解析 |
 
 ## 许可

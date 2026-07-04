@@ -62,7 +62,7 @@
 
 ## Context / 上下文
 
-- Error Log: `logs/run_experiment_{{RUN_ID}}.log`
-- Baseline: `results/baseline_metrics.json`
-- Version Spec: `env/version_spec.json`
-- Infra: `infra/infra_manifest.json`
+- Error Log: `../logs/run_experiment_{{RUN_ID}}.log`
+- Baseline: `../results/baseline_metrics.json`
+- Version Spec: `../env/version_spec.json`
+- Infra: `../infra/infra_manifest.json`

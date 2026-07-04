@@ -3,25 +3,20 @@ name: math-read-do
 description: >-
   数学文献实验复现标准化工作流 / Standardized Math Paper Reproduction Pipeline
   8阶段全链路：宿主检测 → 版本管理 → MinerU PDF解析(含公式/表格/图表) →
-  三方视角审阅(研究生深度理解/导师可复现性评估/审稿人批判审查) →
-  环境重建 → 基线验证 → 增量实现 → 统计验证(五态判决+95%CI) → 双语报告 → 制品打包。
+  按用户指定视角输出审阅报告(研究生/导师/审稿人) →
+  环境重建 → 基线验证 → 增量实现 → 统计验证(五态判决+95%CI) → 双语报告。
   覆盖数学全领域：纯数学、应用数学、统计学、运筹学、计算数学、AI4Math等。每份报告必须中英双语。
-<<<<<<< HEAD
-=======
 
   集成三大 Nature 子技能：
   - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
   - nature-figure/：出版级图表生成 (Python/R, Nature/CNS 风格)
   - nature-paper2ppt/：论文一键转为中文组会PPT (6类论文叙事弧)
 
->>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
   Triggers: 复现, reproduction, 实验复现, reproduce paper, 复现论文, 重现实验,
   reproduce experiment, 复现报告, reproduction report, PDF解析, paper parsing, 实验重现,
   重现论文, 论文重现, 数值复现, 论文复现, paper reproduction, experiment reproduction,
   reproduce results, reproduce figures, 重现结果, 重现图表, 复现结果, 复现图表,
   reproducibility check, 可复现性评估, 复现验证
-<<<<<<< HEAD
-=======
 
   # nature-reader triggers
   读论文, 读文献, 论文阅读, 论文分析, read paper, read article, 审阅论文, extract paper,
@@ -35,29 +30,41 @@ description: >-
   # nature-paper2ppt triggers
   论文做PPT, 论文汇报, 组会PPT, 文献汇报, 学术汇报, 做幻灯片, 讲paper,
   读书报告PPT, paper to slides, journal club, 论文转PPT, 学术演讲
->>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 compatibility:
-  - python3 (mineru-open-sdk >= 0.2.5, openai)
+  - python3 (mineru-open-sdk >= 0.2.5)
   - 配置文件: ~/.mineru/config.yaml (MinerU token)
-  - 环境变量: LLM_API_KEY, LLM_API_BASE, LLM_MODEL
-<<<<<<< HEAD
-=======
   - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
   - nature-figure: Python (matplotlib/seaborn) 或 R (ggplot2/patchwork/ComplexHeatmap)
   - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
->>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 ---
 
 # Mathematical Literature Experiment Reproduction Standardized Workflow
 # 数学文献实验复现标准化流程
 
+## 交互规则 / Interaction Rules
+
+用户未输入任何具体操作指令时，**不允许默认执行任何操作**。必须主动向用户提问，列出可执行的操作选项，等待用户选择后执行。
+
+**标准提问模板**:
+```
+请选择要执行的操作：
+
+1️⃣ 阅读论文 — 解析PDF并输出指定视角的审阅报告
+2️⃣ 复现实验 — 启动完整复现流程（Phase 0→7）
+3️⃣ 生成图表 — 基于实验数据出版级图表
+4️⃣ 制作PPT — 将论文或复现结果转为演示文稿
+```
+
+用户做出选择后，按对应流程执行。用户未指定审阅视角时，默认使用**研究生视角**（学习理解导向）。
+
 ## 核心原则 / Core Principles
 
-1. **双语输出**: 所有报告必须有中英双版本 (`.md` + `.zh.md`)
+1. **双语输出**: 所有报告必须有中英双版本 (`.md` 英文 + `-CN.md` 中文)
 2. **增量验证**: 每添加一个模块即验证一次
 3. **可审计**: 每步产生结构化产物，溯源链完整
 4. **人机协同**: 风险分级审批
 5. **锁定即契约**: 版本/环境/依赖每步锁定，不信任隐式继承
+6. **先问后做**: 用户无指令时先主动提问，确认操作后再执行
 
 ## 反例与黑名单 / Anti-Patterns & Blacklist
 
@@ -67,9 +74,9 @@ compatibility:
 | 2 | Windows 上直跑 Linux 路径脚本 | 换行符/路径分隔符不兼容 | 使用 WSL2 或 `scripts/enable_gpu.ps1` 等 Windows 原生脚本 |
 | 3 | 先装包再装语言运行时 | Conda/pip SAT 死锁 | 严格 运行时→版本管理器→锁定→包的顺序 |
 | 4 | 只跑一个种子就下判决 | 非确定性被忽略 | 至少 N=5 种子, 95% CI 统计判决 |
-| 5 | 只生成英文报告 | 中文用户无法阅读 | 每份报告同时生成 `.md` 和 `.zh.md` |
+| 5 | 只生成英文报告 | 中文用户无法阅读 | 每份报告同时生成 `.md`(英文) 和 `-CN.md`(中文) |
 | 6 | 跳过三方审阅直接进 Phase 2 | 论文理解不充分 | 必须跑完 Phase 1.4, 获得 reproducibility_assessment.json |
-| 7 | 导出图表时不导出生成代码 | 图表无法独立复现 | 每张图附带 `results/figures/code/plot_*.py` |
+| 7 | 导出图表时不导出生成代码 | 图表无法独立复现 | 每张图附带 Python+LaTeX 双平台代码 (`code/{python,latex}/plot_*`), 含 docstring/H1/宏参数注释 + [A][B] 区域标记 |
 | 8 | 跳过可行性预判直接建环境 | 遇到私有数据/硬件时大量浪费 | Phase 0 先快速可行性标记 |
 | 9 | 基线失败时不记录偏离 | 丢失诊断信息 | 基线失败必须写 `analysis/gray_areas.md` |
 | 10 | conda + pip 一次性混合安装 | SAT 求解器死锁 | 严格 conda→pip 顺序，单步验证 |
@@ -87,9 +94,9 @@ compatibility:
 | 2 | 依赖扫描→环境构建→确定性配置→验证 | `conda-lock.yml` | G3: 环境就绪 |
 | 3 | 官方代码运行→指标对齐→失败诊断→锁定 | `baseline_metrics.json` | G4: 基线建立 |
 | 4 | 模块拆解→增量实现→代码管理 | `delta_report.json` | -- |
-| 5 | 多轮运行→统计计算→五态判决→图表导出 | `verdict.json` | 5.1 参数确认 |
-| 6 | 数据就绪检测→双语报告生成(含模板) | `reproduction_report.md/zh.md` | 数据就绪 |
-| 7 | 证据包→溯源链→签名存证 | `artifact_bundle.zip` | 完整性确认 |
+| 5 | 多轮运行→统计计算→五态判决→图表导出 | `判决结果.json` | 5.1 参数确认 |
+| 6 | 数据就绪检测→双语报告生成(含模板) | `实验复刻结果汇总/实验报告/复现报告.md` + `-CN.md` | 数据就绪 |
+| 7 | 最终整理→完整性确认 | `实验复刻结果汇总/` 完整目录 | 文件就位确认 |
 
 ---
 
@@ -147,17 +154,17 @@ compatibility:
 
 1.3 **领域分类**: 关键词+依赖 → 路由到数值/符号/AI4Math/统计/优化/经济子策略
 
-1.4 **三方视角审阅**: 使用 `scripts/three_perspective_review.py` 自动执行
-    - **研究生** (Phase 1.4-A): 深度理解 -- 摘要/文献综述/研究问题/方法/结果/讨论/关键公式
+1.4 **视角审阅**: 按用户指定视角输出审阅报告；未指定时默认**研究生视角**
+    - **用户未指定视角 → 默认研究生**: 直接以研究生视角执行审阅（学习理解导向）
+    - **研究生**: 深度理解 -- 摘要/文献综述/研究问题/方法/结果/讨论/关键公式
       → 消费方: Phase 2 环境重建方法栈, Phase 4 增量实现的公式/算法参考
-    - **导师** (Phase 1.4-B): 可复现性评级 -- 方法评估/可复现性表/教学建议/reproducibility_assessment.json
+    - **导师**: 可复现性评级 -- 方法评估/可复现性表/教学建议/reproducibility_assessment.json
       → 消费方: G01 门禁 (决定是否进入复现流程)
-    - **审稿人** (Phase 1.4-C): 批判审查 -- 总体评价/方法论评估/修改意见(强制/建议/细节)/总结
+    - **审稿人**: 批判审查 -- 总体评价/方法论评估/修改意见(强制/建议/细节)/总结
       → 消费方: Phase 5 判决引擎, Phase 6 诊断章节引用
-    - 需要 `LLM_API_KEY` 环境变量; 未配置时输出占位分析
     - 执行: `python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json`
-    - 产出: `analysis/<paper>_{student,advisor,reviewer}_review.md` + `reproducibility_assessment.json` + `review_manifest.json`
-    - 三方综合: 交叉对比表 + review_manifest.json 汇总
+    - 产出: `analysis/<paper>_{student,advisor,reviewer}_review.md`（仅输出指定视角）
+    - **严禁默认输出全部视角，仅输出用户指定的单一视角**
 
 **G01 门禁**: 审查 `reproducibility_assessment.json`
     - `proceed` → 直接进 Phase 2
@@ -221,18 +228,156 @@ compatibility:
 ### Phase 5: 实验验证与统计判决 / Experiment Execution & Verdict
 
 **输入**: 可运行代码 + `results/tolerance_spec.json`
-**输出**: `results/raw_metrics.csv` + `reports/verdict.json` + `results/figures/` (图 + 生成代码)
+**输出**: `results/raw_metrics.csv` + `实验复刻结果汇总/实验报告/判决结果.json` + `实验复刻结果汇总/实验图表（含代码）/` (图 + 生成代码)
 
 5.1 **多轮运行**: 确认参数 (基线可行? N=5 种子? 运行时间? GPU 启用?) → 每轮独立执行 → `raw_metrics.csv`
 5.2 **统计计算**: 均值 x-bar + 标准差 s + 95% t-CI: x-bar +/- t*s/sqrt(N) → `statistical_summary.json`
 5.3 **五态判决**: `within_ci`→OK / `close_outside_ci`→approx / `outside_tolerance`→FAIL / `not_testable`→WARN / `static_check_failed`→FAIL
-5.4 **诊断输出**: >=2 条诊断假说 + Top-12 失败模式 + 引用审稿人视角发现 → `reports/diagnosis.md/zh.md`
+5.4 **诊断输出**: >=2 条诊断假说 + Top-12 失败模式 + 引用审稿人视角发现 → `实验复刻结果汇总/实验报告/诊断分析.md` / `诊断分析-CN.md`
 5.5 **图表+代码导出**:
     - 图形: 收敛曲线(convergence.png) / 指标对比(comparison.png) / 消融图(ablation.png) / 散点图/热力图
     - 格式: PNG (嵌入报告) + PDF (出版级)
-    - 代码自包含: 每图附带独立可运行 `results/figures/code/plot_*.py` (固定种子+对齐论文配色)
-    - 验证: `python results/figures/code/plot_convergence.py` → 输出一致
-    - 产出: `results/figures/*.png/.pdf` + `results/figures/code/plot_*.py`
+    - 代码多平台: 每图附带独立可运行代码, 覆盖以下平台:
+      - **Python** (必选): `实验复刻结果汇总/实验图表（含代码）/code/python/plot_*.py` (matplotlib/seaborn, 固定种子+对齐论文配色)
+      - **LaTeX (TikZ/pgfplots)** (必选): `实验复刻结果汇总/实验图表（含代码）/code/latex/plot_*.tex` (出版级矢量图)
+      - **MATLAB** (可选): `实验复刻结果汇总/实验图表（含代码）/code/matlab/plot_*.m`
+      - **Tableau** (可选): `实验复刻结果汇总/实验图表（含代码）/code/tableau/plot_*.twb` (工作簿/数据驱动)
+    - **代码注释要求**: Python、MATLAB、LaTeX 三者在注释规范上侧重点完全不同, 必须按各自生态规范执行, 与图表中的 [A][B]… 区域标记一一对应:
+
+      **① Python (reST/Sphinx docstring 风格)**:
+      ```python
+      def plot_convergence(train_loss, val_acc, save_path):
+          """
+          绘制训练损失收敛曲线与验证精度曲线 (双y轴叠加图)。
+
+          自动适配图例位置和轴范围, 支持双 y 轴对齐。
+          使用固定种子以保证每次输出图形一致。
+
+          :param list[float] train_loss: 每个 epoch 的训练损失值, 长度 N.
+          :param list[float] val_acc: 每个 epoch 的验证精度, 长度 N.
+          :param str save_path: 输出图片路径 (支持 .png/.pdf).
+          :return: 无返回值, 图片直接写入 save_path.
+          :raises ValueError: 当 train_loss 与 val_acc 长度不一致时抛出.
+
+          Example::
+
+              >>> plot_convergence([0.8, 0.6, 0.4], [0.7, 0.82, 0.89], "conv.png")
+          """
+          # ============================================================
+          # [A] 训练损失曲线 / Training Loss Curve
+          # 样式: 深蓝实线 (#0F4D92), linewidth=2.0, marker='o', ms=4
+          # 域: x=epoch(1-N), y=loss(0-2.5), 训练集损失下降
+          # 对应: Fig.2(a), Section 3.2
+          # ============================================================
+          ax1.plot(train_loss, color='#0F4D92', linewidth=2.0, marker='o', ms=4)
+
+          # ============================================================
+          # [B] 验证精度曲线 / Validation Accuracy Curve
+          # 样式: 绿色实线 (#8BCF8B), linewidth=2.0, marker='s', ms=4
+          # 域: x=epoch(1-N), y=accuracy(0-1.0), 验证集精度变化
+          # 对应: Fig.2(b), Section 3.3
+          # ============================================================
+          ax2.plot(val_acc, color='#8BCF8B', linewidth=2.0, marker='s', ms=4)
+
+          # 注: 增加延迟是因为底层 ORM 存在竞态条件, 需等待主从同步完成
+          time.sleep(0.5)
+      ```
+
+      **② MATLAB (H1 行 + help 注释块)**:
+      ```matlab
+      function plotConvergence(trainLoss, valAcc, savePath)
+      %PLOTCONVERGENCE 绘制训练损失收敛曲线与验证精度曲线 (双y轴叠加图)。
+      %   本函数自动适配图例位置和轴范围, 支持双 y 轴对齐。
+      %   固定随机种子确保每次输出图形一致。
+      %
+      %   语法 (Syntax):
+      %    PLOTCONVERGENCE(TRAINLOSS, VALACC)
+      %    PLOTCONVERGENCE(TRAINLOSS, VALACC, SAVEPATH)
+      %
+      %   输入参数 (Input Arguments):
+      %       TRAINLOSS - 训练损失向量, 1×N double, 每个 epoch 的损失值。
+      %       VALACC    - 验证精度向量, 1×N double, 每个 epoch 的精度值。
+      %       SAVEPATH  - 输出文件路径, char, 支持 .png/.pdf, 可选, 默认 'conv.png'。
+      %
+      %   输出参数 (Output Arguments):
+      %       无直接返回值, 图片写入 SAVEPATH 指定路径。
+      %
+      %   异常处理 (Error Handling):
+      %       若 TRAINLOSS 和 VALACC 长度不一致, 函数抛出 'LENGTH_MISMATCH' 错误ID。
+      %
+      %   示例 (Examples):
+      %       plotConvergence([0.8 0.6 0.4], [0.7 0.82 0.89])
+      %       plotConvergence([0.8 0.6 0.4], [0.7 0.82 0.89], 'conv.pdf')
+      %
+      %   参见 (See Also): plotAblation, plotComparison
+
+      % ============================================================
+      % [A] 训练损失曲线 / Training Loss Curve
+      % 样式: 深蓝实线 (#0F4D92), LineWidth=2, Marker='o', MarkerSize=4
+      % 域: x=epoch(1:N), y=loss, 训练集损失下降
+      % 对应: Fig.2(a), Section 3.2
+      % ============================================================
+      yyaxis left;
+      plot(trainLoss, 'Color', [0.059 0.302 0.573], 'LineWidth', 2, ...
+           'Marker', 'o', 'MarkerSize', 4);
+
+      % ============================================================
+      % [B] 验证精度曲线 / Validation Accuracy Curve
+      % 样式: 绿色实线 (#8BCF8B), LineWidth=2, Marker='s', MarkerSize=4
+      % 域: x=epoch(1:N), y=accuracy(0-1), 验证集精度变化
+      % 对应: Fig.2(b), Section 3.3
+      % ============================================================
+      yyaxis right;
+      plot(valAcc, 'Color', [0.545 0.812 0.545], 'LineWidth', 2, ...
+           'Marker', 's', 'MarkerSize', 4);
+
+      % 注: 增加延迟是因为底层 ORM 存在竞态条件, 需等待主从同步完成
+      pause(0.5);
+      end
+      ```
+
+      **③ LaTeX (TikZ/pgfplots 宏参数注释)**:
+      ```latex
+      % ==========================================================================
+      % FILE:        plot_convergence.tex
+      % DESCRIPTION: 绘制训练损失收敛曲线与验证精度曲线 (双y轴叠加图)。
+      %              固定随机种子以保证每次输出图形一致。
+      % DEPENDS:     \usepackage{pgfplots, tikz}
+      % ==========================================================================
+
+      \begin{tikzpicture}
+      \begin{axis}[
+          xlabel={Epoch},
+          ylabel={Loss},
+          legend pos=north east,
+      ]
+
+      % ======================================================================
+      % [A] 训练损失曲线 / Training Loss Curve
+      % 样式: blue1 (#0F4D92), thick, solid, mark=*
+      % 域: x=epoch(1:N), y=loss, 训练集损失下降
+      % 对应: Fig.2(a), Section 3.2
+      % #1 - 数据文件路径 (csv), #2 - 曲线标签 (字符串)
+      % ======================================================================
+      \addplot[color=blue1, thick, mark=*] table {data/train_loss.csv};
+      \addlegendentry{训练损失 / Training Loss}
+
+      % ======================================================================
+      % [B] 验证精度曲线 / Validation Accuracy Curve
+      % 样式: green2 (#8BCF8B), thick, solid, mark=square*
+      % 域: x=epoch(1:N), y=accuracy(0-1), 验证集精度变化
+      % 对应: Fig.2(b), Section 3.3
+      % ======================================================================
+      \addplot[color=green2, thick, mark=square*] table {data/val_acc.csv};
+      \addlegendentry{验证精度 / Val. Accuracy}
+
+      \end{axis}
+      \end{tikzpicture}
+      ```
+
+      图区域标记 [A][B][C]… 必须与图表 PDF/PNG 上的标注完全一致, 便于审阅者从 PDF 反查代码段。
+    - 验证: 每份代码标注运行环境和依赖; Python 代码必须 `python plot_*.py` → 输出一致
+    - 产出: `实验复刻结果汇总/实验图表（含代码）/*.png/.pdf` + `实验复刻结果汇总/实验图表（含代码）/code/{python,matlab,latex,tableau}/plot_*`
 
 **Top-12 失败模式**: 代码/数据缺失 | 环境漂移 | CUDA 冲突 | ABI 不兼容 | 依赖冲突 | 非确定性 | BLAS 变体 | 跨平台路径 | 数据泄露 | 预训练权重漂移 | 选择性报告 | 上游依赖位腐
 
@@ -241,30 +386,57 @@ compatibility:
 ### Phase 6: 双语报告生成 / Bilingual Report Generation
 
 **输入**: 所有阶段产出
-**输出**: `reports/` 中英双语文档
+**输出**: `实验复刻结果汇总/` 中英双语文档（在论文所在目录下创建）
 
 **确认所有数据就绪** → 判决/图表/三方审阅/路径一致 → 生成报告
 
-**文档清单** (每个 `.md` + `.zh.md`):
-- `reproduction_report.md` -- 完整报告 (模板: templates/reproduction_report.template.md)
-- `comparison_table.md` -- 对比表 (双列表格: EN/ZH 并行)
-- `diagnosis.md` -- 诊断分析
-- `RUN_SUMMARY.md` -- 运行摘要 (状态/关键结果/环境/制品)
-- `verdict.json` -- 判决 JSON (中英双语字段)
+在论文所在目录下创建 `实验复刻结果汇总/` 文件夹，内含三个子目录：
 
-**格式**: 英文标题+中文标题; 表格列头 `Metric / 指标`; 数值统一精度; 图表标题 EN/ZH 标注
+**文档清单**:
+- `实验复刻结果汇总/实验报告/复现报告.md` -- 完整报告 (英文版，模板: templates/reproduction_report.template.md)
+- `实验复刻结果汇总/实验报告/复现报告-CN.md` -- 完整报告 (中文版)
+- `实验复刻结果汇总/实验报告/诊断分析.md` -- 诊断分析 (英文)
+- `实验复刻结果汇总/实验报告/诊断分析-CN.md` -- 诊断分析 (中文)
+- `实验复刻结果汇总/实验报告/运行摘要.md` -- 运行摘要 (英文)
+- `实验复刻结果汇总/实验报告/运行摘要-CN.md` -- 运行摘要 (中文)
+- `实验复刻结果汇总/实验报告/判决结果.json` -- 判决 JSON (中英双语字段)
+- `实验复刻结果汇总/实验结果对比表/实验结果对比表.md` -- 对比表 (英文)
+- `实验复刻结果汇总/实验结果对比表/实验结果对比表-CN.md` -- 对比表 (中文)
+- `实验复刻结果汇总/实验图表（含代码）/*.png/.pdf` -- 实验图表
+- `实验复刻结果汇总/实验图表（含代码）/code/python/plot_*.py` -- Python 图表代码 (必选, 含 [A][B] 区域注释)
+- `实验复刻结果汇总/实验图表（含代码）/code/latex/plot_*.tex` -- LaTeX TikZ/pgfplots 代码 (必选, 含 [A][B] 区域注释)
+- `实验复刻结果汇总/实验图表（含代码）/code/matlab/plot_*.m` -- MATLAB 图表代码 (若适用)
+- `实验复刻结果汇总/实验图表（含代码）/code/tableau/plot_*.twb` -- Tableau 工作簿 (若适用)
+
+**格式**: 英文版 = `文件名.md`，中文版 = `文件名-CN.md`; 英文标题+中文标题; 表格列头 `Metric / 指标`; 数值统一精度; 图表标题 EN/ZH 标注
 
 ---
 
-### Phase 7: 制品打包与溯源 / Artifact Packaging & Provenance
+### Phase 7: 最终整理与完整性确认 / Final Consolidation & Integrity Check
 
 **输入**: 所有阶段产物
-**输出**: `dist/artifact_bundle.zip` + `dist/provenance_chain.json`
+**输出**: `实验复刻结果汇总/` 完整目录
 
-7.1 **证据包**: 代码快照 + 环境锁定 + 检测报告 + 版本锁定 + 运行日志 + 原始结果 + 三方审阅 + 双语报告 → 打包
-     CHECKPOINT: 完整性确认 (SHA/锁文件/审阅/双语配对/图表代码)
-7.2 **溯源链**: 每条输入→处理→输出的 SHA-256 记录 → `provenance_chain.json`
-7.3 **签名**: GPG 签名 + ACM Badge 相容存证 (可选提交公共复现账本)
+7.1 **文件归位**: 确认所有阶段产物已按以下结构归位
+     - `实验复刻结果汇总/实验报告/` — 双语报告 + 判决 JSON
+     - `实验复刻结果汇总/实验图表（含代码）/` — 图表 PNG/PDF + 多平台源码
+     - `实验复刻结果汇总/实验结果对比表/` — 双语对比表
+     CHECKPOINT: 完整性确认 (所有文件就位/双语配对/多平台图表代码齐全)
+7.2 **一致性验证**: 对比 `判决结果.json` 与报告中的数值一致性，确认图表引用正确
+
+### 后处理: 自动更新 / Post-Processing: Auto-Update (Phase 0–7 完成后执行)
+
+**执行位置**: Phase 7 完整性确认之后。向用户展示任务结果时, 一并输出更新信息。
+
+P.1 **版本检测**: 读取本地 `VERSION` 文件 → GET `raw.githubusercontent.com/.../VERSION` → 一致则跳过
+
+P.2 **更新执行**: 下载 ZIP → 解压 → 覆盖 skill 目录 → 写入新 VERSION
+
+P.3 **更新亮点**: GitHub API Compare → 提取 commits 格式化为 bullet list
+
+P.4 **失败处理**: 网络不可达→静默跳过; 下载失败→保留旧版; 均不影响本次任务结果
+
+**执行脚本**: `scripts/auto_update.ps1` (PowerShell 5.1+, 无额外依赖)
 
 ---
 
@@ -280,19 +452,15 @@ compatibility:
 | G4 | Phase 3 -> 4 | 基线指标记录+tolerance | 用户决策 |
 | G5 | Phase 4 | 每个模块 delta 在预期内 | 排查修复 |
 | G6 | Phase 5 | 五态判决产出 | 补跑统计 |
-| G66 | Phase 5.5 | 有图表时每图有独立源码 | 补导出 |
-| G7 | Phase 6 | 所有报告中英双语 | 补译 |
-| G8 | Phase 7 | 证据包完整性校验通过 | 补文件 |
+| G66 | Phase 5.5 | 有图表时每图有 Python + LaTeX 双平台源码; Python 含 reST docstring, MATLAB 含 H1 行+help 块, LaTeX 含宏参数注释; 均含 [A][B] 区域标记 | 补导出 |
+| G7 | Phase 6 | 所有报告中英双语 (`.md` + `-CN.md`) | 补译 |
+| G8 | Phase 7 | `实验复刻结果汇总/` 下所有文件就位 | 补缺文件 |
 
 ---
 
 ## 文件结构 / Directory Structure
 
 ```
-<<<<<<< HEAD
-reproduction/
-├── SKILL.md
-=======
 math-read-do/
 ├── SKILL.md                     # 主 skill 入口
 ├── nature-reader/               # 子技能：论文阅读与结构化提取
@@ -323,18 +491,29 @@ math-read-do/
 │   ├── README.md
 │   ├── core/                    # 伦理、论文类型分类、阅读工作流、术语账本
 │   └── journal-formats/         # 期刊格式参考 (nat-comms)
->>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 ├── skills/registry.yaml
+├── scripts/            # 脚本 (PDF提取/三方审阅/图表导出等)
+├── templates/          # 双语报告模板 (Jinja2)
+├── schemas/            # 校验 JSON Schema
+├── tests/              # 测试
 ├── infra/              # 基础设施 (manifest/Vagrantfile/Dockerfile/apptainer)
 ├── provisioning/       # 配置脚本 (ansible/版本管理器/CUDA/HPC)
 ├── env/                # 环境锁定 (version_spec/conda-lock/requirements/Manifest)
 ├── analysis/           # 论文分析 (summary/parsed/formulas/gray_areas/三视角审阅)
 ├── code/               # 代码 (Git repo)
 ├── logs/               # 运行日志
-├── results/            # 实验 (baseline/tolerance/raw/stat/figures+code)
-├── reports/            # 双语报告 (repro/comparison/verdict/diagnosis/RUN_SUMMARY/html)
+├── results/            # 实验 (baseline/tolerance/raw/stat)
 ├── implementation/     # 增量实现 (log/delta)
-└── dist/               # 发布制品 (bundle/provenance)
+└── 实验复刻结果汇总/   # 最终输出 (在论文所在目录创建, 非本目录)
+    ├── 实验报告/       # 双语复现报告 + 诊断 + 运行摘要 + 判决 JSON
+    ├── 实验图表（含代码）/# 图表 PNG/PDF + 多平台可运行源码
+    │   ├── code/
+    │   │   ├── python/   # Python matplotlib/seaborn (必选, 含 [A][B] 注释)
+    │   │   ├── latex/    # LaTeX TikZ/pgfplots (必选, 含 [A][B] 注释)
+    │   │   ├── matlab/   # MATLAB 代码 .m (可选)
+    │   │   └── tableau/  # Tableau 工作簿 .twb (可选)
+    │   └── *.png/.pdf    # 图表文件
+    └── 实验结果对比表/  # 双语实验结果对比表
 ```
 
 ## 依赖与配置 / Dependencies & Configuration
@@ -342,10 +521,7 @@ math-read-do/
 | 包 | 用途 | 安装 |
 |---|------|------|
 | mineru-open-sdk | PDF->Markdown (含公式/表格) | `pip install mineru-open-sdk` |
-| openai | 三方审阅 LLM 后端 | `pip install openai` |
 | pyyaml | MinerU 配置解析 | `pip install pyyaml` |
-
-**环境变量**: `LLM_API_KEY` (必填), `LLM_API_BASE` (默认 `https://api.openai.com/v1`), `LLM_MODEL` (默认 `gpt-4o`)
 
 **首次配置**:
 ```bash
@@ -353,9 +529,7 @@ math-read-do/
 mkdir -p ~/.mineru && echo "token: 'your-api-key'" > ~/.mineru/config.yaml
 # 来源: https://mineru.net/apiManage/token
 # 依赖安装
-pip install mineru-open-sdk openai pyyaml
-# LLM API
-export LLM_API_KEY='your-key'
+pip install mineru-open-sdk pyyaml
 ```
 
 ## 决策响应 / Decision Responses
@@ -368,10 +542,6 @@ export LLM_API_KEY='your-key'
 | 跳过 | skip | 跳过 |
 
 **风险分级**: 低(只读分析, 无需审批) / 中(运行前计划审批) / 高(逐条审批)
-
-<<<<<<< HEAD
-=======
----
 
 ## 集成 Nature 子技能 / Integrated Nature Skills
 
@@ -388,7 +558,7 @@ export LLM_API_KEY='your-key'
 
 ### 与主流程的协同
 
-- **nature-reader** 可增强 Phase 1 (论文解析与三方审阅)，提供替代 PDF 解析策略和结构化输出格式。
+- **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。用户未指定审阅视角时，主动询问。
 - **nature-figure** 可增强 Phase 5 (图表导出)，提供出版级图表样式和质量门禁。
 - **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
 
@@ -396,9 +566,6 @@ export LLM_API_KEY='your-key'
 
 每个子技能有独立的 `SKILL.md` + `manifest.yaml`，通过 load_skill 加载后自动读取对应的 static/fragments/references。子技能之间的共享内容通过 `_shared/` 目录引用，无需重复加载。
 
----
-
->>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
 ## 参考文献 / References
 
 - MaRDI Mathematical Research Data Initiative. https://www.mardi4nfdi.de/
@@ -410,9 +577,6 @@ export LLM_API_KEY='your-key'
 - MaRDIFlow: A Workflow Framework for Documentation and Integration of FAIR Computational Experiments
 - repo2docker. https://repo2docker.readthedocs.io/
 - Apptainer. https://apptainer.org/
-<<<<<<< HEAD
-=======
 - nature-reader. https://github.com/Yuan1z0825/nature-skills
 - nature-figure. https://github.com/Yuan1z0825/nature-skills
 - nature-paper2ppt. https://github.com/Yuan1z0825/nature-skills
->>>>>>> c8ac056 (integrate nature-reader/figure/paper2ppt sub-skills into math-read-do)
