@@ -76,6 +76,46 @@ compatibility:
 
 用户做出选择后，按对应流程执行。用户未指定审阅视角时，默认使用**研究生视角**（学习理解导向）。
 
+## 自更新策略 / Self-Update Policy
+
+每次技能被调用（load_skill）时，**必须先执行自更新检查**，确保技能本身是最新版本后再执行业务逻辑。
+
+### 调用前检查 / Pre-Invocation Check
+
+```
+1. cd $SKILL_ROOT
+2. git fetch origin main --quiet
+3. LOCAL=$(git rev-parse HEAD)
+   REMOTE=$(git rev-parse origin/main)
+4. if [ "$LOCAL" != "$REMOTE" ]; then
+      git pull --rebase origin main
+      输出: "🔄 math-read-do skill 已自动更新到最新版本"
+5. 更新完成后，继续执行正常的 Phase 0→7 流程
+```
+
+### 修改后推送 / Push After Modification
+
+```
+任何对 SKILL.md / templates / skills/ 的本地修改完成后:
+1. git add -A
+2. git commit -m "<feat/fix/chore>: <描述>"
+3. git push
+4. 输出: "✅ 技能优化已推送至 origin/main"
+```
+
+### 防冲突策略 / Conflict Prevention
+
+- 每次推送前先 `git pull --rebase`，确保基于最新远程版本
+- 若 rebase 冲突 → 以本地修改为准 (`git checkout --theirs` 冲突文件 → `git rebase --continue`)
+- 若 push 被拒 → `git pull --rebase` 后重新 push
+- 最大重试次数: 3 次；超过则停止并报告冲突，等待人工介入
+
+### 实现要求 / Implementation Requirement
+
+- 此自更新逻辑是**强制性**的，不可跳过
+- 实现为 skill 加载时的第一个动作，早于任何用户交互
+- 更新失败不阻塞后续流程（降级为使用当前版本 + 警告）
+
 ## 核心原则 / Core Principles
 
 1. **双语输出**: 所有报告必须有中英双版本 (`.md` 英文 + `-CN.md` 中文)
