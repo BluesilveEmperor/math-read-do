@@ -36,11 +36,7 @@ Memory:        {{MEMORY}}
 | `实验复刻结果汇总/实验报告/复现报告-CN.md` | Full report / 完整复现报告 (ZH) |
 | `实验复刻结果汇总/实验结果对比表/实验结果对比表.md` | Comparison table / 实验结果对比表 (EN) |
 | `实验复刻结果汇总/实验结果对比表/实验结果对比表-CN.md` | Comparison table / 实验结果对比表 (ZH) |
-| `实验复刻结果汇总/实验图表（含代码）/` | Figures & multi-platform source code / 实验图表及多平台生成代码 |
-| `实验复刻结果汇总/实验图表（含代码）/code/python/` | Python chart code (mandatory / 必选) |
-| `实验复刻结果汇总/实验图表（含代码）/code/latex/` | LaTeX TikZ chart code (mandatory / 必选) |
-| `实验复刻结果汇总/实验图表（含代码）/code/matlab/` | MATLAB chart code (if applicable / 若适用) |
-| `实验复刻结果汇总/实验图表（含代码）/code/tableau/` | Tableau workbooks (if applicable / 若适用) |
+| `实验复刻结果汇总/实验图表（含代码）/` | Figures & source code / 实验图表及生成代码 |
 | `experiment_folder/results/raw_metrics.csv` | Raw metrics / 原始指标数据 |
 | `env/reproduction_manifest.json` | Environment lock / 环境锁定清单 |
 | `infra/infra_manifest.json` | Infrastructure info / 基础设施信息 |

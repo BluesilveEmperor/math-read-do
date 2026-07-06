@@ -17,10 +17,6 @@ reporting
 | 实验结果对比表 | `实验复刻结果汇总/实验结果对比表/实验结果对比表.md` | `实验复刻结果汇总/实验结果对比表/实验结果对比表-CN.md` | `templates/comparison_table.template.md` |
 | 运行摘要 | `实验复刻结果汇总/实验报告/运行摘要.md` | `实验复刻结果汇总/实验报告/运行摘要-CN.md` | `templates/RUN_SUMMARY.template.md` |
 | 诊断分析 | `实验复刻结果汇总/实验报告/诊断分析.md` | `实验复刻结果汇总/实验报告/诊断分析-CN.md` | `templates/diagnosis.template.md` |
-| 图表源码 (Python) | `实验复刻结果汇总/实验图表（含代码）/code/python/plot_*.py` | — | 必选, 含 [A][B] 区域注释 |
-| 图表源码 (LaTeX) | `实验复刻结果汇总/实验图表（含代码）/code/latex/plot_*.tex` | — | 必选, 含 [A][B] 区域注释 |
-| 图表源码 (MATLAB) | `实验复刻结果汇总/实验图表（含代码）/code/matlab/plot_*.m` | — | 可选 |
-| 图表源码 (Tableau) | `实验复刻结果汇总/实验图表（含代码）/code/tableau/plot_*.twb` | — | 可选 |
 
 ## 报告规范 / Report Specifications
 

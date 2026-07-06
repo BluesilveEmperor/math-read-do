@@ -50,9 +50,91 @@
 
 {% endif %}
 
-## 3. 实验结果对比 / Results Comparison
+## 3. 方法原理 / Method Principles
 
-### 主要指标 / Primary Metrics
+### 核心原理 / Core Principles
+
+{{PRINCIPLE_EN}}
+
+{{PRINCIPLE_ZH}}
+
+### 数学基础 / Mathematical Foundation
+
+{% for formula in formulas %}
+**{{formula.label_en}} / {{formula.label_zh}}**:
+
+$$
+{{formula.latex}}
+$$
+
+> {{formula.explanation_en}} / {{formula.explanation_zh}}
+
+{% endfor %}
+
+### 算法流程概述 / Algorithm Workflow Overview
+
+{{ALGORITHM_WORKFLOW_EN}}
+
+{{ALGORITHM_WORKFLOW_ZH}}
+
+## 4. 创新点 / Innovations
+
+| # | Innovation / 创新点 | Description / 描述 | Ref / 论文引用 |
+|---|--------------------|--------------------|----|
+{% for innov in innovations %}
+| {{innov.id}} | {{innov.title_en}} / {{innov.title_zh}} | {{innov.description_en}} / {{innov.description_zh}} | {{innov.paper_ref}} |
+{% endfor %}
+
+{{INNOVATION_DISCUSSION_EN}}
+
+{{INNOVATION_DISCUSSION_ZH}}
+
+## 5. 优缺点分析 / Strengths & Weaknesses
+
+### 优点 / Strengths
+
+| # | Strength / 优点 | Evidence / 证据 | Impact / 影响 |
+|---|----------------|----------------|--------------|
+{% for strength in strengths %}
+| {{strength.id}} | {{strength.title_en}} / {{strength.title_zh}} | {{strength.evidence}} | {{strength.impact}} |
+{% endfor %}
+
+### 缺点 / Weaknesses
+
+| # | Weakness / 缺点 | Evidence / 证据 | Mitigation / 缓解方案 |
+|---|----------------|----------------|---------------------|
+{% for weakness in weaknesses %}
+| {{weakness.id}} | {{weakness.title_en}} / {{weakness.title_zh}} | {{weakness.evidence}} | {{weakness.mitigation}} |
+{% endfor %}
+
+{{STRENGTH_WEAKNESS_SUMMARY_EN}}
+
+{{STRENGTH_WEAKNESS_SUMMARY_ZH}}
+
+## 6. 伪代码 / Pseudocode
+
+### 核心算法伪代码 / Core Algorithm Pseudocode
+
+```
+{{PSEUDOCODE_MAIN}}
+```
+
+> {{PSEUDOCODE_MAIN_EXPLANATION_EN}} / {{PSEUDOCODE_MAIN_EXPLANATION_ZH}}
+
+{% for sub_algo in sub_algorithms %}
+### {{sub_algo.title_en}} / {{sub_algo.title_zh}}
+
+```
+{{sub_algo.pseudocode}}
+```
+
+> {{sub_algo.explanation_en}} / {{sub_algo.explanation_zh}}
+
+{% endfor %}
+
+## 7. 实验结果对比 / Results Comparison
+
+### 7.1 主要指标 / Primary Metrics
 
 | Metric / 指标 | Paper / 论文 | Reproduced / 复现 | Δ(%) | Within Tol? / 在容忍度内? |
 |---------------|-------------|-------------------|------|-------------------------|
@@ -60,13 +142,13 @@
 | {{metric.name}} | {{metric.paper_value}} | {{metric.reproduced_mean}} ± {{metric.std}} | {{metric.delta_pct}} | {{metric.within_tolerance_icon}} {{metric.within_tolerance_en}} / {{metric.within_tolerance_zh}} |
 {% endfor %}
 
-### 次指标 / Secondary Metrics
+### 7.2 次指标 / Secondary Metrics
 
 {% for sec in secondary_metrics %}
 | {{sec.name_en}} / {{sec.name_zh}} | {{sec.paper_value}} | {{sec.reproduced_value}} | {{sec.delta_pct}} |
 {% endfor %}
 
-## 4. 诊断与讨论 / Diagnosis & Discussion
+## 8. 诊断与讨论 / Diagnosis & Discussion
 
 ### 复现质量评估 / Reproduction Quality Assessment
 
@@ -92,38 +174,26 @@ The following details were not explicitly specified in the paper; assumptions we
 - {{gray.en}} / {{gray.zh}}
 {% endfor %}
 
-## 5. 复现结论 / Reproduction Conclusion
+## 9. 复现结论 / Reproduction Conclusion
 
 **{{CONCLUSION_EN}}**
 
 **{{CONCLUSION_ZH}}**
 
-## 6. 图表与源码清单 / Figures & Source Code
+## 10. 图表与源码清单 / Figures & Source Code
 
-| Figure / 图 | File / 文件 | Python | LaTeX | MATLAB | Tableau | Paper Ref / 论文引用 |
-|------------|------------|--------|-------|--------|---------|-------------------|
+| Figure / 图 | File / 文件 | Source Code / 源码 | Paper Ref / 论文引用 |
+|------------|------------|-------------------|-------------------|
 {% for fig in figures %}
-| {{fig.title_en}} / {{fig.title_zh}} | `实验复刻结果汇总/实验图表（含代码）/{{fig.filename}}` | `code/python/plot_{{fig.code_name}}.py` | `code/latex/plot_{{fig.code_name}}.tex` | {% if fig.has_matlab %}`code/matlab/plot_{{fig.code_name}}.m`{% else %}—{% endif %} | {% if fig.has_tableau %}`code/tableau/plot_{{fig.code_name}}.twb`{% else %}—{% endif %} | {{fig.paper_ref}} |
+| {{fig.title_en}} / {{fig.title_zh}} | `实验复刻结果汇总/实验图表（含代码）/{{fig.filename}}` | `实验复刻结果汇总/实验图表（含代码）/code/plot_{{fig.code_name}}.py` | {{fig.paper_ref}} |
 {% endfor %}
 
 验证所有图表可独立复现:
-
 ```bash
-# Python (必选)
-cd 实验复刻结果汇总/实验图表（含代码）/code/python
-pip install -r requirements.txt
-python plot_convergence.py
-
-# LaTeX (必选)
-cd ../latex
-pdflatex plot_convergence.tex
-
-# MATLAB (若适用)
-cd ../matlab
-matlab -batch "plot_convergence"
-
-# Tableau (若适用)
-cd ../tableau && open plot_convergence.twb
+cd 实验复刻结果汇总/实验图表（含代码）/code
+python -m pip install -r requirements.txt
+python plot_convergence.py   # 应输出 convergence.png
+python plot_comparison.py    # 应输出 comparison.png
 ```
 
 ---
