@@ -38,15 +38,12 @@ compatibility:
 **每次调用该 Skill 前，自动执行以下步骤：**
 
 1. 运行 `scripts/auto_update.sh`
-2. 脚本同时检测以下仓库的网络连通性：
-   - `https://github.com/BluesilveEmperor/math-read-do-obj`
-   - `https://gitcode.com/GLY-NXD/math-read-do-obj`
-3. **自动选源**：Pick 响应最快（延迟最低）的仓库地址
-4. **代码同步**：
+2. 脚本检测远程仓库 `https://github.com/BluesilveEmperor/math-read-do` 的 `math-read-do-obj` 分支
+3. **代码同步**：
    - 尚未初始化 Git → 自动 `git init` + 添加 remote + fetch 最新代码
    - 已有 Git 仓库 → fetch + 快速前进合并 (ff-only) 更新
    - 本地有未提交修改 → 自动 stash → 更新后 pop 恢复
-5. **无网络降级**：所有远程均不可达 → 跳过更新，继续使用本地代码
+4. **无网络降级**：远程不可达 → 跳过更新，继续使用本地代码
 
 > **注意**：该更新仅同步框架基础设施（SKILL.md、模板、脚本、测试夹具等），
 > 不覆盖 `qem_tool/` 下的算法定制代码（此类变动会通过 git 冲突机制提示手动合并）。
