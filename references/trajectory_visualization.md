@@ -72,7 +72,7 @@
 ```bash
 python scripts/trajectory_visualizer.py \
     --data results/uav_path_data.json \
-    --output results/trajectory.html \
+    --output trajectory.html \
     --mode orbit-start \
     --orbit-speed 0.5
 ```
@@ -91,7 +91,7 @@ python scripts/trajectory_visualizer.py \
 python scripts/trajectory_visualizer.py \
     --data results/path.json \
     --obstacles results/obstacles.json \
-    --output results/trajectory.html
+    --output trajectory.html
 ```
 
 障碍物格式：
@@ -123,7 +123,7 @@ python scripts/trajectory_visualizer.py \
 ```markdown
 ## 轨迹可视化
 
-双击打开 [trajectory.html](../实验图表（含代码）/trajectory.html) 查看交互式 3D 轨迹。
+双击打开 [trajectory.html](trajectory.html) 查看交互式 3D 轨迹。
 
 - 支持绕起点自动旋转和自由旋转两种模式
 - 可播放动画观察运动过程

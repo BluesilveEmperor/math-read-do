@@ -10,7 +10,7 @@ Robotics Trajectory Real-Time Visualization HTML Generator
   2. free: 自由旋转（OrbitControls 鼠标拖拽 + 滚轮缩放）
 
 用法:
-    python trajectory_visualizer.py --data results/uav_path_data.json --output results/trajectory.html
+    python trajectory_visualizer.py --data results/uav_path_data.json --output trajectory.html
     python trajectory_visualizer.py --demo-maze --output results/maze_demo.html
     python trajectory_visualizer.py --demo-random-boxes --output results/boxes_demo.html
 
@@ -585,7 +585,7 @@ def load_trajectory_data(filepath):
 def main():
     parser = argparse.ArgumentParser(description="机器人轨迹实时可视化 HTML 生成器")
     parser.add_argument("--data", help="轨迹数据 JSON 文件路径")
-    parser.add_argument("--output", default="results/trajectory.html", help="输出 HTML 文件路径")
+    parser.add_argument("--output", default="trajectory.html", help="输出 HTML 文件路径")
     parser.add_argument("--title", default="Trajectory Visualization", help="页面标题")
     parser.add_argument("--mode", default="orbit-start", choices=["orbit-start", "free"],
                         help="默认相机模式")
