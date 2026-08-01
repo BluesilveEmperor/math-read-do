@@ -234,7 +234,17 @@ compatibility:
 5.2 **统计计算**: 均值 x-bar + 标准差 s + 95% t-CI: x-bar +/- t*s/sqrt(N) → `statistical_summary.json`
 5.3 **五态判决**: `within_ci`→OK / `close_outside_ci`→approx / `outside_tolerance`→FAIL / `not_testable`→WARN / `static_check_failed`→FAIL
 5.4 **诊断输出**: >=2 条诊断假说 + Top-12 失败模式 + 引用审稿人视角发现 → `实验复刻结果汇总/实验报告/诊断分析.md` / `诊断分析-CN.md`
-5.5 **图表+代码导出**:
+5.5 **交互式轨迹可视化** (机器人路径优化论文):
+    - 生成双击即可在浏览器打开的 3D 可视化 HTML（基于 Three.js）
+    - 执行: `python scripts/trajectory_visualizer.py --data results/uav_path_data.json --output trajectory.html`
+    - 产出: 对应论文根目录下直接生成 `trajectory.html`
+    - 支持两种相机模式（可在页面切换）:
+      - **绕起点旋转 (orbit-start)**: 自动环绕起点垂直轴旋转观察
+      - **自由旋转 (free)**: 鼠标拖拽 + 滚轮缩放，双击重置
+    - 支持播放控制（播放/暂停/速度调节）、实时轨迹跟踪
+    - 支持障碍物显示、起点/终点标记
+    - 支持 3 种演示模式: `--demo-maze` / `--demo-random-boxes` / `--demo-uav-village`
+5.6 **图表+代码导出**:
     - 图形: 收敛曲线(convergence.png) / 指标对比(comparison.png) / 消融图(ablation.png) / 散点图/热力图
     - 格式: PNG (嵌入报告) + PDF (出版级)
     - 代码自包含: 每图附带独立可运行 `实验复刻结果汇总/实验图表（含代码）/code/plot_*.py` (固定种子+对齐论文配色)
