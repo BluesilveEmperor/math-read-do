@@ -5,13 +5,7 @@ description: >-
   8阶段全链路：宿主检测 → 版本管理 → MinerU PDF解析(含公式/表格/图表) →
   按用户指定视角输出审阅报告(研究生/导师/审稿人) →
   环境重建 → 基线验证 → 增量实现 → 统计验证(五态判决+95%CI) → 双语报告。
-  覆盖数学全领域：纯数学、应用数学、统计学、运筹学、计算数学、AI4Math等。
-  支持 Python(R/Python) / C++(CUDA/OpenGL) 多语言生态。
-  每份报告必须中英双语。
-
-  领域自适应路由：自动检测项目语言生态 (Python vs C++/CUDA)，匹配对应的环境构建、
-  依赖管理、增量实现和产出物验证策略。C++/CUDA 项目自动启用 vcpkg + MSBuild 链路、
-  OBJ 模型质量基线和 GPU kernel 性能剖析。
+  覆盖数学全领域：纯数学、应用数学、统计学、运筹学、计算数学、AI4Math等。每份报告必须中英双语。
 
   集成三大 Nature 子技能：
   - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
@@ -23,12 +17,6 @@ description: >-
   重现论文, 论文重现, 数值复现, 论文复现, paper reproduction, experiment reproduction,
   reproduce results, reproduce figures, 重现结果, 重现图表, 复现结果, 复现图表,
   reproducibility check, 可复现性评估, 复现验证
-
-  # C++/CUDA mesh/geometry triggers
-  网格简化, mesh simplification, QEM, quadric error metrics, 面片简化, 减面,
-  GPU简化, CUDA网格, .obj简化, 模型LOD, geometry processing, 几何处理,
-  mesh decimation, 点云简化, surface simplification, OpenGL网格,
-  CUDA kernel, nvcc, vcpkg, MSBuild
 
   # nature-reader triggers
   读论文, 读文献, 论文阅读, 论文分析, read paper, read article, 审阅论文, extract paper,
@@ -48,13 +36,6 @@ compatibility:
   - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
   - nature-figure: Python (matplotlib/seaborn) 或 R (ggplot2/patchwork/ComplexHeatmap)
   - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
-  # C++/CUDA 生态 (Phase 0/2/3/4/5 自适应启用)
-  - CUDA Toolkit >= 12.0 (nvcc, nvidia-smi, Nsight Compute)
-  - Visual Studio 2022 (MSBuild v145+, PlatformToolset)
-  - vcpkg (C++ 包管理器, x64-windows-static triplet)
-  - GLM, GLEW, GLFW3, SDL2 (3D 图形管线依赖)
-  - Hausdorff 距离计算工具 (mesh-to-mesh comparison: MeshLab/PyMeshLab/libigl)
-  - Wavefront OBJ (.obj) 格式读写支持
 ---
 
 # Mathematical Literature Experiment Reproduction Standardized Workflow
@@ -76,46 +57,6 @@ compatibility:
 
 用户做出选择后，按对应流程执行。用户未指定审阅视角时，默认使用**研究生视角**（学习理解导向）。
 
-## 自更新策略 / Self-Update Policy
-
-每次技能被调用（load_skill）时，**必须先执行自更新检查**，确保技能本身是最新版本后再执行业务逻辑。
-
-### 调用前检查 / Pre-Invocation Check
-
-```
-1. cd $SKILL_ROOT
-2. git fetch origin main --quiet
-3. LOCAL=$(git rev-parse HEAD)
-   REMOTE=$(git rev-parse origin/main)
-4. if [ "$LOCAL" != "$REMOTE" ]; then
-      git pull --rebase origin main
-      输出: "🔄 math-read-do skill 已自动更新到最新版本"
-5. 更新完成后，继续执行正常的 Phase 0→7 流程
-```
-
-### 修改后推送 / Push After Modification
-
-```
-任何对 SKILL.md / templates / skills/ 的本地修改完成后:
-1. git add -A
-2. git commit -m "<feat/fix/chore>: <描述>"
-3. git push
-4. 输出: "✅ 技能优化已推送至 origin/main"
-```
-
-### 防冲突策略 / Conflict Prevention
-
-- 每次推送前先 `git pull --rebase`，确保基于最新远程版本
-- 若 rebase 冲突 → 以本地修改为准 (`git checkout --theirs` 冲突文件 → `git rebase --continue`)
-- 若 push 被拒 → `git pull --rebase` 后重新 push
-- 最大重试次数: 3 次；超过则停止并报告冲突，等待人工介入
-
-### 实现要求 / Implementation Requirement
-
-- 此自更新逻辑是**强制性**的，不可跳过
-- 实现为 skill 加载时的第一个动作，早于任何用户交互
-- 更新失败不阻塞后续流程（降级为使用当前版本 + 警告）
-
 ## 核心原则 / Core Principles
 
 1. **双语输出**: 所有报告必须有中英双版本 (`.md` 英文 + `-CN.md` 中文)
@@ -124,49 +65,6 @@ compatibility:
 4. **人机协同**: 风险分级审批
 5. **锁定即契约**: 版本/环境/依赖每步锁定，不信任隐式继承
 6. **先问后做**: 用户无指令时先主动提问，确认操作后再执行
-
-## 领域自适应路由 / Domain-Adaptive Routing
-
-本技能启动时，自动检测项目类型并匹配对应的子策略：
-
-### 检测矩阵 / Detection Matrix
-
-| 检测信号 | Python 生态 | C++/CUDA 生态 | C++/3D 图形生态 |
-|---------|------------|--------------|----------------|
-| 入口文件 | `requirements.txt`, `setup.py`, `pyproject.toml`, `environment.yml` | `.vcxproj`, `CMakeLists.txt`, `Makefile`, `.cu` 文件 | `.vcxproj` + OpenGL/GLEW/GLFW 依赖 |
-| GPU 类型 | `torch.cuda`, `cupy`, `tensorflow` | `cuda_runtime.h`, `nvcc`, `cudaMalloc` | CUDA + GLM + `GL/glew.h` |
-| 构建系统 | pip/conda/poetry | MSBuild/CMake/Make | MSBuild + vcpkg |
-| 包管理 | pip/conda/mamba | vcpkg/conan/apt | vcpkg x64-windows-static |
-| 产出物 | 数值结果 (CSV/NPZ) / 图表 | 可执行文件 + 性能数据 | .obj 模型 + 渲染截图 |
-
-### 路由决策 / Routing Decision
-
-```
-检测到 .vcxproj + .cu + GLEW/GLM → "C++/CUDA/3D 图形" 子策略
-   ├─ Phase 0: 增加 CUDA Toolkit + MSBuild + vcpkg 检测
-   ├─ Phase 2: vcpkg 环境构建替代 conda
-   ├─ Phase 3: 增加 OBJ 模型质量基线 (Hausdorff / 法线偏差 / 体积比)
-   ├─ Phase 4: C++ 编译单元增量 + CUDA kernel 性能验证
-   ├─ Phase 5: 增加 3D 质量度量 (Hausdorff distance, normal deviation, volume ratio)
-   └─ Phase 6: 增加 实验模型/ 产出物目录
-
-检测到 .py + torch → "Python ML" 子策略 (默认, 无变更)
-
-检测到 .R + renv.lock → "R 统计" 子策略
-```
-
-### 关键差异速查 / Key Divergence Quick-Ref
-
-| 维度 | Python 默认路径 | C++/CUDA/3D 路径 |
-|------|---------------|------------------|
-| 环境构建 | conda create + pip install | vcpkg install + MSBuild |
-| 构建验证 | `python -c "import X"` | `MSBuild .sln /t:Build /p:Configuration=Release` |
-| 确定性配置 | `PYTHONHASHSEED` + torch seed | `CUBLAS_WORKSPACE_CONFIG` + CUDA deterministic |
-| 基线指标 | RMSE/MAE/Accuracy | Hausdorff distance / normal deviation / volume ratio |
-| 模块验证 | `python -c "from mod import *; test()"` | MSBuild 编译 + 单元测试运行 |
-| GPU 验证 | `torch.cuda.is_available()` | `nvidia-smi` + `nvcc --version` + 测试程序运行 |
-| 增量单元 | Python .py 文件 | C++ .cpp / CUDA .cu 编译单元 |
-| 核心产出 | 数值指标 + 图表 | .obj 模型文件 + 数值指标 + 渲染截图 |
 
 ## 反例与黑名单 / Anti-Patterns & Blacklist
 
@@ -185,25 +83,20 @@ compatibility:
 | 11 | 单点均值比较忽略方差 | CI 很宽时判决虚假积极 | 用 95% CI 区间验证, 报告 x-bar ± CI |
 | 12 | 自动翻译不校对专业术语 | 术语混淆 (identification != 识别) | 术语先在 glossary.md 对齐, 翻译后人工校对 |
 | 13 | 增量实现时不标注论文出处 | 代码溯源断裂 | 每个函数 docstring 写 `Ref: Section X.Y, Eq.(Z)` |
-| 14 | C++/CUDA 项目用 pip 装依赖 | 缺少 C++ 编译工具链 | 检测 .vcxproj/.cu → 自动切 vcpkg+MSBuild 路径 |
-| 15 | CUDA kernel 不验证 CPU 等价性 | GPU 结果可能存在数值偏差 | 每个 kernel 必须有 CPU reference 实现对比 |
-| 16 | 3D 模型复现只跑一种简化率 | 无法评估算法鲁棒性 | 至少 5 种简化率 (90%/70%/50%/30%/10%) |
-| 17 | 导出 .obj 不附带原始模型 | 无法追溯对比 | 复现产出必须同时归档 original/ 和 simplified/ |
-| 18 | MSBuild 构建不锁定 PlatformToolset | 不同 VS 版本 ABI 不兼容 | 锁定 v145 (VS2022)，写入 env/build_config.json |
 
 ## 阶段速查 / Phase Quick-Ref
 
 | Stage | What | Key Artifact | CHECKPOINT |
 |-------|------|-------------|------------|
-| 0 | 宿主检测→环境构建→GPU配置 (C++: +CUDA Toolkit+MSBuild+vcpkg) | `infra_manifest.json` | G0: 基础设施就绪 |
-| 0.5 | 版本检测→安装→锁定→验证 (C++: +nvcc版本+MSVC工具集) | `version_spec.json` | G1: 版本一致 |
-| 1 | PDF解析→结构化提取→领域分类→三方审阅 (图形学: +公式→代码映射) | `reproducibility_assessment.json` | G01: 可复现性门禁 |
-| 2 | 依赖扫描→环境构建→确定性配置→验证 (C++: vcpkg→MSBuild→CUDA确定性) | `conda-lock.yml` / `vcpkg_manifest.json` | G3: 环境就绪 |
-| 3 | 官方代码运行→指标对齐→失败诊断→锁定 (3D: +OBJ质量基线) | `baseline_metrics.json` | G4: 基线建立 |
-| 4 | 模块拆解→增量实现→代码管理 (C++: 编译单元+Kernel验证) | `delta_report.json` | -- |
-| 5 | 多轮运行→统计计算→五态判决→图表导出 (3D: +Hausdorff/法线/体积) | `判决结果.json` | 5.1 参数确认 |
-| 6 | 数据就绪检测→双语报告生成(含模板) (3D: +实验模型归档) | `实验复刻结果汇总/实验报告/复现报告.md` + `-CN.md` | 数据就绪 |
-| 7 | 最终整理→完整性确认 (3D: +OBJ模型配对检查) | `实验复刻结果汇总/` 完整目录 | 文件就位确认 |
+| 0 | 宿主检测→环境构建→GPU配置 | `infra_manifest.json` | G0: 基础设施就绪 |
+| 0.5 | 版本检测→安装→锁定→验证 | `version_spec.json` | G1: 版本一致 |
+| 1 | PDF解析→结构化提取→领域分类→三方审阅 | `reproducibility_assessment.json` | G01: 可复现性门禁 |
+| 2 | 依赖扫描→环境构建→确定性配置→验证 | `conda-lock.yml` | G3: 环境就绪 |
+| 3 | 官方代码运行→指标对齐→失败诊断→锁定 | `baseline_metrics.json` | G4: 基线建立 |
+| 4 | 模块拆解→增量实现→代码管理 | `delta_report.json` | -- |
+| 5 | 多轮运行→统计计算→五态判决→图表导出 | `判决结果.json` | 5.1 参数确认 |
+| 6 | 数据就绪检测→双语报告生成(含模板) | `实验复刻结果汇总/实验报告/复现报告.md` + `-CN.md` | 数据就绪 |
+| 7 | 最终整理→完整性确认 | `实验复刻结果汇总/` 完整目录 | 文件就位确认 |
 
 ---
 
@@ -228,36 +121,6 @@ compatibility:
 
 **G0**: 基础设施检测完成, manifest 已验证, GPU 配置就绪, 环境配置齐备。任一不满足→返回修复。
 
-### Phase 0-CXX: C++/CUDA/3D 项目专属检测 / C++/CUDA/3D-Specific Detection
-
-**触发条件**: 检测到 `.vcxproj` + `.cu` 文件 或 GLM/GLEW/OpenGL 依赖
-
-0-CXX.1 **CUDA 工具链检测**:
-    - `nvidia-smi` → GPU 型号、驱动版本、CUDA 版本
-    - `nvcc --version` → CUDA Toolkit 版本 (要求 >= 12.0)
-    - 确认 compute capability (如 A6000 = sm_86, RTX 4090 = sm_89)
-    - 产出: `infra/cuda_manifest.json`
-
-0-CXX.2 **MSBuild 编译器检测**:
-    - 定位 VS2022: `"C:\Program Files\Microsoft Visual Studio\2022"` 或 vswhere.exe
-    - 确认 PlatformToolset: v145 (VS2022)
-    - 确认平台: x64
-    - 产出: `infra/compiler_manifest.json`
-
-0-CXX.3 **vcpkg 包管理器检测**:
-    - `vcpkg --version` → 已安装确认
-    - 检测 triplet: x64-windows-static
-    - 如缺失: 引导用户 `git clone https://github.com/Microsoft/vcpkg.git && bootstrap-vcpkg.bat`
-    - 产出: `infra/vcpkg_manifest.json`
-
-0-CXX.4 **3D 图形依赖扫描**:
-    - 扫描 `.vcxproj` 中的 `<AdditionalDependencies>` 提取: glew, glfw3, SDL2, opengl32, glm
-    - 区分 bundled (项目内 `res/libs/`) vs system (vcpkg 安装)
-    - 记录头文件路径 (`AdditionalIncludeDirectories`)
-    - 产出: `infra/dependency_manifest.json`
-
-**G0-CXX**: CUDA Toolkit + MSBuild + vcpkg + 3D 依赖全部就绪。任一缺失→返回修复。
-
 ---
 
 ### Phase 0.5: 版本管理 / Version Management
@@ -266,12 +129,9 @@ compatibility:
 **输出**: `env/version_spec.json` + `env/reproduction_manifest.json`
 
 0.5.1 **需求检测**: 扫描 `.python-version` / `Manifest.toml` / `.Rprofile` / `.nvmrc` / `CMakeLists.txt` 等
-    - **C++/CUDA 项目**: 额外扫描 `.vcxproj` 中的 `<PlatformToolset>`, `<CUDA 版本号>.props`, `<CodeGeneration>` 标记
 0.5.2 **版本管理器**: pyenv/juliaup/rig/nvm/sdkman/rustup (缺失则自动安装)
-    - **C++ 工具链**: 检测 `$(CUDA_PATH)` 环境变量 → nvcc 版本; 检测 MSVC 工具集版本 (v145=VS2022); 检测 Windows SDK 版本
 0.5.3 **版本安装**: pyenv install / juliaup add / rig add / nvm install / conda cudatoolkit / apt gcc 等
 0.5.4 **版本锁定**: conda env export → `conda-lock.yml`; pip freeze → `requirements-locked.txt`; 复制 `Manifest.toml`; dpkg 快照
-    - **C++/CUDA 项目**: 生成 `env/cuda_version.json` (包含 toolkit 版本, driver 版本, compute capability, nvcc flags); 生成 `env/build_config.json` (PlatformToolset, Configuration, Platform, CUDA CodeGeneration)
 0.5.5 **一致性验证**: 对比 `version_spec.json` 与运行版本, 记录差异
 
 **G1**: 所有运行时版本与 `version_spec.json` 一致, 锁定文件已写入 `env/`。版本不匹配→修复后继续。
@@ -291,14 +151,8 @@ compatibility:
     - 产出: `analysis/parsed_text.md` + `analysis/formulas.tex`
 
 1.2 **结构化提取**: 核心方法/数学公式/超参数/数据集/评估指标/灰色地带
-    - **图形学/几何处理论文**: 额外提取
-      * 算法类型: mesh_decimation / subdivision / remeshing / smoothing / parametrization
-      * 并行识别: 标注算法的 embarrassingly parallel / topology-dependent / sequential 阶段
-      * 公式→代码映射: 论文公式编号 → 预期数据结构/函数
-      * 输入/输出格式: .obj / .ply / .stl / .off
-      * 质量度量: Hausdorff distance / normal deviation / volume preservation / visual fidelity
-    - 产出追加: `analysis/qem_algorithm_notes.md` (仅当领域分类为 computer_graphics 时)
-1.3 **领域分类**: 关键词+依赖 → 路由到数值/符号/AI4Math/统计/优化/经济/**图形学**子策略
+
+1.3 **领域分类**: 关键词+依赖 → 路由到数值/符号/AI4Math/统计/优化/经济子策略
 
 1.4 **视角审阅**: 按用户指定视角输出审阅报告；未指定时默认**研究生视角**
     - **用户未指定视角 → 默认研究生**: 直接以研究生视角执行审阅（学习理解导向）
@@ -334,42 +188,6 @@ compatibility:
 
 **G3**: 导入测试通过, 锁定文件已写入, GPU 可用/已降级。任一不满足→返回 2.4 修复。
 
-### Phase 2-CXX: C++/CUDA 环境构建 / C++/CUDA Environment Setup
-
-**触发条件**: 领域自适应路由判定为 C++/CUDA/3D 生态
-
-2-CXX.1 **依赖扫描 (vcpkg)**:
-    - 从 `.vcxproj` 的 `<AdditionalDependencies>` 提取依赖列表
-    - 从项目 `res/libs/` 区分 bundled vs system 依赖
-    - vcpkg manifest 模式: 生成 `vcpkg.json` (如项目未提供)
-    - 示例 vcpkg.json:
-    ```json
-    {
-      "name": "mesh-simplification",
-      "version": "1.0.0",
-      "dependencies": ["glew", "glfw3", "sdl2", "glm"]
-    }
-    ```
-
-2-CXX.2 **环境构建 (vcpkg + MSBuild)**:
-    - `vcpkg install --triplet x64-windows-static` → 安装所有 C++ 依赖
-    - 如项目已自带部分 lib (bundled): 仅安装缺失项
-    - 确认 CUDA Toolkit 路径: `$(CUDA_PATH)` 环境变量或默认 `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2`
-    - MSBuild 构建: `MSBuild MeshSimplification.sln /t:Build /p:Configuration=Release /p:Platform=x64`
-
-2-CXX.3 **确定性配置 (C++/CUDA)**:
-    - CUDA: 禁 fast math (`--use_fast_math` 关闭) → 确保数值可复现
-    - MSVC: `/fp:precise` (非 `/fp:fast`) → IEEE 754 浮点
-    - 锁定 compute capability: `compute_86,sm_86` (匹配目标 GPU)
-    - 环境变量: `CUBLAS_WORKSPACE_CONFIG=:4096:8`
-
-2-CXX.4 **验证**:
-    - MSBuild 编译通过 (Release x64)
-    - 可执行文件能启动 (不 crash, 能加载测试 .obj)
-    - nvidia-smi 确认 GPU 可用
-    - CUDA kernel 能正常分配 device memory (cudaMalloc 不报错)
-    - 产出: `env/vcpkg_manifest.json` + `env/build_config.json`
-
 ---
 
 ### Phase 3: 基线验证 / Baseline Verification
@@ -388,37 +206,6 @@ compatibility:
 
 **G4**: 基线指标已记录, tolerance_spec 已设定。基线未建立→用户决定是否继续进 Phase 4。
 
-### Phase 3-CXX: 3D 模型质量基线 / 3D Model Quality Baselines
-
-**触发条件**: 产出物包含 .obj 模型文件
-
-3-CXX.1 **OBJ 输出验证**:
-    - 确认简化后 .obj 文件可被标准工具 (MeshLab, Blender) 正确读取
-    - 验证顶点坐标在合理范围内 (无 NaN/Inf)
-    - 验证面片索引合法 (不越界, 无退化三角形)
-    - 检查是否保留了原始 UV (`vt`) 和法线 (`vn`) 信息
-
-3-CXX.2 **质量基线指标**:
-    - **Hausdorff 距离**: 原始模型与简化模型之间的最大/平均/RMS 距离
-      * 工具: MeshLab (`meshlabserver -i orig.obj -i simpl.obj -s hausdorff.mlx`)
-      * 容忍度: 最大 Hausdorff < 模型包围盒对角线的 2%
-    - **法线偏差**: 简化后顶点法线与原始模型最近点法线的角度差
-      * 容忍度: 平均偏差 < 5°
-    - **体积保持率**: 简化模型体积 / 原始模型体积
-      * 容忍度: 0.95 ~ 1.05
-    - **退化面检测**: 面积 < 1e-8 的三角形数量 → 必须为 0
-
-3-CXX.3 **GPU vs CPU 等价性验证**:
-    - 同一模型、同一参数、CPU 路径 vs GPU 路径 → 逐顶点位置 delta
-    - 容忍度: max(|delta|) < 1e-4 (单精度浮点误差范围)
-    - 如超出 → 检查 GPU kernel 的数值精度 (atomicAdd 顺序、fast math 是否关闭)
-    - 产出: `results/gpu_vs_cpu_delta.json`
-
-3-CXX.4 **多模型基线矩阵**:
-    - 测试模型集: 至少 3 种不同拓扑的 OBJ (如 bunny, cow, torus)
-    - 每种模型记录: 原始顶点数/面数, 简化后顶点数/面数, 简化耗时, 质量指标
-    - 产出: `results/multi_model_baseline.json`
-
 ---
 
 ### Phase 4: 增量实现 / Incremental Implementation (按需)
@@ -435,47 +222,6 @@ compatibility:
     5. delta 超容忍度→排查→修复→回到第 2 步
     6. 确认后 `git commit` → 记录到 `implementation_log.md` → 下一模块
 4.3 **代码管理**: 每个模块独立 commit (含论文公式编号); 每个函数 docstring 写 `Ref: Section X.Y, Eq.(Z)`; 领域命名约定
-
-### Phase 4-CXX: C++/CUDA 增量实现 / C++/CUDA Incremental Implementation
-
-**触发条件**: 项目语言为 C++/CUDA
-
-4-CXX.1 **模块拆解 (C++ 编译单元粒度)**:
-    - 每个模块对应一个或一组 `.cpp` / `.cu` 文件
-    - I/O 接口: 函数签名 + 数据结构 (struct/class) 定义
-    - DAG 依赖图标注编译依赖关系 (#include 链)
-    - 拓扑排序确保底层模块先编译验证
-    - 产出: `implementation/modules_dag.json`
-
-4-CXX.2 **增量循环 (C++ 编译 → 运行 → 对比 → commit)**:
-    1. 实现/修改当前模块 (标注 Ref: Section X.Y, Eq.(Z))
-    2. **编译验证**: `MSBuild MeshSimplification.sln /t:Build /p:Configuration=Release /p:Platform=x64`
-       - 如编译失败 → 修复 → 回到第 2 步
-    3. **运行测试**: 启动可执行文件, 处理测试模型
-       - 验证 OBJ 输出正确可读
-    4. **性能对比**: 使用 `std::chrono` profiler (代码中已有的) 对比模块优化前后耗时
-       - CUDA kernel: 使用 `nvprof` 或 Nsight Compute 验证 GPU 耗时
-    5. **正确性对比**: 模块优化前后 OBJ 输出逐顶点 delta 对比
-       - delta > 容忍度 (1e-4) → 标记为性能/精度 trade-off → 记录到 delta_report
-    6. **git commit** (含论文引用 + Delta 说明) → `implementation_log.md` → 下一模块
-
-4-CXX.3 **CUDA Kernel 验证专项**:
-    - 每个 `.cu` kernel 必须有对应的 CPU reference 实现
-    - 数值对比: CPU 参考 vs GPU 输出, max delta < 1e-4
-    - 性能剖析: `nvprof --print-gpu-trace ./app.exe` 记录 kernel 执行时间
-    - 内存传输: 记录 cudaMemcpy H2D/D2H 耗时, 识别潜在 overlap 机会
-    - 产出: `implementation/kernel_profiles.json`
-
-4-CXX.4 **典型模块拆分示例 (QEM 网格简化)**:
-    ```
-    Module 0: Bug 修复 (initEdgeVector 边交换逻辑)           → 正确性保证
-    Module 1: initVertexNeighbor O(V×E) → O(E) 优化          → 数据结构
-    Module 2: vector+make_heap → priority_queue 增量更新     → 算法优化
-    Module 3: calcEdgeError GPU 批量并行化 + 新增 .cu kernel → GPU 加速
-    Module 4: CUDA atomicAdd → warp shuffle 归约优化         → Kernel 优化
-    Module 5: 运行时参数化 (MAX_FACES → 命令行参数)           → 可用性
-    Module 6: OBJ 导出完善 (保留 UV/法线 + 多级 LOD 输出)     → 产出质量
-    ```
 
 ---
 
@@ -497,38 +243,6 @@ compatibility:
 
 **Top-12 失败模式**: 代码/数据缺失 | 环境漂移 | CUDA 冲突 | ABI 不兼容 | 依赖冲突 | 非确定性 | BLAS 变体 | 跨平台路径 | 数据泄露 | 预训练权重漂移 | 选择性报告 | 上游依赖位腐
 
-### Phase 5-CXX: 3D 模型实验矩阵与质量验证 / 3D Experiment Matrix & Quality Verification
-
-**触发条件**: 产出物包含 .obj 模型文件
-
-5-CXX.1 **实验矩阵设计**:
-    ```
-    模型  × 简化率      × 路径  × 种子  = 总实验数
-    ─────────────────────────────────────────────
-    5种   × 5档         × 2种   × 5个   = 250 次
-    (bunny, (90%, 70%,   (CPU,   (N=5)
-     cow,   50%, 30%,     GPU)
-     foot,  10%)
-     monkey,
-     torus)
-    ```
-    - 每轮独立运行，输出独立的 OBJ 文件: `results/{model}_{path}_{ratio}_seed{N}.obj`
-    - 记录: 耗时 (init / GPU compute / collapse loop), 输出面数, 文件大小
-
-5-CXX.2 **质量度量计算**:
-    - **Hausdorff 距离**: MeshLab CLI 批量计算 `results/hausdorff.csv`
-    - **法线偏差**: 逐顶点法线夹角统计 `results/normal_deviation.csv`
-    - **体积保持率**: 闭合网格体积比 (如模型非水密则跳过) `results/volume_ratio.csv`
-    - **视觉保真度**: 可选 — 多视角渲染截图对比 (Phase 6 中用于报告)
-    - 产出: `results/quality_metrics.csv`
-
-5-CXX.3 **3D 专用图表** (Phase 5.5 扩展):
-    - `quality_vs_faces.png` — X轴=保留面数, Y轴=Hausdorff距离, 双线(CPU/GPU)
-    - `speedup_vs_model_size.png` — GPU 加速比 (CPU_time/GPU_time) 随原始面数变化
-    - `vertex_delta_histogram.png` — 逐顶点位置 delta 的直方图 (验证 GPU vs CPU 一致性)
-    - `side_by_side.png` — 原始模型 vs 简化模型并排渲染截图
-    - 每图附带独立可运行 `code/plot_*.py` (Python + matplotlib, 读取 CSV 数据)
-
 ---
 
 ### Phase 6: 双语报告生成 / Bilingual Report Generation
@@ -538,7 +252,7 @@ compatibility:
 
 **确认所有数据就绪** → 判决/图表/三方审阅/路径一致 → 生成报告
 
-在论文所在目录下创建 `实验复刻结果汇总/` 文件夹，内含**四个**子目录：
+在论文所在目录下创建 `实验复刻结果汇总/` 文件夹，内含三个子目录：
 
 **文档清单**:
 - `实验复刻结果汇总/实验报告/复现报告.md` -- 完整报告 (英文版，模板: templates/reproduction_report.template.md)
@@ -552,9 +266,6 @@ compatibility:
 - `实验复刻结果汇总/实验结果对比表/实验结果对比表-CN.md` -- 对比表 (中文)
 - `实验复刻结果汇总/实验图表（含代码）/*.png/.pdf` -- 实验图表
 - `实验复刻结果汇总/实验图表（含代码）/code/plot_*.py` -- 图表生成代码 (自包含, 可独立运行)
-- `实验复刻结果汇总/实验模型/original/*.obj` -- ★原始模型归档 (3D 项目专属)
-- `实验复刻结果汇总/实验模型/simplified/*_{cpu,gpu}_{ratio}_seed{N}.obj` -- ★简化后模型归档 (3D 项目专属)
-- `实验复刻结果汇总/实验模型/README.md` -- ★模型清单说明 (文件名→参数→指标 对照表)
 
 **格式**: 英文版 = `文件名.md`，中文版 = `文件名-CN.md`; 英文标题+中文标题; 表格列头 `Metric / 指标`; 数值统一精度; 图表标题 EN/ZH 标注
 
@@ -569,15 +280,8 @@ compatibility:
      - `实验复刻结果汇总/实验报告/` — 双语报告 + 判决 JSON
      - `实验复刻结果汇总/实验图表（含代码）/` — 图表 PNG/PDF + 独立可运行源码
      - `实验复刻结果汇总/实验结果对比表/` — 双语对比表
-     - `实验复刻结果汇总/实验模型/original/` — ★原始 OBJ 模型 (3D 项目, 每个文件名与 simplified/ 对应)
-     - `实验复刻结果汇总/实验模型/simplified/` — ★简化后 OBJ 模型 (3D 项目, 命名规范: {model}_{path}_{ratio}_seed{N}.obj)
-     CHECKPOINT: 完整性确认 (所有文件就位/双语配对/图表代码齐全/**OBJ 模型对应关系正确**)
+     CHECKPOINT: 完整性确认 (所有文件就位/双语配对/图表代码齐全)
 7.2 **一致性验证**: 对比 `判决结果.json` 与报告中的数值一致性，确认图表引用正确
-    - **3D 项目**: 额外验证
-      * 每个简化的 .obj 能否被 MeshLab/Blender 正确打开
-      * original/ 和 simplified/ 的文件名对应关系
-      * Hausdorff 指标与报告的数值一致
-      * 多级 LOD 模型的顶点数递减关系正确 (简化率越高顶点越少)
 
 ---
 
@@ -596,11 +300,6 @@ compatibility:
 | G66 | Phase 5.5 | 有图表时每图有独立源码 | 补导出 |
 | G7 | Phase 6 | 所有报告中英双语 (`.md` + `-CN.md`) | 补译 |
 | G8 | Phase 7 | `实验复刻结果汇总/` 下所有文件就位 | 补缺文件 |
-| G0-CXX | Phase 0.3 → 0.5 | CUDA + MSBuild + vcpkg 就绪 | 安装缺失工具链 |
-| G3-CXX | Phase 2-CXX → 3 | MSBuild 编译通过 + GPU kernel 可用 | 修复编译错误 |
-| G4-CXX | Phase 3-CXX → 4 | GPU vs CPU 顶点 delta < 1e-4 | 检查 kernel 数值精度 |
-| G7-CXX | Phase 6 | `实验模型/` 目录包含 original/ + simplified/ | 补缺 OBJ 文件 |
-| G8-CXX | Phase 7 | 每个 simplified/*.obj 可被标准工具打开 | 修复损坏文件 |
 
 ---
 
@@ -653,11 +352,7 @@ math-read-do/
 └── 实验复刻结果汇总/   # 最终输出 (在论文所在目录创建, 非本目录)
     ├── 实验报告/       # 双语复现报告 + 诊断 + 运行摘要 + 判决 JSON
     ├── 实验图表（含代码）/# 图表 PNG/PDF + 独立可运行源码
-    ├── 实验结果对比表/  # 双语实验结果对比表
-    └── 实验模型/        # ★3D 项目专属: OBJ 模型归档
-        ├── original/    #   原始模型文件
-        ├── simplified/  #   简化后模型 (命名: {model}_{cpu,gpu}_{ratio}_seed{N}.obj)
-        └── README.md    #   模型清单说明
+    └── 实验结果对比表/  # 双语实验结果对比表
 ```
 
 ## 依赖与配置 / Dependencies & Configuration
@@ -666,18 +361,6 @@ math-read-do/
 |---|------|------|
 | mineru-open-sdk | PDF->Markdown (含公式/表格) | `pip install mineru-open-sdk` |
 | pyyaml | MinerU 配置解析 | `pip install pyyaml` |
-
-### C++/CUDA 专属依赖 / C++/CUDA-Specific Dependencies
-
-| 工具/库 | 用途 | 安装/配置 |
-|---------|------|----------|
-| CUDA Toolkit >= 12.0 | GPU 加速 (nvcc + CUDA Runtime) | [NVIDIA 官网下载](https://developer.nvidia.com/cuda-downloads) |
-| Visual Studio 2022 | C++ 编译器 (MSBuild v145) | [Visual Studio 下载](https://visualstudio.microsoft.com/) + "使用C++的桌面开发" 工作负载 |
-| vcpkg | C++ 包管理器 | `git clone https://github.com/Microsoft/vcpkg.git && bootstrap-vcpkg.bat` |
-| GLEW / GLFW3 / SDL2 | OpenGL 图形管线 | `vcpkg install glew:x64-windows-static glfw3:x64-windows-static sdl2:x64-windows-static` |
-| GLM | 图形数学库 (头文件) | bundled 或 `vcpkg install glm:x64-windows-static` |
-| MeshLab / PyMeshLab | OBJ 质量验证 (Hausdorff 距离) | [MeshLab 下载](https://www.meshlab.net/) 或 `pip install pymeshlab` |
-| Nsight Compute | CUDA Kernel 性能剖析 | 随 CUDA Toolkit 安装或[单独下载](https://developer.nvidia.com/nsight-compute) |
 
 **首次配置**:
 ```bash
