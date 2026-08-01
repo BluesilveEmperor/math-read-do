@@ -1,14 +1,11 @@
 ---
-name: math-read-do-routine
+name: math-read-do
 description: >-
-  机器人路径优化论文实验复现标准化工作流 / Robotics Path Optimization Paper Reproduction Pipeline
-  面向机器人路径优化方向（路径规划 Path Planning、轨迹规划 Trajectory Planning、运动规划 Motion Planning），
-  覆盖基于凸优化 (CVXPY/SOCP/MICP)、基于搜索 (A*/RRT/PRM)、基于采样 (RRT*/BIT*)、基于学习、MCP 等方法。
-
+  数学文献实验复现标准化工作流 / Standardized Math Paper Reproduction Pipeline
   8阶段全链路：宿主检测 → 版本管理 → MinerU PDF解析(含公式/表格/图表) →
   按用户指定视角输出审阅报告(研究生/导师/审稿人) →
-  环境重建（自动检测求解器/碰撞检测器） → 基线验证 → 增量实现 → 统计验证(五态判决+95%CI) → 双语报告。
-  每份报告必须中英双语。
+  环境重建 → 基线验证 → 增量实现 → 统计验证(五态判决+95%CI) → 双语报告。
+  覆盖数学全领域：纯数学、应用数学、统计学、运筹学、计算数学、AI4Math等。每份报告必须中英双语。
 
   集成三大 Nature 子技能：
   - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
@@ -19,10 +16,7 @@ description: >-
   reproduce experiment, 复现报告, reproduction report, PDF解析, paper parsing, 实验重现,
   重现论文, 论文重现, 数值复现, 论文复现, paper reproduction, experiment reproduction,
   reproduce results, reproduce figures, 重现结果, 重现图表, 复现结果, 复现图表,
-  reproducibility check, 可复现性评估, 复现验证,
-  路径规划, path planning, 轨迹规划, trajectory planning, 运动规划, motion planning,
-  机器人路径, robot path, 无人机路径, UAV path, 凸优化路径, convex optimization path,
-  RRT, PRM, A*, Dijkstra, CVXPY, SOCP, MICP, GCS, FastPathPlanning, 网格简化复现
+  reproducibility check, 可复现性评估, 复现验证
 
   # nature-reader triggers
   读论文, 读文献, 论文阅读, 论文分析, read paper, read article, 审阅论文, extract paper,
@@ -42,7 +36,6 @@ compatibility:
   - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
   - nature-figure: Python (matplotlib/seaborn) 或 R (ggplot2/patchwork/ComplexHeatmap)
   - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
-  - robotics: numpy, scipy, networkx, cvxpy, clarabel, matplotlib
 ---
 
 # Mathematical Literature Experiment Reproduction Standardized Workflow
@@ -63,45 +56,6 @@ compatibility:
 ```
 
 用户做出选择后，按对应流程执行。用户未指定审阅视角时，默认使用**研究生视角**（学习理解导向）。
-
-## 自更新策略 / Self-Update Policy
-
-每次技能被调用（load_skill）时，**必须先执行自更新检查**，确保技能本身是最新版本后再执行业务逻辑。
-
-### 调用前检查 / Pre-Invocation Check
-
-```bash
-1. cd $SKILL_ROOT
-2. bash scripts/auto_update.sh
-   (内部逻辑: git fetch origin math-read-do-routine → 比较 HEAD → 有更新则 stash → merge --ff-only → pop)
-3. 更新完成后，继续执行正常的 Phase 0→7 流程
-```
-
-输出: "✅ math-read-do-routine 已自动更新到最新版本" 或 "✅ 已是最新版本"
-
-### 修改后推送 / Push After Modification
-
-```
-任何对 SKILL.md / templates / scripts/ / references/ 的本地修改完成后:
-1. git add -A
-2. git commit -m "<feat/fix/chore>: <描述>"
-3. git pull --rebase origin math-read-do-routine
-4. git push origin math-read-do-routine
-5. 输出: "✅ 技能优化已推送至 origin/math-read-do-routine"
-```
-
-### 防冲突策略 / Conflict Prevention
-
-- 每次推送前先 `git pull --rebase`，确保基于最新远程版本
-- 若 rebase 冲突 → 以本地修改为准 (`git checkout --theirs` 冲突文件 → `git rebase --continue`)
-- 若 push 被拒 → `git pull --rebase` 后重新 push
-- 最大重试次数: 3 次；超过则停止并报告冲突，等待人工介入
-
-### 实现要求 / Implementation Requirement
-
-- 此自更新逻辑是**强制性**的，不可跳过
-- 实现为 skill 加载时的第一个动作，早于任何用户交互
-- 更新失败不阻塞后续流程（降级为使用当前版本 + 警告）
 
 ## 核心原则 / Core Principles
 
@@ -137,7 +91,6 @@ compatibility:
 | 0 | 宿主检测→环境构建→GPU配置 | `infra_manifest.json` | G0: 基础设施就绪 |
 | 0.5 | 版本检测→安装→锁定→验证 | `version_spec.json` | G1: 版本一致 |
 | 1 | PDF解析→结构化提取→领域分类→三方审阅 | `reproducibility_assessment.json` | G01: 可复现性门禁 |
-| 1.5 | 论文类型自动检测→路由到子策略 | `repro_plan.json` | 类型判定 |
 | 2 | 依赖扫描→环境构建→确定性配置→验证 | `conda-lock.yml` | G3: 环境就绪 |
 | 3 | 官方代码运行→指标对齐→失败诊断→锁定 | `baseline_metrics.json` | G4: 基线建立 |
 | 4 | 模块拆解→增量实现→代码管理 | `delta_report.json` | -- |
@@ -214,52 +167,24 @@ compatibility:
     - **严禁默认输出全部视角，仅输出用户指定的单一视角**
 
 **G01 门禁**: 审查 `reproducibility_assessment.json`
-    - `proceed` → 直接进 Phase 1.5
-    - `proceed_with_caution` → 进 Phase 1.5, 记录已知风险
+    - `proceed` → 直接进 Phase 2
+    - `proceed_with_caution` → 进 Phase 2, 记录已知风险
     - `needs_human_approval` → STOP: 展示风险标记, 获取用户确认
     - `discourage` → STOP: 不建议复现, 展示理由
 
 ---
 
-### Phase 1.5: 论文类型自动检测与路由 / Auto-Type Detection & Routing
-
-**输入**: `analysis/paper_summary.json`
-**输出**: `analysis/repro_plan.json`
-
-1.5.1 **类型检测**: 执行 `python scripts/robotics_repro.py --paper-json analysis/paper_summary.json`
-    - 自动判定论文属于：凸优化 / 搜索 / 采样 / 非凸优化 / 学习 / MPC
-    - 识别机器人平台：UAV / 移动机器人 / 机械臂 / 足式 / 水下
-    - 识别规划类型：Path / Trajectory / Motion
-
-1.5.2 **求解器推荐**: 根据类型推荐求解器栈
-    - 凸优化 → `cvxpy` + `clarabel` (免费) 或 `mosek` (学术)
-    - 采样 → `ompl` + `numpy` + `scipy`
-    - 学习 → `torch` / `tensorflow` + GPU
-    - MPC → `casadi` / `acados`
-
-1.5.3 **路由决策**: 生成 `repro_plan.json`，包含：
-    - `paper_type`: 检测到的论文类型
-    - `recommended_solver`: 推荐求解器
-    - `repro_steps`: 针对该类型的定制化复现步骤
-    - `metrics`: 关键评估指标（规划时间、路径成本、成功率等）
-
----
-
 ### Phase 2: 环境重建 / Environment Setup
 
-**输入**: `analysis/paper_summary.json` + `env/version_spec.json` + `analysis/repro_plan.json`
+**输入**: `analysis/paper_summary.json` + `env/version_spec.json`
 **输出**: `env/environment.yml` + `env/requirements-locked.txt`
 
 2.1 **依赖扫描**: 扫描 repo 配置文件 (`requirements.txt`, `environment.yml`, `Manifest.toml`, `renv.lock`) + 静态分析 import
 2.2 **环境构建**: Conda/Mamba → Python venv → Julia → 系统级库 (逐级 fallback)
     - Conda 冲突→`mamba clean --all && --force`; 仍失败→逐个安装核心包
     - pip 超时→`--default-timeout=120`; 仍失败→分批次先科学计算再领域包
-2.3 **CVXPY 环境特化** (凸优化论文): 
-    - 执行 `python scripts/cvxpy_env_setup.py --solver clarabel --paper-json analysis/paper_summary.json`
-    - 安装 CVXPY + 推荐求解器 (clarabel/mosek/ecos/scs)
-    - 验证求解器可用性: `python -c "import cvxpy; print(cvxpy.installed_solvers())"`
-2.4 **确定性配置**: 固定随机种子 (torch/np/random/tf) + 浮点确定性 + `PYTHONHASHSEED`
-2.5 **验证**: 基础导入测试 + 版本一致 + GPU 可用性 + 锁定
+2.3 **确定性配置**: 固定随机种子 (torch/np/random/tf) + 浮点确定性 + `PYTHONHASHSEED`
+2.4 **验证**: 基础导入测试 + 版本一致 + GPU 可用性 + 锁定
 
 **G3**: 导入测试通过, 锁定文件已写入, GPU 可用/已降级。任一不满足→返回 2.4 修复。
 
@@ -317,13 +242,6 @@ compatibility:
     - 产出: `实验复刻结果汇总/实验图表（含代码）/*.png/.pdf` + `实验复刻结果汇总/实验图表（含代码）/code/plot_*.py`
 
 **Top-12 失败模式**: 代码/数据缺失 | 环境漂移 | CUDA 冲突 | ABI 不兼容 | 依赖冲突 | 非确定性 | BLAS 变体 | 跨平台路径 | 数据泄露 | 预训练权重漂移 | 选择性报告 | 上游依赖位腐
-
-**机器人路径优化特有失败模式**:
-- 求解器数值问题 (MIP gap, tolerance)
-- 离散化误差 (栅格/采样分辨率)
-- 碰撞模型不匹配 (包围盒 vs 精确几何)
-- 动力学简化 (微分平坦性假设)
-- 地图/环境差异 (随机种子/障碍物分布)
 
 ---
 
@@ -501,10 +419,3 @@ pip install mineru-open-sdk pyyaml
 - nature-reader. https://github.com/Yuan1z0825/nature-skills
 - nature-figure. https://github.com/Yuan1z0825/nature-skills
 - nature-paper2ppt. https://github.com/Yuan1z0825/nature-skills
-
-## 机器人路径优化参考 / Robotics Path Optimization References
-
-- references/robotics_path_optimization.md — 路径优化论文复现参考手册（问题分类、算法模板、求解器对比、评估指标、常见陷阱）
-  - 涵盖：凸优化路径规划 (FastPathPlanning, GCS)、基于搜索 (A*, RRT)、基于采样 (RRT*, BIT*)、基于学习、MPC
-  - 求解器对比：CLARABEL, MOSEK, GUROBI, ECOS, SCS, OSQP
-  - 评估指标：路径长度、规划时间、成功率、最优性差距、完备性
