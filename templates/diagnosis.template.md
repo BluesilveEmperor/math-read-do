@@ -1,68 +1,50 @@
-# Reproduction Diagnosis Report
-# 复现诊断报告
+# 诊断分析 / Diagnosis Analysis
 
-## Failure Summary / 失败摘要
+## 概述 / Overview
 
-{{FAILURE_SUMMARY_EN}}
+**Paper / 论文**: {{ paper_title }}
+**Algorithm / 算法**: Quadric Error Metric Mesh Simplification
 
-{{FAILURE_SUMMARY_ZH}}
+## 灰色地带 / Gray Areas
 
-## Detection & Analysis / 检测与分析
+### 1. 最优位置求解 / Optimal Position
 
-### {{DIAG_ITEM_1_TITLE_EN}}
-### {{DIAG_ITEM_1_TITLE_ZH}}
+- **Issue**: 当 4×4 的 Q 矩阵前 3×3 子矩阵奇异时，最优位置的求解退化为中点
+- **Impact**: 某些高度共面的网格区域简化质量可能下降
+- **Status**: {{ qr_singularity_status }}
 
-| Property / 属性 | Value / 值 |
-|----------------|-----------|
-| Observation / 观察 | {{OBS_1_EN}} / {{OBS_1_ZH}} |
-| Hypothesis / 假说 | {{HYP_1_EN}} / {{HYP_1_ZH}} |
-| Evidence / 证据 | {{EVIDENCE_1_EN}} / {{EVIDENCE_1_ZH}} |
-| Confidence / 置信度 | {{CONF_1}}% |
+### 2. 法线重建 / Normal Reconstruction
 
-### {{DIAG_ITEM_2_TITLE_EN}}
-### {{DIAG_ITEM_2_TITLE_ZH}}
+- **Issue**: 简化后法线需要重新计算。加权平均策略可能在尖锐特征处产生模糊
+- **Impact**: 着色效果可能偏离原始模型
+- **Status**: {{ normal_status }}
 
-| Property / 属性 | Value / 值 |
-|----------------|-----------|
-| Observation / 观察 | {{OBS_2_EN}} / {{OBS_2_ZH}} |
-| Hypothesis / 假说 | {{HYP_2_EN}} / {{HYP_2_ZH}} |
-| Evidence / 证据 | {{EVIDENCE_2_EN}} / {{EVIDENCE_2_ZH}} |
-| Confidence / 置信度 | {{CONF_2}}% |
+### 3. 纹理坐标 / Texture Coordinates
 
-## Failure Mode Classification / 失败模式分类
+- **Issue**: 简化后的顶点是原始顶点的线性组合，纹理坐标丢失语义
+- **Impact**: 简化的模型带纹理渲染时可能出现错位
+- **Status**: {{ texcoord_status }}
 
-| # | Failure Mode / 失败模式 | Match / 匹配 |
-|---|------------------------|-------------|
-| 1 | 代码/数据缺失 | {{FM1}} |
-| 2 | 环境漂移 | {{FM2}} |
-| 3 | CUDA版本冲突 | {{FM3}} |
-| 4 | 编译器ABI不兼容 | {{FM4}} |
-| 5 | 包依赖冲突 | {{FM5}} |
-| 6 | 非确定性 | {{FM6}} |
-| 7 | BLAS变体差异 | {{FM7}} |
-| 8 | 跨平台路径 | {{FM8}} |
-| 9 | 数据泄露 | {{FM9}} |
-| 10 | 预训练权重漂移 | {{FM10}} |
-| 11 | 选择性报告 | {{FM11}} |
-| 12 | 上游依赖位腐 | {{FM12}} |
+### 4. 非流形几何 / Non-Manifold Geometry
 
-## Recommended Fix / 推荐修复
+- **Issue**: QEM 不保证始终保持流形结构，特定退化输入可能产生非流形输出
+- **Impact**: 下游 3D 打印或布尔运算可能失败
+- **Status**: {{ manifold_status }}
 
-### Priority 1 / 优先级 1
+## 与原实现的差异 / Differences from Original C++
 
-{{FIX_1_EN}}
+| Aspect / 方面 | Original C++ | Python (this impl) |
+|:---|:---|:---|
+| Optimal position / 最优位置 | Midpoint / 中点 | Solve 4×4 linear system |
+| Heap / 堆 | Full rebuild O(n log n) each step | Incremental heapq O(log n) |
+| Face deletion / 面删除 | O(n²) iterative erase | Mark-sweep O(1) |
+| Boundary preservation / 边界保护 | None | Constrained optimization |
+| Normal output / 法线输出 | No | Yes (reconstructed) |
+| Texture coordinates / 纹理坐标 | Dropped | Preserved (passthrough) |
 
-{{FIX_1_ZH}}
+## 改进建议 / Improvement Suggestions
 
-### Priority 2 / 优先级 2
-
-{{FIX_2_EN}}
-
-{{FIX_2_ZH}}
-
-## Context / 上下文
-
-- Error Log: `../logs/run_experiment_{{RUN_ID}}.log`
-- Baseline: `../results/baseline_metrics.json`
-- Version Spec: `../env/version_spec.json`
-- Infra: `../infra/infra_manifest.json`
+1. **Pair contraction**: 同时收缩多对独立边可以进一步提高性能
+2. **Volume preservation**: 添加体积约束可以防止大尺度形状塌缩
+3. **Adaptive simplification**: 根据曲率自适应调整简化密度
+4. **Out-of-core processing**: 超大规模网格（>10⁶ 面）需要分块处理

@@ -1,83 +1,93 @@
-# Math-Read-Do：数学文献阅读与实验复现工作流
+# Math-Read-Do-OBJ：通用 OBJ 输出实验复刻框架
 
 ## 概述
 
-**Math-Read-Do** 是一个面向数学文献的标准化"阅读→复现→验证"工作流（Skill），专为 AI Agent 设计。输入一篇数学论文 PDF，即可自动完成从文献理解到结果验证的全流程。
+**math-read-do-obj** 是一个面向"输出 .obj 文件"的计算机图形学/几何处理实验的标准化复刻框架。以 **QEM 网格简化** (Garland & Heckbert, SIGGRAPH 1997) 为首个内建范本，验证框架的通用性和正确性。
 
-核心价值在于将数学论文的**阅读理解**（Read）与**实验复现**（Do）有机结合，避免只读不练或盲目复现。
+一句话：**输入 .obj + 算法规格 → 自动复现 → 输出简化 .obj + 双语对比报告**
 
-## 8 阶段全链路
+## 框架架构
 
-| 阶段 | 名称 | 核心产出 |
-|------|------|----------|
-| Phase 0 | 基础设施检测 | `infra_manifest.json` |
-| Phase 0.5 | 版本管理 | `version_spec.json` |
-| Phase 1 | 论文解析 & 视角审阅 | `reproducibility_assessment.json` |
-| Phase 2 | 环境重建 | `conda-lock.yml` |
-| Phase 3 | 基线验证 | `baseline_metrics.json` |
-| Phase 4 | 增量实现（按需） | `delta_report.json` |
-| Phase 5 | 统计判决 & 图表导出 | `判决结果.json` |
-| Phase 6 | 双语报告生成 | `复现报告.md / -CN.md` |
-| Phase 7 | 最终整理与完整性确认 | `实验复刻结果汇总/` |
+```
+框架层 (Framework)            范本层 (Exemplar: QEM)
+  obj_io.py  (通用 .obj I/O)    qem_core.py (QEM 引擎)
+  templates/ (报告模板)          cli.py     (QEM CLI)
+  scripts/  (验证 + 基准)       tests/     (QEM 测试)
+  
+适配新算法只需替换 3 个范本文件，框架层不变。
+```
 
-## 视角审阅
+## 内建算法：QEM 网格简化
 
-按用户指定视角输出审阅报告，用户未指定时主动询问：
+Quadric Error Metric (QEM) — 经典边收缩网格简化算法。
 
-- **研究生视角** — 深度理解论文方法、公式、实验设计
-- **导师视角** — 可复现性评级与教学建议
-- **审稿人视角** — 批判性审查，发现论文弱点
+**对比原始 C++ 实现的优化项**：
 
-## 支持的领域
-
-覆盖数学全领域：纯数学 · 应用数学 · 统计学 · 运筹学 · 计算数学 · AI4Math 等
+| 优化项 | 原始 C++ | 本实现 |
+|--------|---------|--------|
+| 最优位置 | 中点 (v1+v2)/2 | 解 4×4 线性系统 (论文 Eq.5) |
+| 堆管理 | 全重建 O(n log n)/步 | 增量 heapq O(log n)/步 |
+| 面删除 | O(n²) 遍历 + 迭代器失效 | 标记-清理 O(1) |
+| 法线导出 | ❌ 无 | ✅ 加权平均重建 |
+| 边界保护 | ❌ 无 | ✅ 约束优化 |
+| 编译依赖 | OpenGL + GLFW + SDL2 | 纯 Python + NumPy |
+| 参数化 | 硬编码宏 | CLI 参数 (`--faces`/`--ratio`) |
 
 ## 快速开始
 
 ```bash
-# 1. 配置 MinerU Token（用于 PDF 解析）
-mkdir -p ~/.mineru
-echo "token: 'your-api-key'" > ~/.mineru/config.yaml
-# 获取 Token：https://mineru.net/apiManage/token
+# 查看模型信息
+python -m qem_tool.cli -i model.obj --info
 
-# 2. 安装依赖
-pip install mineru-open-sdk pyyaml
+# 简化到指定面数
+python -m qem_tool.cli -i model.obj -o simplified.obj -f 2000
 
-# 3. 运行复现
-python scripts/math_pdf_extract.py paper.pdf --output-dir analysis/
-python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/
+# 按比例简化
+python -m qem_tool.cli -i model.obj -o simplified.obj -r 0.1
+
+# 运行全部测试
+python -m pytest tests/ -v
+
+# 验证简化质量
+python scripts/verify_qem.py -i model.obj -f 2000 --check-hausdorff
+
+# 性能基准测试
+python scripts/benchmark_qem.py -i model.obj
 ```
 
 ## 项目结构
 
 ```
-reproduction/
+math-read-do-obj/
 ├── SKILL.md              # 工作流定义
-├── infra/                # 基础设施配置
-├── provisioning/         # 环境配置脚本
-├── env/                  # 环境锁定文件
-├── analysis/             # 论文分析与三方审阅
-├── code/                 # 复现代码
-├── logs/                 # 运行日志
-├── results/              # 实验结果与图表
-├── reports/              # 双语报告
-├── implementation/       # 增量实现记录
-└── dist/                 # 发布制品
+├── README.md             # 本文件
+├── qem_tool/             # 工具链（算法引擎可替换）
+│   ├── cli.py            # CLI 入口
+│   ├── qem_core.py       # QEM 算法引擎（替换以适配新算法）
+│   └── obj_io.py         # 通用 .obj 解析/导出
+├── tests/                # 测试套件
+├── scripts/              # 验证 + 基准
+├── templates/            # 报告模板
+└── results/              # 运行结果
 ```
-
-## 输出规范
-
-- 所有报告**中英双语**（`.md` + `.zh.md`）
-- 图表附带独立可运行生成代码（`results/figures/code/plot_*.py`）
-- 判决结果使用五态分类：OK / approx / FAIL / WARN / FAIL
-- 统计验证使用 95% 置信区间，至少 N=5 随机种子
 
 ## 依赖
 
-| 包 | 用途 |
-|---|------|
-| mineru-open-sdk | PDF → Markdown（含公式、表格、图表） |
-| pyyaml | MinerU 配置解析 |
+| 包 | 用途 | 必要 |
+|----|------|------|
+| numpy | 矩阵运算 (QEM) | ✅ |
+| pytest | 测试运行 | ❌ (推荐) |
+| matplotlib | 可视化 | ❌ (可选) |
+
+## 与 math-read-do 的关系
+
+| 维度 | math-read-do | math-read-do-obj |
+|------|-------------|-----------------|
+| 领域 | 通用数学论文复现 | OBJ 输出图形学实验 |
+| 算法获取 | PDF → MinerU → 理解 | 直接算法理解（跳过 PDF） |
+| 输入 | PDF 论文链接 | .obj 文件 |
+| 验证 | 多随机种子统计 | 多模型交叉验证 |
+| 核心依赖 | mineru-open-sdk | numpy |
 
 ## 许可
 

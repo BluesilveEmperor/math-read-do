@@ -1,51 +1,32 @@
-# Results Comparison Table: {{PAPER_TITLE}}
-# 实验结果对比表：{{PAPER_TITLE}}
+# 实验结果对比表 / Experimental Results Comparison
 
-## 1. 主要实验结果对比 / Main Results Comparison
+## 简化参数 / Simplification Parameters
 
-| Metric / 指标 | Paper / 论文 | Reproduced / 复现 | Std Dev / 标准差 | 95% CI | Δ(%) | Verdict / 判决 |
-|---------------|-------------|-------------------|-----------------|--------|------|---------------|
-{% for metric in metrics %}
-| {{metric.name}} | {{metric.paper_value}} | {{metric.reproduced_mean}} | ±{{metric.std}} | [{{metric.ci_lower}}, {{metric.ci_upper}}] | {{metric.delta_pct}} | {{metric.verdict_icon}} {{metric.verdict}} |
+- **Input model / 输入模型**: {{ input_model }}
+- **Original faces / 原始面数**: {{ orig_faces }}
+- **Target faces / 目标面数**: {{ target_faces }}
+- **Actual output faces / 实际输出面数**: {{ out_faces }}
+
+## 多模型对比 / Multi-Model Comparison
+
+| Model / 模型 | Original Verts / 原始顶点 | Original Faces / 原始面 | Simplified Verts / 简化顶点 | Simplified Faces / 简化面 | Time / 时间 | Error / 误差 |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+{% for model in models -%}
+| {{ model.name }} | {{ model.orig_v }} | {{ model.orig_f }} | {{ model.out_v }} | {{ model.out_f }} | {{ model.time }}s | {{ model.error }} |
 {% endfor %}
 
-## 2. 按种子详细结果 / Per-Seed Detailed Results
+## 不同简化比对比 / Multi-Ratio Comparison
 
-| Seed / 种子 | {% for m in metrics %} {{m.name}} | {% endfor %} |
-|------------|{% for m in metrics %}---|{% endfor %}|
-{% for seed in seeds %}
-| {{seed.id}} | {% for val in seed.metrics %} {{val}} | {% endfor %} |
+| Ratio / 比例 | Original Faces / 原始面 | Target / 目标 | Output / 输出 | Hausdorff / Hausdorff | Time / 时间 |
+|:---|:---:|:---:|:---:|:---:|:---:|
+{% for row in ratios -%}
+| {{ row.ratio }}% | {{ row.orig_f }} | {{ row.target }} | {{ row.out_f }} | {{ row.hausdorff }} | {{ row.time }}s |
 {% endfor %}
 
-| Mean / 均值 | {% for m in metrics %} {{m.reproduced_mean}} | {% endfor %} |
-| Std / 标准差 | {% for m in metrics %} ±{{m.std}} | {% endfor %} |
+## 与原始 C++ 实现对比 / Comparison with Original C++
 
-## 3. 消融实验对比 / Ablation Study Comparison
-
-| Variant / 变体 | Paper / 论文 | Reproduced / 复现 | Δ | Status / 状态 |
-|---------------|-------------|-------------------|---|---------------|
-{% for ablation in ablations %}
-| {{ablation.name_en}} / {{ablation.name_zh}} | {{ablation.paper}} | {{ablation.reproduced}} | {{ablation.delta}} | {{ablation.status_icon}} {{ablation.status_en}} / {{ablation.status_zh}} |
-{% endfor %}
-
-## 4. 基线方法对比 / Baseline Method Comparison
-
-| Method / 方法 | Paper Reported / 论文报告 | This Run / 本次 | Gap / 差距 |
-|--------------|-------------------------|----------------|-----------|
-{% for baseline in baselines %}
-| {{baseline.name}} | {{baseline.paper}} | {{baseline.reproduced}} | {{baseline.gap}} |
-{% endfor %}
-
-## 5. 计算资源对比 / Computational Resource Comparison
-
-| Resource / 资源 | Paper Reported / 论文报告 | This Run / 本次 |
-|----------------|-------------------------|----------------|
-| GPU | {{PAPER_GPU}} | {{OUR_GPU}} |
-| GPU Memory / 显存 | {{PAPER_GPU_MEM}} GB | {{OUR_GPU_MEM}} GB |
-| Training Time / 训练时间 | {{PAPER_TIME}} | {{OUR_TIME}} |
-| Parameters / 参数量 | {{PAPER_PARAMS}} | {{OUR_PARAMS}} |
-
----
-
-*本文件位于 `实验复刻结果汇总/实验结果对比表/`*
-*Table generated on / 表格生成于 {{DATE}}*
+| Metric / 指标 | Original C++ | Python (this impl) | Delta / 偏差 |
+|:---|:---:|:---:|:---:|
+| Output faces / 输出面数 | {{ cpp_faces }} | {{ py_faces }} | {{ faces_delta }} |
+| Output verts / 输出顶点 | {{ cpp_verts }} | {{ py_verts }} | {{ verts_delta }} |
+| Time / 时间 | {{ cpp_time }}s | {{ py_time }}s | {{ time_delta }} |
