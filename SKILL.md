@@ -16,7 +16,9 @@ description: >-
   reproduce experiment, 复现报告, reproduction report, PDF解析, paper parsing, 实验重现,
   重现论文, 论文重现, 数值复现, 论文复现, paper reproduction, experiment reproduction,
   reproduce results, reproduce figures, 重现结果, 重现图表, 复现结果, 复现图表,
-  reproducibility check, 可复现性评估, 复现验证
+  reproducibility check, 可复现性评估, 复现验证,
+  T-MPC, topology-driven, 同伦轨迹优化, homotopy trajectory, corridor 复现,
+  guidance planner, mpc_planner, acados FORCES Pro, ROS2 Jazzy 复现
 
   # nature-reader triggers
   读论文, 读文献, 论文阅读, 论文分析, read paper, read article, 审阅论文, extract paper,

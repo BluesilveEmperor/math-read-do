@@ -19,6 +19,7 @@
 
 | 范式 | 代表方法 | 特点 | 复现要点 |
 |------|---------|------|---------|
+| 同伦优化 (Homotopy-based) | T-MPC, T-MPC++, TCC-MPC++ | 并行优化多同伦类轨迹 | 同伦约束线性化、guidance planner |
 | 基于搜索 | A*, D*, RRT, PRM | 概率完备 | 随机种子、采样数 |
 | 基于优化 | CHOMP, TrajOpt, GPMP | 凸/非凸优化 | 求解器选择、收敛性 |
 | 基于凸优化 | MICP, GCS, FastPathPlanning | 完备+高效 | SOCP/SDP/MILP 求解器 |
@@ -29,6 +30,7 @@
 
 | 保证类型 | 实现方式 | 代表论文 |
 |---------|---------|---------|
+| 同伦约束 | 线性约束 A_k x_k ≤ b_k | TRO 2025 (de Groot et al.) |
 | 离散碰撞检查 | 栅格/占据图 | 传统 RRT/A* |
 | 连续安全证书 | 凸包/间隔证书 | FastPathPlanning, GCS |
 | 鲁棒安全 | Tube/收缩 | RMPC 系列 |
@@ -36,6 +38,35 @@
 ---
 
 ## 2. 核心算法模板 / Core Algorithm Templates
+
+### 2.X 同伦驱动并行轨迹优化 (TRO 2025)
+
+**典型论文**: De Groot et al., "Topology-Driven Parallel Trajectory Optimization in Dynamic Environments", IEEE TRO 2025
+
+**问题形式**:
+```
+高层: Guidance Planner G(x_0, P_g, C) = {τ_1, ..., τ_P}  [Visibility-PRM]
+低层: P 个并行局部规划器 L(τ_i) = τ_i*
+       min J s.t. 动力学(9b) / 初始(9c) / 碰撞(9d) / 同伦(9e)
+决策: 式(11) 最小代价 或 式(12) 一致性 (c_i = 0.75)
+```
+
+**关键设计**:
+- 同伦约束（式8）：$A_k = (o_k - τ_{i,k})/‖o_k - τ_{i,k}‖$, $b_k = A_k^T(o_k - A_k·β(r+r_{obs}))$
+- 松弛因子 β≈0 使约束在障碍边界处非活跃
+- 不修改代价函数 J → 各轨迹代价可直接比较
+- IdentifyAndPropagate 跨迭代重识别同伦类 → 一致性决策
+
+**复现关键点**:
+1. 求解器替代：FORCES Pro (闭源) → acados (开源 SQP/QP)
+2. 行人预测：恒定速度模型，H=30步，pedsim 社会力模型
+3. Guidance planner：Visibility-PRM 在 x-y-t 状态空间，n=30, Tmax=10ms
+4. 多目标支持：5×5 goal grid 围绕参考路径
+5. 关键Bug：reset后reference_path丢失（需缓存重放）
+
+**超参数**: N=30, dt=0.2s, P=4, wc=0.05, wl=0.75, wv=0.55, wω=0.85, wa=0.34
+
+**实验场景**: Clearpath Jackal, 6m走廊, 4/8/12 双向行人, v_ref=2 m/s, 20Hz控制
 
 ### 2.1 凸优化路径规划 (Convex Optimization-based)
 
@@ -212,9 +243,48 @@ subject to  p(0) = p_init, p(T) = p_term
 
 ### 8.3 轨迹规划
 
+- De Groot et al., "Topology-Driven Parallel Trajectory Optimization in Dynamic Environments", IEEE TRO 2025
+- De Groot et al., "Globally Guided Trajectory Planning in Dynamic Environments", ICRA 2023
+
 - Richter et al., "Polynomial Trajectory Planning for Aggressive Quadrotor Flight in Indoor Environments", ISRR 2013
 - Mellinger & Kumar, "Minimum Snap Trajectory Generation and Control for Quadrotors", ICRA 2011
 
 ---
 
-*Reference for math-read-do-routine skill — Robotics Path Optimization Track*
+## 9. 同伦轨迹优化复现特殊步骤 / Homotopy-specific Reproduction Steps
+
+### 9.1 环境配置 (ROS2 + acados)
+
+| 项 | 配置 |
+|----|------|
+| 主机 | Windows 11 + WSL2 (Ubuntu-24.04) |
+| ROS | ROS2 Jazzy |
+| 求解器 | acados（替代FORCES Pro） |
+| Python | 3.8.10 + casadi 3.5.5 |
+| 仿真 | robot_sim.py 50Hz（无Gazebo） |
+| 行人 | pedsim 社会力模型 |
+
+### 9.2 关键Bug修复清单
+
+| # | 问题 | 根因 | 修复 |
+|---|------|------|------|
+| 1 | ROS2 service discovery超时 | 构造函数里未等discovery完成 | 加3s等待 |
+| 2 | Jazzy定时器签名不匹配 | `create_timer` API变更 | `std::chrono::duration<double>` |
+| 3 | solver_timeout = -1.78e12ms | `planning_start_time`未初始化 | Loop开头置当前时间 |
+| 4 | 多轮实验第2/3轮失败60s超时 | `Planner::reset()`清空reference_path/goal | node缓存最近path/goal消息，reset后重放 |
+
+### 9.3 统计验证
+
+- Wilson 95% CI（小样本成功率）
+- Mann-Whitney U检验（论文用于多规划器对比，p=0.001）
+- 图表：成功率+CI、时长分布(箱线+散点)、xy轨迹
+
+### 9.4 已知局限
+
+- FORCES Pro闭源 → acados替代导致数值差异
+- 行人预测为恒定速度，H=30步累积漂移
+- 样本量（3轮/场景 vs 论文200轮）→ CI较宽
+
+---
+
+*Reference for math-read-do-routine skill — Robotics Path Optimization Track (updated with TRO 2025)*

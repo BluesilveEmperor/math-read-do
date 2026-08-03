@@ -6,13 +6,24 @@
 
 ## 1. 技术方案 / Technical Approach
 
-基于 **MeshCat** (https://github.com/rdeits/meshcat) — Julia/Python 3D 可视化库，通过 CDN 在浏览器中直接渲染。
+基于 **MeshCat** (https://github.com/rdeits/meshcat) 或 **Three.js** — 3D 可视化库，通过 CDN 在浏览器中直接渲染。
+
+| 方案 | 库 | CDN 状态 | 推荐场景 |
+|------|-----|---------|---------|
+| A (首选) | MeshCat | ⚠️ meshcat@0.0.6 和 latest CDN 404 | 内部网络或本地缓存 |
+| B (fallback) | Three.js | ✅ jsdelivr 可用 | 公网环境、长期维护 |
 
 **为什么选 MeshCat**:
 - 无需安装，浏览器直接渲染
 - 支持动画、交互式相机
 - 轻量级（~500KB JS）
 - 论文级渲染质量
+
+**为什么备选 Three.js**:
+- MeshCat CDN 在 unpkg/jsdelivr 上 404（meshcat@0.0.6 和 latest）
+- Three.js 在 cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js 可用
+- OrbitControls 从 examples/jsm/controls/OrbitControls.js 加载
+- 完全可控，无版本漂移风险
 
 ---
 
@@ -67,7 +78,7 @@
 
 ## 4. 使用方式 / Usage
 
-### 4.1 从实验数据生成
+### 4.1 MeshCat 方案（首选，需确认 CDN 可用）
 
 ```bash
 python scripts/trajectory_visualizer.py \
@@ -77,7 +88,32 @@ python scripts/trajectory_visualizer.py \
     --orbit-speed 0.5
 ```
 
-### 4.2 演示模式（无数据时）
+### 4.2 Three.js 方案（fallback）
+
+当 MeshCat CDN 404 时，使用 Three.js 直接渲染：
+
+```html
+<!-- 在 trajectory.html 中引入 -->
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+  
+  // 场景初始化
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  
+  // 轨迹用 THREE.TubeGeometry + THREE.CatmullRomCurve3
+  // 障碍物用 THREE.Mesh + THREE.BoxGeometry
+  // 起点/终点用 THREE.Mesh + THREE.SphereGeometry（彩色）
+  // OrbitControls 内置自由旋转；Orbit 模式用 requestAnimationFrame 绕起点插值
+</script>
+```
+
+### 4.3 演示模式（无数据时）
 
 ```bash
 python scripts/trajectory_visualizer.py \
@@ -85,7 +121,7 @@ python scripts/trajectory_visualizer.py \
     --output results/demo.html
 ```
 
-### 4.3 带障碍物
+### 4.4 带障碍物
 
 ```bash
 python scripts/trajectory_visualizer.py \
@@ -140,7 +176,23 @@ MeshCat 使用自定义二进制协议通信。动画数据编码为 `set_animat
 - 头部: 动画元数据 (fps, name, tracks)
 - 每个 track: 路径 + 类型 (如 position) + 关键帧
 
-### 7.2 相机控制
+### 7.2 Three.js 实现要点
+
+**场景初始化**:
+```javascript
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
+```
+
+**轨迹渲染**: 使用 `THREE.TubeGeometry` 沿 `THREE.CatmullRomCurve3` 生成平滑管道；障碍物用 `THREE.BoxMesh`；起点/终点用 `THREE.SphereMesh` 彩色标记。
+
+**相机模式**: OrbitControls 内置自由旋转；Orbit 模式用 `requestAnimationFrame` 绕起点做圆周运动插值。
+
+### 7.3 相机控制
 
 Orbit 模式使用参数方程：
 ```
@@ -152,7 +204,7 @@ cam_z = start_z + h
 
 Free 模式使用 MeshCat 内置的轨道相机控制器。
 
-### 7.3 性能优化
+### 7.4 性能优化
 
 - 轨迹点超过 1000 时自动降采样
 - 使用 `requestAnimationFrame` 保证流畅
@@ -160,4 +212,4 @@ Free 模式使用 MeshCat 内置的轨道相机控制器。
 
 ---
 
-*Reference for math-read-do-routine skill — Trajectory Visualization*
+*Reference for math-read-do-routine skill — Trajectory Visualization (updated with Three.js fallback)*
