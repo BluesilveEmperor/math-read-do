@@ -6,6 +6,13 @@
 
 本仓库包含多个分支，面向不同研究方向。请选择适合的分支开始使用。
 
+| 分支 | 方向 | Phase 1 做什么 | 核心风险 |
+|------|------|---------------|---------|
+| [main](https://github.com/BluesilveEmperor/math-read-do/tree/main) | 通用数学文献 | PDF 解析 (MinerU) + 三视角审阅 | 公式理解偏差 |
+| [math-read-do-routine](https://github.com/BluesilveEmperor/math-read-do/tree/math-read-do-routine) | 机器人路径优化 | 论文类型检测 + 子策略路由 | 求解器配置 |
+| [math-read-do-obj](https://github.com/BluesilveEmperor/math-read-do/tree/math-read-do-obj) | 图形学 / OBJ 几何 | 算法理解（无需 PDF 解析） | 几何退化 |
+| [financial](https://github.com/BluesilveEmperor/math-read-do/tree/financial) | 量化金融 + 深度学习 | **数据可得性分诊** | 数据授权 + 环境冲突 |
+
 ---
 
 ## 分支导航 / Branch Navigation
@@ -49,6 +56,27 @@
 
 ---
 
+### 💹 [financial](https://github.com/BluesilveEmperor/math-read-do/tree/financial)
+
+**量化金融论文复现** / Quantitative Finance Paper Reproduction
+
+面向「量化金融 + 深度学习」方向，基于 10 篇顶刊论文（QF / Mathematical Finance / SIAM J. Financial Math / Frontiers Math Finance, 2022–2025）的真实复现经验构建：
+- **深度对冲 / 超级对冲**：Robust Deep Hedging、Network Superhedging
+- **签名方法**：Sig-Wasserstein GAN、Signature-Based Models、Signature Volatility
+- **估值调整与定价**：Deep xVA Solver (CVA/BCVA/FVA)、Deep Weighted Monte Carlo
+- **校准与最优停止**：SPX/VIX 联合校准、Randomized NN 最优停止
+- **金融时间序列生成**：Fin-GAN
+
+内建 10 个实验档案，含真实复现数值、阻塞原因与已验证修复补丁（完全复现 5 / 部分复现 3 / 无法复现 2）。
+
+**特色功能**：
+- Phase 1 **数据可得性分诊** — 本领域最大时间陷阱是 CRSP/WRDS/Bloomberg/ICAP 授权数据，开跑前先分诊
+- **五态判决**：`pass` / `approx` / `fail` / `not_testable`（合成数据替代）/ `blocked`（缺代码或缺算力）
+- **双 conda 环境隔离**：signatory 只支持 torch 1.9，与 TF 2.15 依赖互斥
+- 金融指标库：年化 Sharpe（252 交易日）/ Sortino / 最大回撤 / 对冲概率 + 确定性 bootstrap 95% CI
+
+---
+
 ### 📐 [main](https://github.com/BluesilveEmperor/math-read-do/tree/main)
 
 **通用数学文献复现** / General Mathematical Literature Reproduction
@@ -77,15 +105,15 @@
 ```bash
 # 克隆特定分支
 git clone -b math-read-do-routine https://github.com/BluesilveEmperor/math-read-do.git
-# 或
-git clone -b math-read-do-obj https://github.com/BluesilveEmperor/math-read-do.git
+git clone -b math-read-do-obj     https://github.com/BluesilveEmperor/math-read-do.git
+git clone -b financial            https://github.com/BluesilveEmperor/math-read-do.git
 ```
 
 每个分支都有独立的 `SKILL.md`，包含该方向的完整使用说明。
 
 ## 自更新 / Auto-Update
 
-`math-read-do-routine` 和 `math-read-do-obj` 分支内置自更新机制，每次调用前自动检查远程仓库是否有更新。
+`math-read-do-routine`、`math-read-do-obj` 和 `financial` 分支内置自更新机制，每次调用前自动检查远程仓库是否有更新。
 
 ## 许可 / License
 
