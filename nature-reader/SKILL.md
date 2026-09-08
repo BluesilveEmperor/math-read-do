@@ -67,3 +67,11 @@ The files under `references/` are deep references, not defaults. Open them on de
 - The dynamic layer keeps each invocation cheap: only the fragment relevant to this input enters context.
 - The router itself is short on purpose. Update fragments, not this file, when adding scope.
 - This structure mirrors `nature-writing` and `nature-polishing` so shared content lives in `_shared/`.
+
+## 与 math-read-do 主流程的协同 / Integration with math-read-do
+
+本技能可作为 math-read-do Phase 1 的增强工具：
+
+- **Phase 1.4 文献阅读报告**: 主流程使用 `scripts/literature_reader.py` 生成结构化的中文审阅报告（`文献阅读.md`），包含论文结构导航、术语表、图表索引、三视角分析。
+- **nature-reader 补充**: 如需逐段中英对照的论文全文翻译，可单独调用本技能生成 `paper.md` + `source_map.json`，作为 `文献阅读.md` 的补充阅读材料。
+- **MarkLeaf 兼容**: 两个输出均兼容 `markleaf/packages/styles/literature-reader.css` 样式。

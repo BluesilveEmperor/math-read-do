@@ -1,0 +1,327 @@
+/*
+ * Markdown Preview Enhanced — 文献阅读报告样式
+ * 在 VS Code 中：命令面板 → "Markdown Preview Enhanced: Customize CSS"
+ * 将本文件内容粘贴到 "style.less" 中，或保存为 .css 并在 settings.json 中引用
+ *
+ * 字体依赖（可选，安装后效果更好）：
+ *   - Computer Modern (CMU) → LaTeX 风格英文字体
+ *   - 霞鹜文楷 (LXGW WenKai) → 中文衬线字体
+ */
+
+/* ── 基础变量 ── */
+:root {
+  --font-serif: "Latin Modern Roman", "Computer Modern", "CMU Serif",
+                "霞鹜文楷", "LXGW WenKai", "Noto Serif CJK SC",
+                "Source Han Serif CN", "SimSun", "宋体", serif;
+  --font-sans: "Latin Modern Roman", "Computer Modern", "CMU Serif",
+               "霞鹜文楷", "LXGW WenKai", "Noto Sans CJK SC",
+               "Source Han Sans CN", "SimHei", "黑体", sans-serif;
+  --font-mono: "Latin Modern Mono", "Computer Modern Typewriter",
+               "CMU Typewriter Text", "霞鹜文楷 Mono", "LXGWWenKaiMono-Regular",
+               "Consolas", "Courier New", monospace;
+  --color-student: #0969da;
+  --color-advisor: #1a7f37;
+  --color-reviewer: #8250df;
+  --color-gap: #cf222e;
+  --color-contribution: #1a7f37;
+  --color-result: #0969da;
+  --color-limits: #9a6700;
+  --color-background: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #555555;
+  --color-border: #d0d7de;
+  --color-table-bg: #f6f8fa;
+}
+
+/* ── 文档主体 ── */
+.markdown-preview.markdown-preview {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text);
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2em 2.5em;
+  text-align: justify;
+  background: var(--color-background);
+}
+
+/* ── 标题 ── */
+.markdown-preview.markdown-preview h1 {
+  font-family: var(--font-sans);
+  font-size: 1.8em;
+  text-align: center;
+  line-height: 1.4;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+  padding-bottom: 0.4em;
+  border-bottom: 2px solid var(--color-text);
+  font-weight: bold;
+}
+
+.markdown-preview.markdown-preview h2 {
+  font-family: var(--font-sans);
+  font-size: 1.35em;
+  line-height: 1.4;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: bold;
+}
+
+.markdown-preview.markdown-preview h3 {
+  font-family: var(--font-sans);
+  font-size: 1.15em;
+  line-height: 1.4;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+.markdown-preview.markdown-preview h4 {
+  font-family: var(--font-sans);
+  font-size: 1em;
+  line-height: 1.4;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  font-weight: bold;
+}
+
+/* ── 信息头 ── */
+.markdown-preview.markdown-preview blockquote:first-of-type,
+.markdown-preview.markdown-preview hr:first-of-type {
+  /* 预留 */
+}
+
+.markdown-preview.markdown-preview > blockquote:first-of-type {
+  background: var(--color-table-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1em 1.2em;
+  margin: 1.5em 0;
+  font-size: 0.95em;
+}
+
+.markdown-preview.markdown-preview > blockquote:first-of-type p {
+  margin: 0.3em 0;
+}
+
+/* ── 三线表 ── */
+.markdown-preview.markdown-preview table {
+  width: auto;
+  min-width: 60%;
+  margin: 1em auto;
+  border: 0;
+  border-top: 1.5px solid var(--color-text);
+  border-bottom: 1.5px solid var(--color-text);
+  border-collapse: collapse;
+  background: transparent;
+  font-size: 0.95em;
+  display: table;
+}
+
+.markdown-preview.markdown-preview th {
+  border: 0;
+  border-bottom: 0.75px solid var(--color-text);
+  background: transparent;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  text-align: left;
+}
+
+.markdown-preview.markdown-preview td {
+  border: 0;
+  padding: 5px 14px;
+  background: transparent;
+}
+
+.markdown-preview.markdown-preview table p {
+  margin: 0;
+}
+
+/* ── 引用框 ── */
+.markdown-preview.markdown-preview blockquote {
+  margin: 0.8em 0;
+  padding: 0.6em 1em;
+  border: 1.5px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  background: var(--color-table-bg);
+  font-style: normal;
+}
+
+.markdown-preview.markdown-preview blockquote p {
+  margin: 0.3em 0;
+  text-indent: 0;
+}
+
+/* ── 视角卡片 ── */
+.markdown-preview.markdown-preview .perspective-card {
+  margin: 1.5em 0;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+}
+
+.markdown-preview.markdown-preview .perspective-card > blockquote:first-child {
+  margin: 0;
+  padding: 0.5em 1em;
+  border: 0;
+  border-radius: 0;
+  font-weight: 600;
+  font-size: 1.05em;
+  font-family: var(--font-sans);
+}
+
+.markdown-preview.markdown-preview .perspective-card > *:not(:first-child) {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.markdown-preview.markdown-preview .perspective-card > :last-child {
+  padding-bottom: 1em;
+}
+
+/* 研究生视角：蓝色 */
+.markdown-preview.markdown-preview .perspective-card.student {
+  border-color: var(--color-student);
+}
+
+.markdown-preview.markdown-preview .perspective-card.student > blockquote:first-child {
+  background: var(--color-student);
+  color: #ffffff;
+}
+
+/* 导师视角：绿色 */
+.markdown-preview.markdown-preview .perspective-card.advisor {
+  border-color: var(--color-advisor);
+}
+
+.markdown-preview.markdown-preview .perspective-card.advisor > blockquote:first-child {
+  background: var(--color-advisor);
+  color: #ffffff;
+}
+
+/* 审稿人视角：紫色 */
+.markdown-preview.markdown-preview .perspective-card.reviewer {
+  border-color: var(--color-reviewer);
+}
+
+.markdown-preview.markdown-preview .perspective-card.reviewer > blockquote:first-child {
+  background: var(--color-reviewer);
+  color: #ffffff;
+}
+
+/* ── 公式块 ── */
+.markdown-preview.markdown-preview .katex-display {
+  margin: 1.2em 0;
+  padding: 0.8em 1em;
+  border-left: 3px solid var(--color-student);
+  background: var(--color-table-bg);
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+}
+
+.markdown-preview.markdown-preview .katex {
+  font-family: "Latin Modern Math", "Computer Modern", "KaTeX_Math", serif;
+}
+
+/* ── 链接 ── */
+.markdown-preview.markdown-preview a {
+  color: var(--color-student);
+  text-decoration: none;
+}
+
+.markdown-preview.markdown-preview a:hover {
+  text-decoration: underline;
+}
+
+/* ── 分隔线 ── */
+.markdown-preview.markdown-preview hr {
+  width: 10em;
+  height: 1px;
+  margin: 2em auto;
+  background: var(--color-text);
+  border: 0;
+}
+
+/* ── 列表 ── */
+.markdown-preview.markdown-preview ul,
+.markdown-preview.markdown-preview ol {
+  padding-left: 1.5em;
+}
+
+.markdown-preview.markdown-preview li {
+  padding-left: 0.3em;
+  margin-bottom: 0.2em;
+}
+
+.markdown-preview.markdown-preview li > p {
+  margin: 0;
+}
+
+/* ── 代码 ── */
+.markdown-preview.markdown-preview code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--color-table-bg);
+  padding: 0.12em 0.35em;
+  border-radius: 3px;
+}
+
+.markdown-preview.markdown-preview pre {
+  background: var(--color-table-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1em 1.2em;
+  overflow-x: auto;
+}
+
+.markdown-preview.markdown-preview pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* ── 粗体和斜体 ── */
+.markdown-preview.markdown-preview strong,
+.markdown-preview.markdown-preview b {
+  font-family: var(--font-sans);
+  font-weight: bold;
+}
+
+.markdown-preview.markdown-preview em,
+.markdown-preview.markdown-preview i {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+/* ── 段落 ── */
+.markdown-preview.markdown-preview p {
+  margin: 0.6em 0;
+  text-indent: 0;
+}
+
+/* ── 打印优化 ── */
+@media print {
+  .markdown-preview.markdown-preview {
+    max-width: 100%;
+    padding: 0;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  .markdown-preview.markdown-preview h1 {
+    font-size: 16pt;
+  }
+
+  .markdown-preview.markdown-preview h2 {
+    font-size: 14pt;
+  }
+
+  .markdown-preview.markdown-preview table {
+    font-size: 10pt;
+  }
+}

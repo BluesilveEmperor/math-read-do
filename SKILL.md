@@ -9,7 +9,7 @@ description: >-
 
   集成三大 Nature 子技能：
   - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
-  - nature-figure/：出版级图表生成 (Python/R, Nature/CNS 风格)
+  - nature-figure/：科研数据可视化顾问（先思考后绘制，8 步工作流，视觉自检闭环）
   - nature-paper2ppt/：论文一键转为中文组会PPT (6类论文叙事弧)
 
   Triggers: 复现, reproduction, 实验复现, reproduce paper, 复现论文, 重现实验,
@@ -25,7 +25,7 @@ description: >-
   # nature-figure triggers
   nature figure, 论文配图, 学术图表, 科研绘图, 作图, figure, plot for paper,
   publication figure, 出版级图表, 杂志图, 论文图, figure for paper, scientific figure,
-  journal figure, figure generation, 图表生成, 可视化论文, 数据可视化
+  journal figure, figure generation, 图表生成, 可视化论文, 数据可视化, 不知道用什么图, 怎么展示数据, 用什么图好, 期刊投稿图, 误差棒, 显著性标注, 色盲安全配色, 矢量图导出, 中文论文图表, 多面板
 
   # nature-paper2ppt triggers
   论文做PPT, 论文汇报, 组会PPT, 文献汇报, 学术汇报, 做幻灯片, 讲paper,
@@ -34,7 +34,7 @@ compatibility:
   - python3 (mineru-open-sdk >= 0.2.5)
   - 配置文件: ~/.mineru/config.yaml (MinerU token)
   - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
-  - nature-figure: Python (matplotlib/seaborn) 或 R (ggplot2/patchwork/ComplexHeatmap)
+  - nature-figure: matplotlib + seaborn + SciencePlots (静态) + plotly (交互)，CJK 字体自动配置
   - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
 ---
 
@@ -90,7 +90,7 @@ compatibility:
 |-------|------|-------------|------------|
 | 0 | 宿主检测→环境构建→GPU配置 | `infra_manifest.json` | G0: 基础设施就绪 |
 | 0.5 | 版本检测→安装→锁定→验证 | `version_spec.json` | G1: 版本一致 |
-| 1 | PDF解析→结构化提取→领域分类→三方审阅 | `reproducibility_assessment.json` | G01: 可复现性门禁 |
+| 1 | PDF解析→结构化提取→领域分类→文献阅读报告 | `文献阅读.md` + `reproducibility_assessment.json` | G01: 可复现性门禁 |
 | 2 | 依赖扫描→环境构建→确定性配置→验证 | `conda-lock.yml` | G3: 环境就绪 |
 | 3 | 官方代码运行→指标对齐→失败诊断→锁定 | `baseline_metrics.json` | G4: 基线建立 |
 | 4 | 模块拆解→增量实现→代码管理 | `delta_report.json` | -- |
@@ -138,10 +138,10 @@ compatibility:
 
 ---
 
-### Phase 1: 论文解析与三方审阅 / Paper Parsing & 3-Perspective Review
+### Phase 1: 论文解析与文献阅读 / Paper Parsing & Literature Reading
 
 **输入**: PDF 文件路径 / arXiv 链接
-**输出**: `analysis/paper_summary.json` + 三方审阅报告 + `reproducibility_assessment.json`
+**输出**: `analysis/paper_summary.json` + `文献阅读.md` + `reproducibility_assessment.json` + `literature_reading.json`
 
 1.1 **PDF 解析**: 确认 MinerU token 已配置
     - 优先级: MinerU SDK (首选, 含公式/表格/图表) → LaTeXML → PyMuPDF → OCR
@@ -154,17 +154,48 @@ compatibility:
 
 1.3 **领域分类**: 关键词+依赖 → 路由到数值/符号/AI4Math/统计/优化/经济子策略
 
-1.4 **视角审阅**: 按用户指定视角输出审阅报告；未指定时默认**研究生视角**
-    - **用户未指定视角 → 默认研究生**: 直接以研究生视角执行审阅（学习理解导向）
-    - **研究生**: 深度理解 -- 摘要/文献综述/研究问题/方法/结果/讨论/关键公式
-      → 消费方: Phase 2 环境重建方法栈, Phase 4 增量实现的公式/算法参考
-    - **导师**: 可复现性评级 -- 方法评估/可复现性表/教学建议/reproducibility_assessment.json
-      → 消费方: G01 门禁 (决定是否进入复现流程)
-    - **审稿人**: 批判审查 -- 总体评价/方法论评估/修改意见(强制/建议/细节)/总结
-      → 消费方: Phase 5 判决引擎, Phase 6 诊断章节引用
-    - 执行: `python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json`
-    - 产出: `analysis/<paper>_{student,advisor,reviewer}_review.md`（仅输出指定视角）
-    - **严禁默认输出全部视角，仅输出用户指定的单一视角**
+1.4 **文献阅读报告生成**: 生成结构化的中文审阅分析报告
+    - 执行: `python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json`
+    - **交互流程**: 未指定 `--template` 时，脚本启动后会**先列出 9 种模板供用户选择**，用户输入编号后才会开始生成报告
+    - **模板选择**: 可选模板列表如下：
+      1. `markleaf` — **LaTeX 风格（推荐）**: CMU 字体 + tcolorbox 卡片 + 三线表，适合学术文献阅读
+      2. `print` — **印刷品**: Times New Roman + 两端对齐 + 首行缩进，适合长文阅读
+      3. `retro-print` — **铅字印刷**: KingHwaOldSong 复古字体，适合文学/历史类
+      4. `sans` — **无衬线**: SF Pro Display + 现代简洁，适合技术文档
+      5. `serif` — **衬线**: Source Han Serif，默认清晰易读
+      6. `magazine` — **杂志**: Georgia + 大标题，适合图文混排
+      7. `minimal` — **极简**: Segoe UI + 无多余装饰，适合快速浏览
+      8. `notebook` — **手记**: 霞鹜文楷 + 楷体，适合笔记风格
+      9. `print-double` — **双色印刷**: 蓝色强调，适合打印输出
+    - **视角控制**: 未指定 `--perspective` 时，默认只输出**研究生视角**；`--perspective all` 输出三个视角 + 交叉对比
+    - 报告包含:
+      - **论文结构导航**: 章节/页码/论证功能(gap→contribution→result→limits)
+      - **术语表**: 专业术语 + 英文全称 + 中文译法 + 首次出现位置
+      - **关键图表索引**: 图表/表格的 ID、标题、页码、关联分析
+      - **关键公式索引**: 公式编号、LaTeX、描述、来源页码
+      - **视角分析**: 研究生/导师/审稿人(默认仅研究生)
+      - **复现指导**: 核心算法、超参数、数据集、主要风险
+    - 产出:
+      - `analysis/文献阅读.md` -- 完整中文审阅报告 (自带嵌入式 CSS，MPE 打开即用)
+      - `analysis/literature_reading.json` -- 结构化数据 (供下游消费)
+      - `analysis/reproducibility_assessment.json` -- 可复现性评估 (G01 门禁)
+    - **MPE 兼容**: 报告 Markdown 自带嵌入式 CSS，可在 VS Code + Markdown Preview Enhanced 中直接预览
+    - **旧脚本**: `scripts/three_perspective_review.py` 已废弃，移入 `scripts/legacy/`
+
+    **使用示例**:
+    ```bash
+    # 默认流程：询问模板 + 只输出研究生视角
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json
+
+    # 指定模板：跳过询问
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --template templates/literature_reader.print.md
+
+    # 全部视角
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --perspective all
+
+    # 指定模板 + 全部视角
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --template templates/literature_reader.sans.md --perspective all
+    ```
 
 **G01 门禁**: 审查 `reproducibility_assessment.json`
     - `proceed` → 直接进 Phase 2
@@ -316,14 +347,26 @@ math-read-do/
 │   │   ├── core/                # 核心原则、工作流、输出协议
 │   │   └── fragments/source/    # 来源格式路由 (pdf-text/scanned-pdf/html/doi-arxiv/pasted-text)
 │   └── references/              # 图提取、接地规则、输出规范、论文解剖
-├── nature-figure/               # 子技能：出版级图表生成
+├── nature-figure/               # 子技能：科研数据可视化顾问 (scipilot-figure-skill)
 │   ├── SKILL.md
 │   ├── README.md
-│   ├── manifest.yaml
-│   ├── static/
-│   │   ├── core/                # 核心契约、立场声明
-│   │   └── fragments/backend/   # 后端选择 (python/r)
-│   └── references/              # 图表契约、后端选择、设计理论、通用模式等
+│   ├── LICENSE
+│   ├── requirements.txt
+│   ├── references/              # 选图决策、数据剖析、期刊规范、绘图配方、视觉自检
+│   │   ├── chart_selection.md   # 选图决策框架
+│   │   ├── data_profiling.md    # 数据剖析报告解读
+│   │   ├── journal_specs.md     # 期刊规范 (Nature/Science/IEEE/中文核心)
+│   │   ├── plot_recipes.md      # 9 类图配方
+│   │   ├── publication_checklist.md # 投稿前形式合规清单
+│   │   ├── visual_review.md     # AI 读图 8 项清单 + 回改循环
+│   │   └── viz_pitfalls.md      # 18 条科研画图禁忌
+│   └── scripts/
+│       ├── profile_data.py      # EDA：列类型/样本量/分布/异常/相关
+│       ├── setup_style.py       # 期刊预设 + CJK 字体配置
+│       ├── export_figure.py     # 多格式导出 + 灰度预览
+│       ├── check_figure.py      # 文件合规自检
+│       ├── layout_tools.py      # 子图标签对齐 + 版面整理
+│       └── visual_qa.py         # 渲染预览 + 程序自检
 ├── nature-paper2ppt/            # 子技能：论文→PPTX
 │   ├── SKILL.md
 │   ├── README.md
@@ -337,14 +380,30 @@ math-read-do/
 │   ├── core/                    # 伦理、论文类型分类、阅读工作流、术语账本
 │   └── journal-formats/         # 期刊格式参考 (nat-comms)
 ├── skills/registry.yaml
-├── scripts/            # 脚本 (PDF提取/三方审阅/图表导出等)
-├── templates/          # 双语报告模板 (Jinja2)
+├── scripts/            # 脚本 (PDF提取/文献阅读报告/图表导出等)
+│   ├── literature_reader.py # 文献阅读报告生成器 (主脚本)
+│   ├── generate_templates.py # 模板批量生成器
+│   └── legacy/         # 旧版脚本 (three_perspective_review.py 等)
+├── templates/          # 文献阅读报告模板 (9 种排版风格)
+│   ├── literature_reader.markleaf.md   # LaTeX 风格 (推荐)
+│   ├── literature_reader.print.md      # 印刷品
+│   ├── literature_reader.retro-print.md # 铅字印刷
+│   ├── literature_reader.sans.md       # 无衬线
+│   ├── literature_reader.serif.md      # 衬线
+│   ├── literature_reader.magazine.md   # 杂志
+│   ├── literature_reader.minimal.md    # 极简
+│   ├── literature_reader.notebook.md   # 手记
+│   ├── literature_reader.print-double.md # 双色印刷
+│   └── literature_reader.mpe.css       # MPE 独立样式 (备用)
 ├── schemas/            # 校验 JSON Schema
 ├── tests/              # 测试
 ├── infra/              # 基础设施 (manifest/Vagrantfile/Dockerfile/apptainer)
 ├── provisioning/       # 配置脚本 (ansible/版本管理器/CUDA/HPC)
 ├── env/                # 环境锁定 (version_spec/conda-lock/requirements/Manifest)
-├── analysis/           # 论文分析 (summary/parsed/formulas/gray_areas/三视角审阅)
+├── analysis/           # 论文分析 (summary/parsed/formulas/gray_areas/文献阅读)
+│   ├── 文献阅读.md     # 中文审阅报告 (自带 CSS，MPE 打开即用)
+│   ├── literature_reading.json # 结构化数据 (下游消费)
+│   └── ...             # 其他分析文件
 ├── code/               # 代码 (Git repo)
 ├── logs/               # 运行日志
 ├── results/            # 实验 (baseline/tolerance/raw/stat)
@@ -391,14 +450,14 @@ pip install mineru-open-sdk pyyaml
 | 子技能 | 目录 | 入口文件 | 主要用途 |
 |--------|------|---------|---------|
 | nature-reader | `nature-reader/` | `SKILL.md` + `manifest.yaml` | 科研论文智能阅读、结构化提取、6种来源格式路由 |
-| nature-figure | `nature-figure/` | `SKILL.md` + `manifest.yaml` | 出版级图表生成，Python/R 双后端，含 QA 循环 |
+| nature-figure | `nature-figure/` | `SKILL.md` | 科研数据可视化顾问：8 步工作流，matplotlib+seaborn+SciencePlots+plotly，视觉自检闭环 |
 | nature-paper2ppt | `nature-paper2ppt/` | `SKILL.md` + `manifest.yaml` | 论文→中文 PPTX，6类论文叙事弧，自审校循环 |
 | _shared | `_shared/` | 无入口，被子技能引用 | 术语账本、论文类型分类法、伦理规范、Nat Communs 格式 |
 
 ### 与主流程的协同
 
 - **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。用户未指定审阅视角时，主动询问。
-- **nature-figure** 可增强 Phase 5 (图表导出)，提供出版级图表样式和质量门禁。
+- **nature-figure** 可增强 Phase 5 (图表导出)，作为"可视化顾问"：先剖析数据→推荐图型→拦截错误→绘制→视觉自检闭环，提供出版级图表样式和质量门禁。
 - **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
 
 ### 调用方式
