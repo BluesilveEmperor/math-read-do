@@ -31,6 +31,7 @@ description: >-
   论文做PPT, 论文汇报, 组会PPT, 文献汇报, 学术汇报, 做幻灯片, 讲paper,
   读书报告PPT, paper to slides, journal club, 论文转PPT, 学术演讲
 compatibility:
+  - 论文插图: 内置渲染内核（Node >= 18），无需额外安装
   - python3 (mineru-open-sdk >= 0.2.5)
   - 配置文件: ~/.mineru/config.yaml (MinerU token)
   - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
@@ -51,7 +52,8 @@ compatibility:
 
 1️⃣ 阅读论文 — 解析PDF并输出指定视角的审阅报告
 2️⃣ 复现实验 — 启动完整复现流程（Phase 0→7）
-3️⃣ 生成图表 — 基于实验数据出版级图表
+3️⃣ 生成图表 — ① 数据图：基于实验数据的出版级图表
+              ② 论文插图：研究框架图/技术路线图/方法架构图/系统架构图/论文结构图/实验流程图
 4️⃣ 制作PPT — 将论文或复现结果转为演示文稿
 ```
 
@@ -83,6 +85,10 @@ compatibility:
 | 11 | 单点均值比较忽略方差 | CI 很宽时判决虚假积极 | 用 95% CI 区间验证, 报告 x-bar ± CI |
 | 12 | 自动翻译不校对专业术语 | 术语混淆 (identification != 识别) | 术语先在 glossary.md 对齐, 翻译后人工校对 |
 | 13 | 增量实现时不标注论文出处 | 代码溯源断裂 | 每个函数 docstring 写 `Ref: Section X.Y, Eq.(Z)` |
+| 14 | 实验没跑完就画"最终版"实验流程图，数字靠推测 | 造假风险；PRISMA/CONSORT 数字自相矛盾 | 计划阶段只出 `--stage draft`；final 必过 `requires_experiment_data` 硬门禁 |
+| 15 | 手工修改交付 HTML 冒充校验通过 | 收据 SHA-256 对不上，溯源断裂 | 只改 spec 用 `figures.py render` 重跑；HTML 视为只读产物 |
+| 16 | 路线图补充时重排/删除既有节点 | 初稿与终稿不可比，失去计划-执行对照 | 走 `route-supplement` 追加；结构 diff 拒绝删除，需重画用 `--force-rewrite` |
+| 17 | 出图前不问主题/动效/语言/栏宽/格式/阶段，直接套默认出图 | 风格不合投稿要求返工；"动效没进 PDF"预期落空 | 按「出图前必问清单」一次问全；用户弃权才回落默认并在交付说明写明 |
 
 ## 阶段速查 / Phase Quick-Ref
 
@@ -332,8 +338,51 @@ compatibility:
 | G66 | Phase 5.5 | 有图表时每图有独立源码 | 补导出 |
 | G7 | Phase 6 | 所有报告中英双语 (`.md` + `-CN.md`) | 补译 |
 | G8 | Phase 7 | `实验复刻结果汇总/` 下所有文件就位 | 补缺文件 |
+| G9 | Phase 5.7 → 6 | 实验流程图 final 已过 `requires_experiment_data` 硬门禁；六张图均在 manifest 登记且状态合法 | 拒绝进入报告阶段（实验流程图缺失或仍为 draft 时） |
+| G10 | Phase 7 | 插图中文标签检查通过（检查 11 `text-language`）；每张图有 spec 与 SHA-256 收据 | 补译/补收据 |
 
 ---
+
+## 论文插图 / Figures（六类图，内置渲染内核）
+
+唯一入口：`python scripts/figures.py`（内嵌渲染内核，Node >= 18；`figures.py doctor` 自检）。
+实现与门禁细节见 `docs/figures-feature-plan.md`；内核归属见 `scripts/figuregen/NOTICE.md`。
+
+### 出图前必问清单（缺任一项且用户未弃权 → exit 2，不静默出图）
+
+| 项目 | 选项 | 默认（仅用户弃权时） |
+|---|---|---|
+| 图类型 | framework / route / model / system / structure / experiment | 按用户说法给推荐再确认 |
+| 主题（视觉预设） | 素白 paper（投稿推荐）/ 深色 / 制图线稿 / 新粗野 / 趣味 / 新拟态 / 孟菲斯 / 玻璃 / 包豪斯 / 苹果风 | 素白 |
+| 数据流动形式 | off 静止 / hover 悬停 / flow 流动 / tour 巡演 | off |
+| 文字语言 | zh-CN / en | zh-CN |
+| 排版规格 | single 单栏 / double 双栏 | single |
+| 输出格式 | HTML / PDF / EPS（PDF/EPS 内核尚未实现，见已知限制） | HTML |
+| 定稿阶段 | draft / confirmed / final | — |
+
+问答协议：已说过的项不重复问；批量出图一批只问一次；用户弃权须用 `--declined` 显式声明，并在交付说明写明"该项未指定，按默认交付"。
+
+### 阶段归属（并入 Phase 体系）
+
+| 阶段 | 步骤 | 产出 |
+|---|---|---|
+| Phase 1.5（阅读） | 默认三张：framework(final) + route(draft) + structure(final) | `figures/out/*.html` + manifest |
+| Phase 4.0（复现） | 无路线图出初稿；有则 `route-supplement` 追加（禁删节点/禁改主路径方向） | `figures/specs/route.json` 升版 |
+| Phase 4.4 / 5.6 | 方法·模型架构图、系统架构图（`soft_code_verified`，代码跑通后 final） | 两张 HTML |
+| Phase 5.7 | 实验流程图 final —— **唯一硬门禁 `requires_experiment_data`** | `figures/out/experiment.html` |
+| Phase 7 | 六图 + spec + data + manifest 归位到 `实验复刻结果汇总/论文插图（含规格）/`（G9/G10） | 归位完成 |
+
+### 常用命令
+
+```bash
+python scripts/figures.py doctor
+python scripts/figures.py list
+python scripts/figures.py render framework --stage final --preset paper --motion off --lang zh-CN --column double --format html
+python scripts/figures.py init-reading analysis/literature_reading.json
+python scripts/figures.py route-supplement --spec figures/specs/route_new.json
+```
+
+已知限制：PDF/EPS 与 visual-check 为内核 Phase 2 桩，当前交付自包含 HTML（HarmonyOS Sans 子集 base64 内嵌，可离线打印）。
 
 ## 文件结构 / Directory Structure
 
@@ -400,6 +449,7 @@ math-read-do/
 ├── infra/              # 基础设施 (manifest/Vagrantfile/Dockerfile/apptainer)
 ├── provisioning/       # 配置脚本 (ansible/版本管理器/CUDA/HPC)
 ├── env/                # 环境锁定 (version_spec/conda-lock/requirements/Manifest)
+├── figures/            # 论文插图工作期目录 (specs/ out/ data/ manifest.json)
 ├── analysis/           # 论文分析 (summary/parsed/formulas/gray_areas/文献阅读)
 │   ├── 文献阅读.md     # 中文审阅报告 (自带 CSS，MPE 打开即用)
 │   ├── literature_reading.json # 结构化数据 (下游消费)
@@ -415,6 +465,8 @@ math-read-do/
 ```
 
 ## 依赖与配置 / Dependencies & Configuration
+
+**论文插图（内置渲染内核）**：需要 Node ≥ 18（`python scripts/figures.py doctor` 自检）；字体子集已随仓库内嵌（HarmonyOS Sans，约 500KB woff2），无需安装字体。
 
 | 包 | 用途 | 安装 |
 |---|------|------|
