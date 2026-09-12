@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "diagram_type": "model",
+  "meta": {
+    "title": "Transformer 编码器（算子级）",
+    "subtitle": "Vaswani et al. (2017) — 多头注意力与前馈网络展开到算子粒度",
+    "column": "double",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [680, 880]
+  },
+  "modules": [
+    { "id": "inp", "type": "input", "shape": "parallelogram", "label": "输入 Token", "sublabel": "源序列", "pos": [280, 40], "size": [120, 40], "tensor_shape": "[B, S]" },
+    { "id": "embed", "type": "embedding", "label": "Token 嵌入", "sublabel": "vocab → d_model", "pos": [280, 110], "size": [120, 40], "tensor_shape": "[B, S, D]", "tensor_pos": [410, 178] },
+    { "id": "pos_enc", "type": "embedding", "variant": "dashed", "label": "位置编码", "sublabel": "正弦编码", "pos": [440, 103], "size": [110, 52] },
+    { "id": "mha", "type": "attention", "label": "多头注意力", "sublabel": "h 个头，d_k = D / h", "pos": [60, 200], "size": [560, 220], "nested": ["q_lin", "k_lin", "v_lin", "sdpa", "concat_lin"], "tensor_shape": "[B, S, D]" },
+    { "id": "q_lin", "type": "linear", "label": "线性层 Q", "sublabel": "D → d_k", "pos": [90, 255], "size": [90, 45] },
+    { "id": "k_lin", "type": "linear", "label": "线性层 K", "sublabel": "D → d_k", "pos": [200, 255], "size": [90, 45] },
+    { "id": "v_lin", "type": "linear", "label": "线性层 V", "sublabel": "D → d_k", "pos": [310, 255], "size": [90, 45] },
+    { "id": "sdpa", "type": "scaled_dot_product_attention", "label": "缩放点积注意力", "sublabel": "softmax(QKᵀ / √d_k) · V", "pos": [180, 315], "size": [360, 45], "tensor_shape": "[B, h, S, S]", "tensor_pos": [550, 340] },
+    { "id": "concat_lin", "type": "linear", "label": "线性输出层", "sublabel": "concat → D", "pos": [220, 380], "size": [280, 36], "tensor_shape": "[B, S, D]", "tensor_pos": [510, 400] },
+    { "id": "add_norm_1", "type": "layernorm", "shape": "rect", "label": "相加与层归一化", "sublabel": "γ, β", "pos": [280, 450], "size": [120, 36] },
+    { "id": "ffn", "type": "ffn", "label": "前馈网络", "sublabel": "两层 MLP", "pos": [180, 510], "size": [360, 110], "nested": ["ffn_lin1", "ffn_gelu", "ffn_lin2"], "tensor_shape": "[B, S, D]" },
+    { "id": "ffn_lin1", "type": "linear", "label": "线性层", "sublabel": "D → d_ff", "pos": [200, 550], "size": [80, 40] },
+    { "id": "ffn_gelu", "type": "gelu", "label": "GELU", "sublabel": "激活", "pos": [310, 530], "size": [85, 85] },
+    { "id": "ffn_lin2", "type": "linear", "label": "线性层", "sublabel": "d_ff → D", "pos": [410, 550], "size": [80, 40] },
+    { "id": "add_norm_2", "type": "layernorm", "shape": "rect", "label": "相加与层归一化", "sublabel": "γ, β", "pos": [280, 640], "size": [120, 36] },
+    { "id": "out_lin", "type": "custom", "label": "输出线性层", "sublabel": "D → vocab", "pos": [260, 700], "size": [160, 40], "tensor_shape": "[B, S, V]", "tensor_pos": [430, 725] },
+    { "id": "softmax_out", "type": "activation", "shape": "circle", "label": "Softmax", "sublabel": "概率分布", "pos": [310, 755], "size": [110, 110], "tensor_shape": "[B, S, V]" }
+  ],
+  "connections": [
+    { "from": "inp", "to": "embed", "variant": "forward", "route": "straight" },
+    { "from": "pos_enc", "to": "embed", "variant": "data", "label": "+ 位置", "labelAt": [420, 116], "route": "straight", "fromSide": "left", "toSide": "right" },
+    { "from": "embed", "to": "q_lin", "variant": "forward", "fromSide": "bottom", "toSide": "top", "via": [[340, 237], [135, 237]] },
+    { "from": "embed", "to": "k_lin", "variant": "forward", "fromSide": "bottom", "toSide": "top", "via": [[340, 240], [245, 240]] },
+    { "from": "embed", "to": "v_lin", "variant": "forward", "fromSide": "bottom", "toSide": "top", "via": [[340, 243], [355, 243]] },
+    { "from": "q_lin", "to": "sdpa", "variant": "forward", "fromSide": "bottom", "toSide": "top", "via": [[135, 305], [360, 305]] },
+    { "from": "k_lin", "to": "sdpa", "variant": "forward", "fromSide": "bottom", "toSide": "top", "route": "straight" },
+    { "from": "v_lin", "to": "sdpa", "variant": "forward", "fromSide": "bottom", "toSide": "top", "route": "straight" },
+    { "from": "sdpa", "to": "concat_lin", "variant": "forward", "fromSide": "bottom", "toSide": "top", "route": "straight" },
+    { "from": "concat_lin", "to": "add_norm_1", "variant": "forward", "fromSide": "bottom", "toSide": "top", "via": [[360, 425], [340, 425]] },
+    { "from": "embed", "to": "add_norm_1", "variant": "backward-skip", "fromSide": "right", "toSide": "right", "via": [[400, 165], [640, 165], [640, 468]] },
+    { "from": "add_norm_1", "to": "ffn_lin1", "variant": "forward", "fromSide": "bottom", "toSide": "left", "via": [[340, 495], [170, 495], [170, 570]] },
+    { "from": "ffn_lin1", "to": "ffn_gelu", "variant": "forward", "fromSide": "right", "toSide": "left", "route": "straight" },
+    { "from": "ffn_gelu", "to": "ffn_lin2", "variant": "forward", "fromSide": "right", "toSide": "left", "route": "straight" },
+    { "from": "ffn_lin2", "to": "add_norm_2", "variant": "forward", "fromSide": "bottom", "toSide": "top", "via": [[450, 630], [340, 630]] },
+    { "from": "add_norm_1", "to": "add_norm_2", "variant": "backward-skip", "fromSide": "right", "toSide": "right", "via": [[600, 468], [600, 658]] },
+    { "from": "add_norm_2", "to": "out_lin", "variant": "forward", "route": "straight" },
+    { "from": "out_lin", "to": "softmax_out", "variant": "forward", "route": "straight" }
+  ],
+  "cards": [
+    { "dot": "blue", "title": "架构", "items": [
+      "多头注意力展开到算子粒度：线性层 Q/K/V → 缩放点积注意力 → 线性输出层",
+      "前馈网络展开到：线性层 → GELU → 线性层",
+      "两条残差「相加与层归一化」连接分别包裹两个子层",
+      "正弦位置编码在词嵌入输出处注入"
+    ] },
+    { "dot": "gray", "title": "维度说明", "items": [
+      "B：批大小",
+      "S：序列长度",
+      "D：模型维度 d_model（如 512）",
+      "h：注意力头数（如 8）",
+      "d_k = D / h：每头维度",
+      "d_ff：前馈网络内部维度（如 2048）",
+      "V：词表大小"
+    ] }
+  ]
+}
