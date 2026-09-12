@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "framework",
+  "meta": {
+    "title": "研究框架图",
+    "subtitle": "研究问题 → 研究内容 → 研究成果 的对应关系（骨架，请替换为本文真实内容）",
+    "column": "double",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [740, 360],
+    "legend": { "mode": "auto" },
+    "language": { "mode": "zh-CN" }
+  },
+  "modules": [
+    { "id": "problem_q1", "type": "problem", "label": "研究问题一", "sublabel": "问题背景与难点", "pos": [40, 80], "size": [180, 60] },
+    { "id": "problem_q2", "type": "problem", "label": "研究问题二", "sublabel": "问题背景与难点", "pos": [40, 200], "size": [180, 60] },
+    { "id": "content_c1", "type": "content", "label": "研究内容一", "sublabel": "对应问题一的方法", "pos": [320, 60], "size": [170, 60] },
+    { "id": "content_c2", "type": "content", "label": "研究内容二", "sublabel": "对应问题二的方法", "pos": [320, 150], "size": [170, 60] },
+    { "id": "content_c3", "type": "content", "label": "研究内容三", "sublabel": "支撑性工作", "pos": [320, 240], "size": [170, 60] },
+    { "id": "outcome_o1", "type": "outcome", "label": "研究成果一", "sublabel": "对应创新点一", "pos": [580, 90], "size": [120, 60] },
+    { "id": "outcome_o2", "type": "outcome", "label": "研究成果二", "sublabel": "对应创新点二", "pos": [580, 210], "size": [120, 60] }
+  ],
+  "groups": [
+    { "kind": "layer", "label": "研究问题", "wraps": ["problem_q1", "problem_q2"], "pad": 16 },
+    { "kind": "layer", "label": "研究内容", "wraps": ["content_c1", "content_c2", "content_c3"], "pad": 16 },
+    { "kind": "layer", "label": "研究成果", "wraps": ["outcome_o1", "outcome_o2"], "pad": 16 }
+  ],
+  "connections": [
+    { "from": "problem_q1", "to": "content_c1", "variant": "forward", "route": "straight" },
+    { "from": "problem_q1", "to": "content_c2", "variant": "forward", "route": "straight" },
+    { "from": "problem_q2", "to": "content_c2", "variant": "forward", "route": "straight" },
+    { "from": "problem_q2", "to": "content_c3", "variant": "forward", "route": "straight" },
+    { "from": "content_c1", "to": "outcome_o1", "variant": "forward", "route": "straight" },
+    { "from": "content_c2", "to": "outcome_o1", "variant": "forward", "route": "straight" },
+    { "from": "content_c2", "to": "outcome_o2", "variant": "forward", "route": "straight" },
+    { "from": "content_c3", "to": "outcome_o2", "variant": "forward", "route": "straight" }
+  ],
+  "cards": [
+    { "dot": "blue", "title": "使用说明", "items": [
+      "左列为研究问题，中列为研究内容，右列为研究成果",
+      "每条连线必须对应一个真实的问题-内容-成果关系，禁臆造连线",
+      "替换为本课题真实内容后，用 figures.py render framework --stage final 定稿"
+    ] }
+  ]
+}

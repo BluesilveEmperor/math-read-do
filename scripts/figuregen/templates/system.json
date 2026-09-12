@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "diagram_type": "system",
+  "meta": {
+    "title": "系统架构图",
+    "subtitle": "客户端 → 服务 → 存储（骨架，请替换为真实分层与协议）",
+    "column": "double",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [760, 400],
+    "legend": { "mode": "auto" },
+    "language": { "mode": "zh-CN" }
+  },
+  "modules": [
+    { "id": "client_web", "type": "client", "label": "网页客户端", "sublabel": "浏览器端", "pos": [60, 60], "size": [170, 60] },
+    { "id": "client_app", "type": "client", "label": "桌面客户端", "sublabel": "本地应用", "pos": [60, 200], "size": [170, 60] },
+    { "id": "service_api", "type": "service", "label": "接口服务", "sublabel": "业务逻辑", "pos": [300, 60], "size": [180, 60] },
+    { "id": "service_worker", "type": "service", "label": "计算服务", "sublabel": "离线任务", "pos": [300, 200], "size": [180, 60] },
+    { "id": "storage_db", "type": "storage", "label": "主数据库", "sublabel": "业务数据", "pos": [540, 60], "size": [150, 60] },
+    { "id": "storage_obj", "type": "storage", "label": "对象存储", "sublabel": "文件与制品", "pos": [540, 200], "size": [150, 60] }
+  ],
+  "connections": [
+    { "from": "client_web", "to": "service_api", "variant": "forward", "route": "straight", "label": "HTTPS" },
+    { "from": "client_app", "to": "service_worker", "variant": "forward", "route": "straight", "label": "任务队列" },
+    { "from": "service_api", "to": "storage_db", "variant": "data", "route": "straight", "label": "SQL" },
+    { "from": "service_worker", "to": "storage_obj", "variant": "data", "route": "straight", "label": "对象接口" }
+  ],
+  "cards": [
+    { "dot": "blue", "title": "使用说明", "items": [
+      "跨层连线必须标注真实协议（HTTPS/gRPC/SQL 等），禁臆造",
+      "系统架构图须实现完成后才能 final（soft_code_verified 门禁）"
+    ] }
+  ]
+}

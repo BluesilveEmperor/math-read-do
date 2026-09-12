@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "diagram_type": "structure",
+  "meta": {
+    "title": "论文结构图",
+    "subtitle": "一章一节点 + 章标题（骨架，请替换为本文真实章节）",
+    "column": "single",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [300, 600],
+    "legend": { "mode": "hidden" },
+    "language": { "mode": "zh-CN" }
+  },
+  "modules": [
+    { "id": "ch1", "type": "chapter", "label": "第一章 绪论", "sublabel": "研究背景与问题", "pos": [60, 30], "size": [180, 54] },
+    { "id": "ch2", "type": "chapter", "label": "第二章 文献综述", "sublabel": "相关方法与不足", "pos": [60, 120], "size": [180, 54] },
+    { "id": "ch3", "type": "chapter", "label": "第三章 方法", "sublabel": "本文提出的方法", "pos": [60, 210], "size": [180, 54] },
+    { "id": "ch4", "type": "chapter", "label": "第四章 实验", "sublabel": "数据集与对比结果", "pos": [60, 300], "size": [180, 54] },
+    { "id": "ch5", "type": "chapter", "label": "第五章 讨论", "sublabel": "局限与意义", "pos": [60, 390], "size": [180, 54] },
+    { "id": "ch6", "type": "chapter", "label": "第六章 结论", "sublabel": "总结与展望", "pos": [60, 480], "size": [180, 54] }
+  ],
+  "connections": [
+    { "from": "ch1", "to": "ch2", "variant": "forward", "route": "straight" },
+    { "from": "ch2", "to": "ch3", "variant": "forward", "route": "straight" },
+    { "from": "ch3", "to": "ch4", "variant": "forward", "route": "straight" },
+    { "from": "ch4", "to": "ch5", "variant": "forward", "route": "straight" },
+    { "from": "ch5", "to": "ch6", "variant": "forward", "route": "straight" }
+  ],
+  "cards": [
+    { "dot": "ink", "title": "使用说明", "items": [
+      "只画真实的「章节 → 内容」映射，一章一节点",
+      "章标题替换为本文实际章节名后即可 final"
+    ] }
+  ]
+}
