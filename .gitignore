@@ -1,1 +1,4 @@
 __pycache__/
+
+# 插图引擎只带字体子集（woff2），全量 ttf 不进仓库
+scripts/figuregen/engine/assets/fonts/*.ttf

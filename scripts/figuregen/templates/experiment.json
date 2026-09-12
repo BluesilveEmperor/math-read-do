@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "diagram_type": "experiment",
+  "meta": {
+    "title": "实验流程图",
+    "subtitle": "数据 → 预处理 → 训练 → 评估 → 指标（骨架，请替换为真实实验流程）",
+    "column": "double",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [640, 440],
+    "legend": { "mode": "auto" },
+    "language": { "mode": "zh-CN" }
+  },
+  "modules": [
+    { "id": "dataset", "type": "dataset", "label": "数据集", "sublabel": "初始样本", "pos": [50, 60], "size": [160, 56] },
+    { "id": "preprocess", "type": "preprocess", "label": "预处理", "sublabel": "清洗与对齐", "pos": [50, 200], "size": [160, 56] },
+    { "id": "train", "type": "train", "label": "训练", "sublabel": "模型拟合", "pos": [280, 200], "size": [150, 56] },
+    { "id": "eval", "type": "eval", "label": "评估", "sublabel": "测试集推理", "pos": [470, 200], "size": [140, 56] },
+    { "id": "metric", "type": "metric", "label": "指标", "sublabel": "指标汇总", "pos": [470, 330], "size": [140, 56] },
+    { "id": "baseline", "type": "baseline", "label": "基线方法", "sublabel": "对照", "pos": [280, 60], "size": [150, 56], "variant": "dashed" },
+    { "id": "ablation", "type": "ablation", "label": "消融实验", "sublabel": "逐项验证", "pos": [50, 330], "size": [160, 56] }
+  ],
+  "connections": [
+    { "from": "dataset", "to": "preprocess", "variant": "data", "route": "straight" },
+    { "from": "preprocess", "to": "train", "variant": "forward", "route": "straight" },
+    { "from": "train", "to": "eval", "variant": "forward", "route": "straight" },
+    { "from": "eval", "to": "metric", "variant": "forward", "route": "straight", "label": "汇总指标" },
+    { "from": "baseline", "to": "eval", "variant": "forward", "route": "orthogonal-v", "label": "对照" },
+    { "from": "ablation", "to": "train", "variant": "forward", "route": "orthogonal-h", "label": "逐项消融" }
+  ],
+  "cards": [
+    { "dot": "red", "title": "定稿门禁", "items": [
+      "final 版必须基于真实实验数据（figures/data/experiment_counts.json）",
+      "PRISMA/CONSORT 要求每条排除都写明原因与篇数",
+      "计划阶段只允许 --stage draft，标题自动带「（预计流程）」"
+    ] }
+  ]
+}

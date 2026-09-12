@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "diagram_type": "model",
+  "meta": {
+    "title": "方法/模型架构图",
+    "subtitle": "输入 → 嵌入 → 注意力 → 前馈 → 归一化 → 输出（骨架，请替换为本文真实结构）",
+    "column": "single",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [420, 580],
+    "legend": { "mode": "auto" },
+    "language": { "mode": "zh-CN" }
+  },
+  "modules": [
+    { "id": "input", "type": "input", "label": "输入序列", "sublabel": "原始输入", "pos": [130, 30], "size": [160, 50], "tensor_shape": "×序列长度" },
+    { "id": "embedding", "type": "embedding", "label": "嵌入层", "sublabel": "向量表示", "pos": [130, 120], "size": [160, 50], "tensor_shape": "×嵌入维度" },
+    { "id": "attention", "type": "attention", "label": "注意力模块", "sublabel": "自注意力", "pos": [130, 210], "size": [160, 50] },
+    { "id": "ffn", "type": "ffn", "label": "前馈网络", "sublabel": "逐位置变换", "pos": [130, 300], "size": [160, 50] },
+    { "id": "norm", "type": "norm", "label": "归一化", "pos": [130, 390], "size": [160, 44] },
+    { "id": "output", "type": "output", "label": "输出", "sublabel": "预测或表示", "pos": [130, 480], "size": [160, 50], "tensor_shape": "×输出维度" }
+  ],
+  "connections": [
+    { "from": "input", "to": "embedding", "variant": "forward", "route": "straight" },
+    { "from": "embedding", "to": "attention", "variant": "forward", "route": "straight" },
+    { "from": "attention", "to": "ffn", "variant": "forward", "route": "straight" },
+    { "from": "ffn", "to": "norm", "variant": "forward", "route": "straight" },
+    { "from": "norm", "to": "output", "variant": "forward", "route": "straight" }
+  ],
+  "cards": [
+    { "dot": "blue", "title": "使用说明", "items": [
+      "替换为本文真实的方法/模型结构；张量形状是语义数据，不可删",
+      "需要 ×N 重复块时给模块加 repeat 与 repeat_label",
+      "方法架构图须代码跑通后才能 final（soft_code_verified 门禁）"
+    ] }
+  ]
+}
