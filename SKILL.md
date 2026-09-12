@@ -32,6 +32,7 @@ compatibility:
   - conda 环境 B `sigtorch39`: Python 3.9.23, torch 1.9.1+cpu, signatory 1.2.6, numpy<2
   - fin_tool 本体: python >= 3.9, numpy >= 1.21（两个环境均可导入）
   - 可选: pytest（测试）, matplotlib（图表）, pandas/openpyxl（xlsx 产物）
+  - nature-architecture: Node.js >= 18（CLI: nature-architecture/bin/nature-architecture.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_architecture_bridge.py
 ---
 
 # Quantitative Finance Experiment Reproduction Framework
