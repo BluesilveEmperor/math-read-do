@@ -15,6 +15,12 @@ description: >-
     Ref: Garland & Heckbert, SIGGRAPH 1997
   工具链：.obj I/O 解析器 + QEM 简化引擎 + CLI 命令行
 
+  集成四大 Nature 子技能：
+  - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
+  - nature-figure/：科研数据可视化顾问（先思考后绘制，8 步工作流，视觉自检闭环）
+  - nature-paper2ppt/：论文一键转为中文组会PPT (6类论文叙事弧)
+  - nature-framework/：科研架构图渲染器（6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验，self-contained inline-SVG HTML）；与 nature-figure 形成互补——本子技能专做架构/框架/流程图，nature-figure 专做数据可视化图
+
   Triggers / 触发词:
   OBJ, .obj, 网格简化, mesh simplification, QEM, quadric error metrics,
   表面简化, surface simplification, 模型减面, model decimation,
@@ -28,7 +34,10 @@ compatibility:
   - python >= 3.9
   - numpy >= 1.21
   - 推荐: pytest (测试), matplotlib (可视化), meshlab (对比验证)
-  - nature-framework: Node.js >= 18（CLI: nature-framework/bin/nature-framework.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_architecture_bridge.py
+  - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
+  - nature-figure: matplotlib + seaborn + SciencePlots (静态) + plotly (交互)，CJK 字体自动配置
+  - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
+  - nature-framework: Node.js >= 18（CLI: nature-framework/bin/nature-framework.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_framework_bridge.py
 ---
 
 # General OBJ Experiment Reproduction Framework
