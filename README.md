@@ -9,15 +9,17 @@
 | 分支 | 方向 | Phase 1 做什么 | 核心风险 |
 |------|------|---------------|---------|
 | [main](https://github.com/BluesilveEmperor/math-read-do/tree/main) | 通用数学文献 | PDF 解析 (MinerU) + 三视角审阅 | 公式理解偏差 |
-| [math-read-do-routine](https://github.com/BluesilveEmperor/math-read-do/tree/math-read-do-routine) | 机器人路径优化 | 论文类型检测 + 子策略路由 | 求解器配置 |
-| [math-read-do-obj](https://github.com/BluesilveEmperor/math-read-do/tree/math-read-do-obj) | 图形学 / OBJ 几何 | 算法理解（无需 PDF 解析） | 几何退化 |
+| [routine](https://github.com/BluesilveEmperor/math-read-do/tree/routine) | 机器人路径优化 | 论文类型检测 + 子策略路由 | 求解器配置 |
+| [obj](https://github.com/BluesilveEmperor/math-read-do/tree/obj) | 图形学 / OBJ 几何 | 算法理解（无需 PDF 解析） | 几何退化 |
 | [financial](https://github.com/BluesilveEmperor/math-read-do/tree/financial) | 量化金融 + 深度学习 | **数据可得性分诊** | 数据授权 + 环境冲突 |
+
+> 注：**分支名与技能名不同** —— `routine` 分支的技能名是 `math-read-do-routine`，`obj` 分支的技能名是 `math-read-do-obj`。上面表格里的链接用的是**分支名**。
 
 ---
 
 ## 分支导航 / Branch Navigation
 
-### 🤖 [math-read-do-routine](https://github.com/BluesilveEmperor/math-read-do/tree/math-read-do-routine)
+### 🤖 [routine](https://github.com/BluesilveEmperor/math-read-do/tree/routine)
 
 **机器人路径优化论文复现** / Robotics Path Optimization Paper Reproduction
 
@@ -37,7 +39,7 @@
 
 ---
 
-### 🎨 [math-read-do-obj](https://github.com/BluesilveEmperor/math-read-do/tree/math-read-do-obj)
+### 🎨 [obj](https://github.com/BluesilveEmperor/math-read-do/tree/obj)
 
 **QEM 网格简化 / 图形学 OBJ 复现** / QEM Mesh Simplification & Graphics OBJ Reproduction
 
@@ -96,7 +98,16 @@
 | Phase 6 | 双语报告生成 | `复现报告.md / -CN.md` |
 | Phase 7 | 最终整理 | `实验复刻结果汇总/` |
 
-**视角审阅**：研究生 / 导师 / 审稿人三视角
+**视角审阅**：研究生 / 导师 / 审稿人三视角（**未指定时向用户询问，不设默认值**；只有包含导师视角才会产出 `reproducibility_assessment.json`，否则 G01 门禁无法通过）
+
+---
+
+## 文档 / Docs
+
+| 文档 | 内容 |
+|------|------|
+| [`docs/ask-first-checklist.md`](docs/ask-first-checklist.md) | 「需要询问 vs 不需要询问」完整清单（入口 5 条 + 风险审批 18 条 + 阶段确认 6 条 + 数据图 3 条 + 论文插图 7 条），含已处置问题记录与遗留问题 |
+| [`docs/figures-feature-plan.md`](docs/figures-feature-plan.md) | 论文插图功能方案 v2 —— 把 paperfig 内化为自身功能（六类图的引擎映射、七项必问、门禁设计）。**设计稿，尚未实施** |
 
 ---
 
@@ -104,16 +115,16 @@
 
 ```bash
 # 克隆特定分支
-git clone -b math-read-do-routine https://github.com/BluesilveEmperor/math-read-do.git
-git clone -b math-read-do-obj     https://github.com/BluesilveEmperor/math-read-do.git
-git clone -b financial            https://github.com/BluesilveEmperor/math-read-do.git
+git clone -b routine   https://github.com/BluesilveEmperor/math-read-do.git
+git clone -b obj       https://github.com/BluesilveEmperor/math-read-do.git
+git clone -b financial https://github.com/BluesilveEmperor/math-read-do.git
 ```
 
 每个分支都有独立的 `SKILL.md`，包含该方向的完整使用说明。
 
 ## 自更新 / Auto-Update
 
-`math-read-do-routine`、`math-read-do-obj` 和 `financial` 分支内置自更新机制，每次调用前自动检查远程仓库是否有更新。
+`routine`、`obj` 和 `financial` 分支内置自更新机制，每次调用前自动检查远程仓库是否有更新。
 
 ## 许可 / License
 
