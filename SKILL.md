@@ -11,7 +11,7 @@ description: >-
   - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
   - nature-figure/：科研数据可视化顾问（先思考后绘制，8 步工作流，视觉自检闭环）
   - nature-paper2ppt/：论文一键转为中文组会PPT (6类论文叙事弧)
-  - nature-architecture/：科研架构图渲染器（6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验，self-contained inline-SVG HTML）；与 nature-figure 形成互补——本子技能专做架构/框架/流程图，nature-figure 专做数据可视化图
+  - nature-framework/：科研架构图渲染器（6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验，self-contained inline-SVG HTML）；与 nature-figure 形成互补——本子技能专做架构/框架/流程图，nature-figure 专做数据可视化图
 
   Triggers: 复现, reproduction, 实验复现, reproduce paper, 复现论文, 重现实验,
   reproduce experiment, 复现报告, reproduction report, PDF解析, paper parsing, 实验重现,
@@ -37,7 +37,7 @@ compatibility:
   - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
   - nature-figure: matplotlib + seaborn + SciencePlots (静态) + plotly (交互)，CJK 字体自动配置
   - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
-  - nature-architecture: Node.js >= 18（CLI: nature-architecture/bin/nature-architecture.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_architecture_bridge.py
+  - nature-framework: Node.js >= 18（CLI: nature-framework/bin/nature-framework.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_architecture_bridge.py
 
 ---
 
@@ -461,7 +461,7 @@ pip install mineru-open-sdk pyyaml
 
 - **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。用户未指定审阅视角时，主动询问。
 - **nature-figure** 可增强 Phase 5 (图表导出)，作为"可视化顾问"：先剖析数据→推荐图型→拦截错误→绘制→视觉自检闭环，提供出版级图表样式和质量门禁。
-- **nature-architecture** 可增强 Phase 5 (架构图导出) 与 Phase 6 (报告插图)，作为"架构图/框架图/流程图/技术路线图渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证；适用于论文 float / 开题报告技术路线 / 组会汇报里的方法架构图、实验流程图。Node CLI（`nature-architecture/bin/nature-architecture.mjs`）零外部依赖，Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
+- **nature-framework** 可增强 Phase 5 (架构图导出) 与 Phase 6 (报告插图)，作为"架构图/框架图/流程图/技术路线图渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证；适用于论文 float / 开题报告技术路线 / 组会汇报里的方法架构图、实验流程图。Node CLI（`nature-framework/bin/nature-framework.mjs`）零外部依赖，Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
 - **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
 
 ### 调用方式

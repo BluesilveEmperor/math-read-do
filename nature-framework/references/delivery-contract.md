@@ -1,6 +1,6 @@
 # Delivery Contract
 
-`nature-architecture deliver` is the canonical acceptance command. It freezes the exact specification bytes into a private same-directory snapshot, renders and checks that snapshot, atomically commits the HTML (and the optional PDF), and reports SHA-256 plus byte counts for specification and artifact(s).
+`nature-framework deliver` is the canonical acceptance command. It freezes the exact specification bytes into a private same-directory snapshot, renders and checks that snapshot, atomically commits the HTML (and the optional PDF), and reports SHA-256 plus byte counts for specification and artifact(s).
 
 ## Receipt fields
 
@@ -68,7 +68,7 @@ After a successful `--pdf` delivery, a LaTeX usage snippet is printed to stderr 
 
 ## visual-check
 
-`nature-architecture visual-check <output.html> --json` collects automated browser evidence from the exact delivered HTML without modifying or rerendering it. It opens the HTML at single-column (~336px) and double-column (~672px) widths plus 1440×900 desktop, captures screenshots, and reports scroll overflow checks.
+`nature-framework visual-check <output.html> --json` collects automated browser evidence from the exact delivered HTML without modifying or rerendering it. It opens the HTML at single-column (~336px) and double-column (~672px) widths plus 1440×900 desktop, captures screenshots, and reports scroll overflow checks.
 
 `visual-check` measurements do not approve perceptual polish. Perceptual review requires an actual human or image-capable reviewer. Report browser evidence and perceptual review independently.
 

@@ -1,4 +1,4 @@
-// nature-architecture / renderers / model / render-model.mjs
+// nature-framework / renderers / model / render-model.mjs
 // Compile a model spec into inline-SVG + HTML wrapper (white-first, print-friendly).
 
 import { readFileSync } from "node:fs";
@@ -462,7 +462,7 @@ export function renderModel(spec, opts = {}) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeXml(spec.meta.title)}</title>
-<style>${nature-architectureCss(visualPreset, motion, moduleIds)}</style>
+<style>${nature-frameworkCss(visualPreset, motion, moduleIds)}</style>
 </head>
 <body>
 <figure class="pf-figure${motion ? ` pf-motion pf-m-${motionMode}` : ""} ${columnClass}">
@@ -638,7 +638,7 @@ const PRESET_EXTRA = {
   `,
 };
 
-function nature-architectureCss(preset, motion, moduleIds) {
+function nature-frameworkCss(preset, motion, moduleIds) {
   // preset only changes color tokens; layout is identical
   const presetVars = preset === "paper-dark"
     ? `

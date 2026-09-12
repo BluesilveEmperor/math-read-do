@@ -18,7 +18,7 @@ description: >-
  matplotlib、seaborn、plotly、误差棒、显著性标注、色盲安全配色、矢量图导出、
  中文论文图表、多面板。**即使用户只是给一批数据问"这个怎么画"或"用什么图
  好"，也应使用本技能——本技能首要能力是"判断该用什么图"，其次才是绘制。**
- 不做示意图、流程图、架构图。**如需架构图 / 框架图 / 流程图 / 技术路线图 / 模型架构图 / 研究框架图 / 实验流程图，请改用同级的 `nature-architecture` 子技能**（`../nature-architecture/SKILL.md`）—— 它是 JSON 规格驱动的 self-contained inline-SVG HTML 渲染器，零 Python/Node 依赖的 CLI，11 项 showcase 校验 + SHA-256 收据；与本子技能严格互补（一个做数据图，一个做架构图）。
+ 不做示意图、流程图、架构图。**如需架构图 / 框架图 / 流程图 / 技术路线图 / 模型架构图 / 研究框架图 / 实验流程图，请改用同级的 `nature-framework` 子技能**（`../nature-framework/SKILL.md`）—— 它是 JSON 规格驱动的 self-contained inline-SVG HTML 渲染器，零 Python/Node 依赖的 CLI，11 项 showcase 校验 + SHA-256 收据；与本子技能严格互补（一个做数据图，一个做架构图）。
 ---
 
 # scipilot-figure-skill — 科研数据可视化顾问

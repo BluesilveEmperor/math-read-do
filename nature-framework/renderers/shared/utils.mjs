@@ -1,4 +1,4 @@
-// nature-architecture / renderers / shared / utils.mjs
+// nature-framework / renderers / shared / utils.mjs
 // Pure utility helpers — no DOM, no fs, safe to import anywhere.
 
 import { createHash } from "node:crypto";

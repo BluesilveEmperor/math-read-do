@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 """
-nature-architecture Python bridge.
+nature-framework Python bridge.
 
-Thin Python wrapper over the nature-architecture Node CLI
-(nature-architecture/bin/nature-architecture.mjs).
+Thin Python wrapper over the nature-framework Node CLI
+(nature-framework/bin/nature-framework.mjs).
 
 Used by math-read-do scripts that need to render architecture / framework /
 route / system / structure / experiment figures without writing shell glue.
 
 Typical use:
 
-    from nature_architecture_bridge import NatureArchitecture
+    from nature_framework_bridge import NatureArchitecture
     cli = NatureArchitecture()             # auto-locate the skill root
     cli.doctor()                           # returns parsed status dict
     cli.validate("model", "spec.json", quality="showcase")
@@ -31,7 +31,7 @@ from typing import Any, Iterable, Optional
 
 
 _SKILL_DIR_CANDIDATES: tuple[Path, ...] = (
-    Path(__file__).resolve().parent.parent / "nature-architecture",
+    Path(__file__).resolve().parent.parent / "nature-framework",
     Path(__file__).resolve().parent.parent.parent / "paperfig" / "paperfig",
     Path(__file__).resolve().parent / "_skill_dir",
 )
@@ -39,13 +39,13 @@ _SKILL_DIR_CANDIDATES: tuple[Path, ...] = (
 
 def _locate_skill_root() -> Path:
     for candidate in _SKILL_DIR_CANDIDATES:
-        if (candidate / "bin" / "nature-architecture.mjs").is_file():
+        if (candidate / "bin" / "nature-framework.mjs").is_file():
             return candidate
     env = Path(__file__).resolve().parent / "_skill_dir"
-    if env.is_dir() and (env / "bin" / "nature-architecture.mjs").is_file():
+    if env.is_dir() and (env / "bin" / "nature-framework.mjs").is_file():
         return env
     raise FileNotFoundError(
-        "Cannot locate nature-architecture skill root. "
+        "Cannot locate nature-framework skill root. "
         "Tried: " + ", ".join(str(p) for p in _SKILL_DIR_CANDIDATES)
     )
 
@@ -68,12 +68,12 @@ class NatureArchitecture:
 
     def __init__(self, skill_root: Optional[Path] = None, node_bin: Optional[str] = None) -> None:
         self.skill_root = Path(skill_root) if skill_root else _locate_skill_root()
-        self.cli = self.skill_root / "bin" / "nature-architecture.mjs"
+        self.cli = self.skill_root / "bin" / "nature-framework.mjs"
         if not self.cli.is_file():
             raise FileNotFoundError(f"CLI not found: {self.cli}")
         self.node_bin = node_bin or shutil.which("node")
         if not self.node_bin:
-            raise FileNotFoundError("node executable not found on PATH. nature-architecture requires Node >= 18.")
+            raise FileNotFoundError("node executable not found on PATH. nature-framework requires Node >= 18.")
 
     def _run(self, args: Iterable[str], json_output: bool = True, timeout: float = 120.0) -> CliResult:
         cmd = [self.node_bin, str(self.cli), *args]
@@ -118,7 +118,7 @@ class NatureArchitecture:
             args.append("--open")
         return self._run(args)
 
-    def demo(self, output_dir: str | Path = "./nature-architecture-demo", *, motion: Optional[str] = None) -> CliResult:
+    def demo(self, output_dir: str | Path = "./nature-framework-demo", *, motion: Optional[str] = None) -> CliResult:
         args = ["demo", str(output_dir)]
         if motion is not None:
             args += ["--motion", motion]
@@ -135,5 +135,5 @@ if __name__ == "__main__":
         result = cli.doctor()
         sys.stdout.write(result.stdout)
         sys.exit(0 if result.ok else 1)
-    sys.stdout.write("Usage: python nature_architecture_bridge.py doctor\n")
+    sys.stdout.write("Usage: python nature_framework_bridge.py doctor\n")
     sys.exit(2)
