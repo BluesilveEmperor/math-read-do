@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BluesilveEmperor/math-read-do/schemas/figure_manifest.schema.json",
+  "title": "math-read-do 论文插图 manifest（状态机 + SHA-256 收据）",
+  "type": "object",
+  "required": ["schema_version", "paper", "engine", "global_motion", "figures"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "paper": { "type": "string", "description": "论文标题；尚未读取时可留空字符串" },
+    "updated": { "type": "string" },
+    "engine": {
+      "type": "object",
+      "required": ["internal", "version", "upstream_commit"],
+      "additionalProperties": false,
+      "properties": {
+        "internal": { "const": "figuregen" },
+        "version": { "type": "string" },
+        "upstream_commit": {
+          "type": "string",
+          "description": "内嵌内核的 paperfig 基线 commit（溯源用，不承诺同步）"
+        }
+      }
+    },
+    "global_motion": { "enum": ["off", "hover", "flow", "tour"] },
+    "figures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "stage", "gate", "spec", "output_html", "quality", "checks", "sha256"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+          "type": { "enum": ["framework", "route", "model", "system", "structure", "experiment"] },
+          "stage": { "enum": ["draft", "confirmed", "final"] },
+          "gate": { "enum": ["none", "soft_code_verified", "requires_experiment_data"] },
+          "spec": { "type": "string" },
+          "output_html": { "type": "string" },
+          "output_pdf": { "type": ["string", "null"] },
+          "quality": { "enum": ["standard", "showcase"] },
+          "spec_sha256": {
+            "type": "string",
+            "description": "spec 的内容身份（不含阶段标题后缀），供状态机判断 spec 是否被改过"
+          },
+          "sha256": {
+            "type": "object",
+            "required": ["spec", "html"],
+            "additionalProperties": false,
+            "properties": {
+              "spec": { "type": "string" },
+              "html": { "type": "string" }
+            }
+          },
+          "checks": {
+            "type": "object",
+            "required": ["total", "errors", "warnings"],
+            "additionalProperties": true,
+            "properties": {
+              "passed": { "type": "integer" },
+              "total": { "type": "integer" },
+              "errors": { "type": "integer" },
+              "warnings": { "type": "integer" }
+            }
+          },
+          "data_source": { "type": ["string", "null"] },
+          "blocked_reason": { "type": "string" },
+          "label_suffix": { "type": ["string", "null"] },
+          "declined": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "array", "items": { "type": "string" } },
+          "updated": { "type": "string" }
+        }
+      }
+    }
+  }
+}

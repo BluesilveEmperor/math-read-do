@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  :root {
+    --paper-bg: #ffffff;
+    --paper-ink: #1a1a1a;
+    --paper-muted: #5a5a5a;
+    --paper-dim: #8a8a8a;
+    --paper-border: #c8c8c8;
+    --paper-rule: #e0e0e0;
+    --accent-blue: #2563eb;
+    --accent-red: #b91c1c;
+    --accent-gray: #6b7280;
+    --fill-input: #f5f5f5;
+    --fill-encoder: #eef2ff;
+    --fill-attention: #fef3c7;
+    --fill-ffn: #ecfdf5;
+    --fill-norm: #f3f4f6;
+    --fill-output: #f5f5f5;
+    --fill-residual: #fff7ed;
+    --fill-concat: #f3f4f6;
+    --fill-custom: #fafafa;
+    --fill-repeated-divider: #d4d4d4;
+    --serif: "Cambria", "Georgia", "Times New Roman", serif;
+    --sans: "Helvetica Neue", "Arial", "Inter", sans-serif;
+    --mono: "JetBrains Mono", "Consolas", monospace;
+  }
+  html, body { margin: 0; padding: 0; background: var(--paper-bg); color: var(--paper-ink); }
+  body { font-family: var(--sans); font-size: 14px; line-height: 1.55; }
+  .pf-figure { max-width: 100%; margin: 0 auto; padding: 24px; }
+  .pf-figure.single { max-width: 336px; }
+  .pf-figure.double { max-width: 672px; }
+  .pf-title { font-family: var(--serif); font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .pf-subtitle { font-family: var(--sans); font-size: 12px; color: var(--paper-muted); margin: 0 0 16px; }
+  .pf-canvas { display: block; width: 100%; height: auto; }
+  .pf-cards { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 16px; }
+  @media (min-width: 480px) { .pf-cards { grid-template-columns: 1fr 1fr; } }
+  .pf-card { border: 1px solid var(--paper-border); border-radius: 4px; padding: 8px 10px; background: #fafafa; }
+  .pf-card-title { font-family: var(--sans); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 4px; display: flex; align-items: center; gap: 6px; }
+  .pf-card-dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: var(--paper-ink); }
+  .pf-card-dot.blue { background: var(--accent-blue); }
+  .pf-card-dot.red { background: var(--accent-red); }
+  .pf-card-dot.gray { background: var(--accent-gray); }
+  .pf-card-items { margin: 0; padding-left: 14px; font-size: 11px; color: var(--paper-muted); }
+  .pf-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: 11px; color: var(--paper-muted); }
+  .pf-legend-item { display: flex; align-items: center; gap: 4px; }
+  .pf-legend-swatch { width: 14px; height: 10px; border: 1px solid var(--paper-border); }
+</style>
+</head>
+<body>
+<figure class="pf-figure {{COLUMN}}">
+  <figcaption>
+    <div class="pf-title">{{TITLE}}</div>
+    {{#SUBTITLE}}<div class="pf-subtitle">{{SUBTITLE}}</div>{{/SUBTITLE}}
+  </figcaption>
+  {{SVG}}
+  {{#CARDS}}<div class="pf-cards">{{CARDS}}</div>{{/CARDS}}
+  {{#LEGEND}}<div class="pf-legend">{{LEGEND}}</div>{{/LEGEND}}
+</figure>
+</body>
+</html>
