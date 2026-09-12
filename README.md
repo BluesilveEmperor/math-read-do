@@ -115,6 +115,19 @@ git clone -b financial            https://github.com/BluesilveEmperor/math-read-
 
 `math-read-do-routine`、`math-read-do-obj` 和 `financial` 分支内置自更新机制，每次调用前自动检查远程仓库是否有更新。
 
+## 子技能 / Sub-Skills
+
+每个分支都集成四个 nature-* 子 Skill，可独立调用也可在主流程里协同：
+
+| 子技能 | 角色 | 与谁互补 |
+|--------|------|---------|
+| `nature-reader/` | 科研论文智能阅读、结构化提取 (PDF/HTML/DOI/arXiv) | — |
+| `nature-figure/` | 科研数据可视化（matplotlib/seaborn/SciencePlots/plotly，8 步工作流 + 视觉自检闭环） | 跟 nature-architecture 互补 |
+| `nature-paper2ppt/` | 论文→中文 PPTX（6 类叙事弧 + 自审校） | — |
+| `nature-architecture/` | **科研架构图渲染器**（6 类图：model/framework/route/system/structure/experiment；10 视觉预设；11 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体） | 跟 nature-figure 互补——本子技能专做架构/框架/流程图 |
+
+`nature-architecture` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。详见 [nature-architecture/SKILL.md](nature-architecture/SKILL.md)。
+
 ## 许可 / License
 
 MIT
