@@ -55,7 +55,7 @@ compatibility:
 4️⃣ 制作PPT — 将论文或复现结果转为演示文稿
 ```
 
-用户做出选择后，按对应流程执行。用户未指定审阅视角时，默认使用**研究生视角**（学习理解导向）。
+用户做出选择后，按对应流程执行。**用户未指定审阅视角时，必须向用户询问**（研究生／导师／审稿人／三方全出），不得代为默认——脚本在缺少 `--perspective` 时会进入交互询问。
 
 ## 核心原则 / Core Principles
 
@@ -167,13 +167,14 @@ compatibility:
       7. `minimal` — **极简**: Segoe UI + 无多余装饰，适合快速浏览
       8. `notebook` — **手记**: 霞鹜文楷 + 楷体，适合笔记风格
       9. `print-double` — **双色印刷**: 蓝色强调，适合打印输出
-    - **视角控制**: 未指定 `--perspective` 时，默认只输出**研究生视角**；`--perspective all` 输出三个视角 + 交叉对比
+    - **视角控制**: **未指定 `--perspective` 时脚本会进入交互询问**（研究生 / 导师 / 审稿人 / 三方全出），**不设默认值、不得代选**；`--perspective all` 输出三个视角 + 交叉对比。非交互环境（管道/CI）且未给该参数时脚本直接报错退出，不静默代选。
+    - ⚠️ **只有包含导师视角（`advisor` 或 `all`）才会产出 `reproducibility_assessment.json`**；只选研究生或审稿人视角时不产出该文件，G01 门禁无法通过、无法进入 Phase 2+。脚本在这种情况下会打印明确警告。
     - 报告包含:
       - **论文结构导航**: 章节/页码/论证功能(gap→contribution→result→limits)
       - **术语表**: 专业术语 + 英文全称 + 中文译法 + 首次出现位置
       - **关键图表索引**: 图表/表格的 ID、标题、页码、关联分析
       - **关键公式索引**: 公式编号、LaTeX、描述、来源页码
-      - **视角分析**: 研究生/导师/审稿人(默认仅研究生)
+      - **视角分析**: 研究生 / 导师 / 审稿人（**必须向用户询问，不设默认**）
       - **复现指导**: 核心算法、超参数、数据集、主要风险
     - 产出:
       - `analysis/文献阅读.md` -- 完整中文审阅报告 (自带嵌入式 CSS，MPE 打开即用)
@@ -184,16 +185,16 @@ compatibility:
 
     **使用示例**:
     ```bash
-    # 默认流程：询问模板 + 只输出研究生视角
+    # 未给参数：先询问模板，再询问视角（两步都会停下来等输入）
     python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json
 
-    # 指定模板：跳过询问
+    # 指定模板：跳过模板询问（视角仍会被询问）
     python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --template templates/literature_reader.print.md
 
     # 全部视角
     python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --perspective all
 
-    # 指定模板 + 全部视角
+    # 指定模板 + 全部视角（两个参数都给 → 全程无需交互，可进 CI）
     python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --template templates/literature_reader.sans.md --perspective all
     ```
 
@@ -456,7 +457,7 @@ pip install mineru-open-sdk pyyaml
 
 ### 与主流程的协同
 
-- **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。用户未指定审阅视角时，主动询问。
+- **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。**用户未指定审阅视角时必须询问**（不设默认值），与 `literature_reader.py` 的交互询问保持一致。
 - **nature-figure** 可增强 Phase 5 (图表导出)，作为"可视化顾问"：先剖析数据→推荐图型→拦截错误→绘制→视觉自检闭环，提供出版级图表样式和质量门禁。
 - **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
 

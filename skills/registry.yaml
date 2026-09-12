@@ -1,4 +1,23 @@
 schema_version: 2.0
+
+# ═══════════════════════════════════════════════════════════════════════
+# 审计说明（2026-09-12）
+#
+# 本文件是【声明性文档】，当前不参与运行时：
+#   - 全仓库无任何代码读取它（无 import / 无解析 / 无测试引用），
+#     因此 requires_approval_for 目前是【政策声明，尚未强制】；
+#   - requires_skills 的 DAG 同样未被执行，阶段顺序实际由 SKILL.md 正文约束；
+#   - 待 scripts/pipeline.py 落地后（见 docs/ask-first-checklist.md 4.2），
+#     审批与依赖才具备强制力。
+#
+# implementation_status 取值：
+#   implemented     = 有实体目录 skills/<name>/SKILL.md
+#   declared-only   = 无目录；工作散落在 scripts/ 或手工阶段步骤中，见 implementation 字段
+#   not-implemented = 完全无实现
+# ═══════════════════════════════════════════════════════════════════════
+
+# ⚠️ 注意：该 entrypoint 名称未出现在下方 skills 列表中，也无对应目录。
+#    当前实际入口是仓库根的 SKILL.md。
 default_entrypoint: math_reproduction_workflow_skill
 
 metadata:
@@ -7,11 +26,26 @@ metadata:
   domain: mathematics
   subdomains: [numerical_computing, symbolic_algebra, ai4math, statistics, optimization]
   languages: [zh, en]
+  approvals:
+    enforcement: policy-only
+    declared_actions: 18
+    enforced_actions: 0
+    note: >-
+      18 条 requires_approval_for 仅为政策声明；因无读取方，运行时不会拦截任何动作。
+      实际审批行为目前由模型依据 SKILL.md「风险分级」自觉执行。
 
 skills:
   - name: infrastructure_orchestration_skill
     phase: infrastructure
     path: skills/infrastructure_orchestration_skill
+    implementation_status: implemented
+    implementation:
+      - skills/infrastructure_orchestration_skill/SKILL.md
+      - scripts/detect_host.sh
+      - scripts/detect_host.ps1
+      - scripts/detect_gpu.sh
+      - scripts/enable_gpu.sh
+      - scripts/enable_gpu.ps1
     description: 宿主环境检测与VM/容器编排 / Host detection and VM/container orchestration
     risk_level: medium
     requires_approval_for: [vm_provisioning, docker_build, wsl_setup]
@@ -25,6 +59,10 @@ skills:
   - name: version_management_skill
     phase: environment
     path: skills/version_management_skill
+    implementation_status: implemented
+    implementation:
+      - skills/version_management_skill/SKILL.md
+      - scripts/verify_versions.sh
     description: 语言运行时与编译器版本管理 / Language runtime and compiler version management
     risk_level: medium
     requires_approval_for: [install_language_runtime, change_compiler_version, install_cuda]
@@ -36,7 +74,13 @@ skills:
 
   - name: paper_parsing_skill
     phase: analysis
-    path: skills/paper_parsing_skill
+    path: null                      # 无实体目录
+    implementation_status: declared-only
+    implementation:
+      - scripts/math_pdf_extract.py         # Phase 1.1 PDF 解析（MinerU）
+      - scripts/literature_reader.py        # Phase 1.4 审阅报告 + reproducibility_assessment
+      - scripts/three_perspective_review.py # 旧版，待移入 scripts/legacy/
+      - templates/literature_reader.*.md    # 9 种排版模板
     description: 论文解析与三方视角深度分析 / Paper parsing with three-perspective deep analysis
     risk_level: low
     requires_approval_for: [llm_api_call]
@@ -54,7 +98,11 @@ skills:
 
   - name: environment_setup_skill
     phase: environment
-    path: skills/environment_setup_skill
+    path: null                      # 无实体目录
+    implementation_status: declared-only
+    implementation:
+      - scripts/cvxpy_env_setup.py          # 凸优化依赖环境
+      - "Phase 2 手工程序（依赖扫描 → conda/pip → 确定性配置 → 验证）"
     description: 依赖管理与环境构建 / Dependency management and environment building
     risk_level: medium
     requires_approval_for: [dependency_change, system_package_install]
@@ -65,7 +113,10 @@ skills:
 
   - name: baseline_verification_skill
     phase: verification
-    path: skills/baseline_verification_skill
+    path: null                      # 无实体目录
+    implementation_status: declared-only
+    implementation:
+      - "Phase 3 手工步骤（运行官方代码 → 指标对齐 → 失败诊断 → 锁定）；无专门脚本"
     description: 基线验证 / Baseline verification
     risk_level: medium
     requires_approval_for: [modify_source_code, run_experiment]
@@ -76,7 +127,10 @@ skills:
 
   - name: incremental_implementation_skill
     phase: implementation
-    path: skills/incremental_implementation_skill
+    path: null                      # 无实体目录
+    implementation_status: declared-only
+    implementation:
+      - "Phase 4 手工增量循环（模块拆解 → 实现 → 小规模测试 → delta 对比 → commit）；无专门脚本"
     description: 增量实现 / Incremental implementation
     risk_level: high
     requires_approval_for: [write_code, modify_source, add_dependency]
@@ -87,7 +141,11 @@ skills:
 
   - name: experiment_execution_skill
     phase: execution
-    path: skills/experiment_execution_skill
+    path: null                      # 无实体目录
+    implementation_status: declared-only
+    implementation:
+      - scripts/plot_and_export.py          # Phase 5.5 图表导出（PNG/PDF + 独立源码）
+      - "Phase 5.1-5.3 手工步骤（多轮运行 → 统计计算 → 五态判决）"
     description: 实验运行与结果收集 / Experiment execution and result collection
     risk_level: medium
     requires_approval_for: [run_multi_seed, extend_budget]
@@ -101,6 +159,10 @@ skills:
   - name: statistical_verification_skill
     phase: verification
     path: skills/statistical_verification_skill
+    implementation_status: implemented
+    implementation:
+      - skills/statistical_verification_skill/SKILL.md
+      - "统计计算与五态判决：当前无脚本，由 Phase 5 手工执行"
     description: 统计验证与判决 / Statistical verification and verdict
     risk_level: low
     requires_approval_for: []
@@ -113,6 +175,13 @@ skills:
   - name: bilingual_report_skill
     phase: reporting
     path: skills/bilingual_report_skill
+    implementation_status: implemented
+    implementation:
+      - skills/bilingual_report_skill/SKILL.md
+      - templates/reproduction_report.template.md
+      - templates/comparison_table.template.md
+      - templates/RUN_SUMMARY.template.md
+      - templates/diagnosis.template.md
     description: 中英双语报告生成 / Bilingual report generation (zh + en)
     risk_level: low
     requires_approval_for: []
@@ -127,7 +196,9 @@ skills:
 
   - name: artifact_packaging_skill
     phase: packaging
-    path: skills/artifact_packaging_skill
+    path: null                      # 无实体目录
+    implementation_status: not-implemented
+    implementation: []              # Phase 7 仅做文件归位，不打制品包
     description: 制品打包与溯源 / Artifact packaging and provenance
     risk_level: low
     requires_approval_for: [publish_artifact, sign_attestation]

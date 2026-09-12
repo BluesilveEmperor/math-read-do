@@ -441,6 +441,15 @@ def generate_reproducibility_assessment(advisor_report: str, paper_summary_path:
 
 def select_template_interactive():
     """交互式选择模板。返回选中的模板路径。"""
+    # 非交互式终端不得静默默认，必须让用户显式指定
+    if not sys.stdin.isatty():
+        print(
+            "  ❌ 模板必须由用户选择，但当前不是交互式终端。\n"
+            "     请显式指定: --template templates/literature_reader.<风格>.md",
+            file=sys.stderr,
+        )
+        return None
+
     # 模板目录：优先使用脚本所在目录的 templates/，其次当前目录
     script_dir = Path(__file__).parent.parent
     template_dir = script_dir / "templates"
@@ -509,11 +518,70 @@ def select_template_interactive():
                 return str(selected)
             else:
                 print(f"  ⚠️ 请输入 1-{len(templates)} 之间的数字")
-        except (ValueError, EOFError):
+        except EOFError:
+            print(
+                "\n  ❌ 输入流已结束（非交互环境），无法获取模板选择。\n"
+                "     请显式指定: --template templates/literature_reader.<风格>.md",
+                file=sys.stderr,
+            )
+            return None
+        except ValueError:
             print(f"  ⚠️ 请输入有效的数字")
         except KeyboardInterrupt:
             print("\n\n  ❌ 已取消")
             return None
+
+
+def select_perspective_interactive():
+    """交互式选择审阅视角。返回视角字符串，取消则返回 None。
+
+    视角属"必须询问"项：不设默认值，不得代为选择。
+    """
+    if not sys.stdin.isatty():
+        print(
+            "  ❌ 审阅视角必须由用户选择，但当前不是交互式终端。\n"
+            "     请显式指定: --perspective student|advisor|reviewer|all",
+            file=sys.stderr,
+        )
+        return None
+
+    options = [
+        ("student", "研究生视角 — 学习理解导向（读懂论文、吃透方法）"),
+        ("advisor", "导师视角 — 指导评估导向（判断学术价值与复现可行性）"),
+        ("reviewer", "审稿人视角 — 同行评审导向（批判性审查）"),
+        ("all", "三方全出 — 三个视角 + 交叉对比（要进复现流程选这个）"),
+    ]
+
+    print("\n" + "=" * 50)
+    print("🎓 请选择审阅视角")
+    print("=" * 50)
+    for i, (_, desc) in enumerate(options, 1):
+        print(f"  {i}. {desc}")
+    print("=" * 50)
+
+    while True:
+        try:
+            choice = input(f"\n请选择视角编号 (1-{len(options)}，无默认): ").strip()
+            if choice.isdigit() and 1 <= int(choice) <= len(options):
+                value, desc = options[int(choice) - 1]
+                print(f"\n  ✅ 已选择: {desc}")
+                return value
+            print(f"  ⚠️ 请输入 1-{len(options)} 之间的数字")
+        except EOFError:
+            print(
+                "\n  ❌ 输入流已结束（非交互环境），无法获取视角选择。\n"
+                "     请显式指定: --perspective student|advisor|reviewer|all",
+                file=sys.stderr,
+            )
+            return None
+        except ValueError:
+            print("  ⚠️ 请输入有效的数字", file=sys.stderr)
+        except KeyboardInterrupt:
+            print("\n\n  ❌ 已取消")
+            return None
+
+
+def render_report(template_path: str, data: dict) -> str:
     """使用 Jinja2 渲染报告模板。"""
     try:
         from jinja2 import Environment, FileSystemLoader, BaseLoader
@@ -663,9 +731,9 @@ def main():
         help="paper_summary.json 路径（可选，用于补充可复现性评估）"
     )
     parser.add_argument(
-        "--perspective", default="student",
+        "--perspective", default=None,
         choices=["student", "advisor", "reviewer", "all"],
-        help="指定视角: student(研究生,默认)/advisor(导师)/reviewer(审稿人)/all(三方)"
+        help="指定视角: student(研究生)/advisor(导师)/reviewer(审稿人)/all(三方)；未指定则交互询问"
     )
     parser.add_argument(
         "--template", default=None,
@@ -686,13 +754,20 @@ def main():
         if template_path is None:
             sys.exit(1)
 
+    # ── 视角选择（必须询问，不得代选）────────────────────────────
+    perspective = args.perspective
+    if perspective is None:
+        perspective = select_perspective_interactive()
+        if perspective is None:
+            sys.exit(1)
+
     paper_content = Path(args.paper_md).read_text(encoding="utf-8") if Path(args.paper_md).exists() else ""
     paper_stem = Path(args.paper_md).stem
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"\n📖 论文: {args.paper_md}")
-    print(f"📐 视角: {args.perspective}")
+    print(f"📐 视角: {perspective}")
     print(f"📂 输出: {output_dir.resolve()}")
     print(f"{'='*50}")
 
@@ -719,7 +794,14 @@ def main():
     # ── 步骤 5: 三视角分析 ────────────────────────────────────────
     print(f"\n🎓 [5/5] 三视角分析...")
 
-    perspective = args.perspective or "all"
+    # perspective 已在 main() 顶部解析（缺省时由用户交互选择，不设默认值）
+    if "advisor" not in (perspective, "all"):
+        print(
+            "  ⚠️ 未包含导师视角 → 不会产出 reproducibility_assessment.json，"
+            "G01 门禁将无法通过，无法进入复现流程（Phase 2+）。\n"
+            "     如需复现，请改用 --perspective advisor 或 all。",
+            file=sys.stderr,
+        )
     results = {}
 
     student_report = ""
@@ -818,8 +900,12 @@ def main():
         "CROSS_METHOD_REVIEWER": "",
     }
 
-    # 渲染
-    template_path = args.template or "templates/literature_reader.template.md"
+    # 渲染（template_path 已在 main() 顶部解析：显式 --template 或用户交互选择结果）
+    if not Path(template_path).exists():
+        print(
+            f"  ⚠️ 模板文件不存在: {template_path}，回退到内置默认模板",
+            file=sys.stderr,
+        )
     rendered_report = render_report(template_path, template_data)
 
     # 写入最终报告
