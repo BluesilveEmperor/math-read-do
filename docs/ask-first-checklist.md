@@ -150,6 +150,7 @@
 | Q5 | 根目录残留指向他人机器路径（`C:\Users\GLY\...`）的调试脚本 | 已删除 `check_encoding.py`、`fix_encoding.py`（均被 git 跟踪，可用 `git checkout -- <文件>` 恢复） | `git status` 显示 `D` 两条 |
 | Q6 | *（本轮新发现）* 交互式选择存在**无限重试死循环**：`isatty()` 为真但输入流立即 EOF 时，`except (ValueError, EOFError)` 只打印警告并继续循环，实测刷出 47MB 输出 | 已修：`EOFError` 单独分支处理，打印指引并 `return None` 退出；两个选择器都加了非交互前置守卫 | 回归测试输出仅 455 字节、exit 1 |
 | Q7 | *（本轮新发现）* **用户选的模板被丢弃**：`main()` 里交互选完模板后，渲染处又执行 `template_path = args.template or "templates/literature_reader.template.md"`，把用户选择覆盖为默认模板 | 已修：渲染处直接复用 `main()` 顶部解析好的 `template_path`，并在模板文件缺失时明确告警 | 同上测试 C 使用 markleaf 模板成功渲染 |
+| Q3 | `SKILL.md` 称旧脚本在 `scripts/legacy/`，该目录从未存在（`three_perspective_review.py` 一直在 `scripts/` 原位） | **已处置**：不迁 `legacy/`，直接删除 `scripts/three_perspective_review.py` 及其配套模板 `templates/three_perspective_review.template.md`（两者均已无任何引用）；同步修正 `SKILL.md` 两处（旧脚本说明、目录树里的 `legacy/` 行）与 `skills/registry.yaml` 一处引用 | `git grep three_perspective_review` 在 `SKILL.md` / `skills/` / `scripts/` / `templates/` 中已无残留；`SKILL.md` 目录树不再出现 `legacy/` |
 
 ### 4.2 Q2 —— 6 个"注册了却没有目录"的技能在干什么
 
@@ -193,6 +194,5 @@
 
 | # | 问题 |
 |---|---|
-| Q3 | `SKILL.md` 称旧脚本在 `scripts/legacy/`，该目录不存在（`three_perspective_review.py` 仍在 `scripts/` 原位） |
 | Q8 | *（顺带发现）* `scripts/__pycache__/trajectory_visualizer.cpython-314.pyc` 被误提交进 git，建议加入 `.gitignore` 并移除 |
 

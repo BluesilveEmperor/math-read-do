@@ -181,7 +181,7 @@ compatibility:
       - `analysis/literature_reading.json` -- 结构化数据 (供下游消费)
       - `analysis/reproducibility_assessment.json` -- 可复现性评估 (G01 门禁)
     - **MPE 兼容**: 报告 Markdown 自带嵌入式 CSS，可在 VS Code + Markdown Preview Enhanced 中直接预览
-    - **旧脚本**: `scripts/three_perspective_review.py` 已废弃，移入 `scripts/legacy/`
+    - **旧脚本已移除**: `scripts/three_perspective_review.py` 及其配套模板 `templates/three_perspective_review.template.md` 已于 2026-09-12 删除，其功能由 `scripts/literature_reader.py` 承担
 
     **使用示例**:
     ```bash
@@ -383,8 +383,7 @@ math-read-do/
 ├── skills/registry.yaml
 ├── scripts/            # 脚本 (PDF提取/文献阅读报告/图表导出等)
 │   ├── literature_reader.py # 文献阅读报告生成器 (主脚本)
-│   ├── generate_templates.py # 模板批量生成器
-│   └── legacy/         # 旧版脚本 (three_perspective_review.py 等)
+│   └── generate_templates.py # 模板批量生成器
 ├── templates/          # 文献阅读报告模板 (9 种排版风格)
 │   ├── literature_reader.markleaf.md   # LaTeX 风格 (推荐)
 │   ├── literature_reader.print.md      # 印刷品
