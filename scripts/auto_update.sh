@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #=============================================================================
-# math-read-do-obj Auto-Update Script
+# math-read-do · obj 分支 Auto-Update Script
 # 自动检查远程仓库是否有更新，若有则同步到本地
 #
 # 远程仓库: https://github.com/BluesilveEmperor/math-read-do
-# 分支:     math-read-do-obj
+# 分支:     obj
 #=============================================================================
 
 set -e
@@ -21,7 +21,7 @@ NC='\033[0m'
 
 REMOTE_NAME="origin"
 REPO_URL="https://github.com/BluesilveEmperor/math-read-do"
-BRANCH="math-read-do-obj"
+BRANCH="obj"
 
 echo -e "${CYAN}[auto-update] 检查 ${REPO_URL} (${BRANCH}) 是否有更新...${NC}"
 
@@ -73,4 +73,4 @@ git merge --ff-only "${REMOTE_NAME}/${BRANCH}" --quiet 2>/dev/null || {
 
 [ $HAS_STASH -eq 1 ] && git stash pop --quiet 2>/dev/null
 
-echo -e "${GREEN}  ✅ math-read-do-obj 已自动更新到最新版本${NC}"
+echo -e "${GREEN}  ✅ obj 分支已自动更新到最新版本${NC}"

@@ -38,7 +38,7 @@ compatibility:
 **每次调用该 Skill 前，自动执行以下步骤：**
 
 1. 运行 `scripts/auto_update.sh`
-2. 脚本检测远程仓库 `https://github.com/BluesilveEmperor/math-read-do` 的 `math-read-do-obj` 分支
+2. 脚本检测远程仓库 `https://github.com/BluesilveEmperor/math-read-do` 的 `obj` 分支
 3. **代码同步**：
    - 尚未初始化 Git → 自动 `git init` + 添加 remote + fetch 最新代码
    - 已有 Git 仓库 → fetch + 快速前进合并 (ff-only) 更新
