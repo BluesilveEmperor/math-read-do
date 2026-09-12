@@ -130,3 +130,20 @@ math-read-do-finance/
 
 复现数据来源：`math-read-do-financial-best-repro`（2026-08-05/06，
 WSL2 Ubuntu, 8 核 CPU, 3.7 GB RAM, 纯 CPU 无 GPU）
+
+## 子技能 / Sub-Skills
+
+本分支集成四个 nature-* 子 Skill，可独立调用也可在主流程里协同：
+
+| 子技能 | 角色 | 与谁互补 |
+|--------|------|---------|
+| `nature-reader/` | 科研论文智能阅读、结构化提取 (PDF/HTML/DOI/arXiv) | — |
+| `nature-figure/` | 科研数据可视化（matplotlib/seaborn，8 步工作流 + 视觉自检闭环） | 跟 nature-framework 互补 |
+| `nature-paper2ppt/` | 论文→中文 PPTX（6 类叙事弧 + 自审校） | — |
+| `nature-framework/` | 科研架构图渲染器（6 类图：model/framework/route/system/structure/experiment；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体） | 跟 nature-figure 互补——本子技能专做架构/框架/流程图 |
+
+`nature-framework` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
+
+## 许可
+
+MIT
