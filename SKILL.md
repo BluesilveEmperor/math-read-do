@@ -57,7 +57,7 @@ compatibility:
 4️⃣ 制作PPT — 将论文或复现结果转为演示文稿
 ```
 
-用户做出选择后，按对应流程执行。用户未指定审阅视角时，默认使用**研究生视角**（学习理解导向）。
+用户做出选择后，按对应流程执行。**用户未指定审阅视角时，必须向用户询问**（研究生／导师／审稿人／三方全出），不得代为默认——脚本在缺少 `--perspective` 时会进入交互询问；非交互环境（管道/CI）未给该参数时脚本直接报错退出，不静默代选。
 
 ## 核心原则 / Core Principles
 
@@ -156,17 +156,18 @@ compatibility:
 
 1.3 **领域分类**: 关键词+依赖 → 路由到数值/符号/AI4Math/统计/优化/经济子策略
 
-1.4 **视角审阅**: 按用户指定视角输出审阅报告；未指定时默认**研究生视角**
-    - **用户未指定视角 → 默认研究生**: 直接以研究生视角执行审阅（学习理解导向）
+1.4 **视角审阅**: 按用户指定视角输出审阅报告；**未指定时必须向用户询问，不设默认值、不得代选**
+    - **未指定视角 → 交互询问**: 脚本进入交互询问（研究生 / 导师 / 审稿人 / 三方全出）；非交互环境（管道/CI）未给该参数时直接报错退出，不静默代选
+    - ⚠️ **只有包含导师视角（`advisor` 或 `all`）才会产出 `reproducibility_assessment.json`**；只选研究生或审稿人不产出该文件，G01 门禁无法通过、无法进入 Phase 2+。脚本在这种情况下会打印明确警告。
     - **研究生**: 深度理解 -- 摘要/文献综述/研究问题/方法/结果/讨论/关键公式
       → 消费方: Phase 2 环境重建方法栈, Phase 4 增量实现的公式/算法参考
     - **导师**: 可复现性评级 -- 方法评估/可复现性表/教学建议/reproducibility_assessment.json
       → 消费方: G01 门禁 (决定是否进入复现流程)
     - **审稿人**: 批判审查 -- 总体评价/方法论评估/修改意见(强制/建议/细节)/总结
       → 消费方: Phase 5 判决引擎, Phase 6 诊断章节引用
-    - 执行: `python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json`
+    - 执行: `python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --perspective <student|advisor|reviewer|all>`
     - 产出: `analysis/<paper>_{student,advisor,reviewer}_review.md`（仅输出指定视角）
-    - **严禁默认输出全部视角，仅输出用户指定的单一视角**
+    - **严禁默认输出全部视角，也严禁默认单一视角**——视角必须由用户指定，或经脚本交互询问确认后才执行
 
 **G01 门禁**: 审查 `reproducibility_assessment.json`
     - `proceed` → 直接进 Phase 2

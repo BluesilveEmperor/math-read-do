@@ -6,7 +6,10 @@
 框架对论文进行深度分析，产出结构化审阅文件和可复现性评估。
 
 用法:
-  python three_perspective_review.py <marked_md_path> --output-dir ./analysis
+  python three_perspective_review.py <marked_md_path> --output-dir ./analysis --perspective all
+
+视角必须由用户指定（研究生/导师/审稿人/三方全出），脚本不设默认值：
+缺少 --perspective 时会进入交互询问；非交互环境（管道/CI）未给该参数则直接报错退出。
 
 依赖:
   pip install openai  (或其他 LLM 客户端)
@@ -198,6 +201,55 @@ def generate_reproducibility_assessment(advisor_report: str, paper_summary_path:
     return assessment
 
 
+def select_perspective_interactive():
+    """交互式选择审阅视角。返回视角字符串，取消则返回 None。
+
+    视角属"必须询问"项：不设默认值，不得代为选择。
+    """
+    if not sys.stdin.isatty():
+        print(
+            "  ❌ 审阅视角必须由用户选择，但当前不是交互式终端。\n"
+            "     请显式指定: --perspective student|advisor|reviewer|all",
+            file=sys.stderr,
+        )
+        return None
+
+    options = [
+        ("student", "研究生视角 — 学习理解导向（读懂论文、吃透方法）"),
+        ("advisor", "导师视角 — 指导评估导向（判断学术价值与复现可行性）"),
+        ("reviewer", "审稿人视角 — 同行评审导向（批判性审查）"),
+        ("all", "三方全出 — 三个视角 + 交叉对比（要进复现流程选这个）"),
+    ]
+
+    print("\n" + "=" * 50)
+    print("🎓 请选择审阅视角")
+    print("=" * 50)
+    for i, (_, desc) in enumerate(options, 1):
+        print(f"  {i}. {desc}")
+    print("=" * 50)
+
+    while True:
+        try:
+            choice = input(f"\n请选择视角编号 (1-{len(options)}，无默认): ").strip()
+            if choice.isdigit() and 1 <= int(choice) <= len(options):
+                value, desc = options[int(choice) - 1]
+                print(f"\n  ✅ 已选择: {desc}")
+                return value
+            print(f"  ⚠️ 请输入 1-{len(options)} 之间的数字")
+        except EOFError:
+            print(
+                "\n  ❌ 输入流已结束（非交互环境），无法获取视角选择。\n"
+                "     请显式指定: --perspective student|advisor|reviewer|all",
+                file=sys.stderr,
+            )
+            return None
+        except ValueError:
+            print("  ⚠️ 请输入有效的数字", file=sys.stderr)
+        except KeyboardInterrupt:
+            print("\n\n  ❌ 已取消")
+            return None
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="三方视角审阅执行器 — 研究生/导师/审稿人分析"
@@ -217,7 +269,7 @@ def main():
     parser.add_argument(
         "--perspective", default=None,
         choices=["student", "advisor", "reviewer", "all"],
-        help="指定视角: student(研究生)/advisor(导师)/reviewer(审稿人)/all(三方)"
+        help="指定视角: student(研究生)/advisor(导师)/reviewer(审稿人)/all(三方)；未指定则交互询问"
     )
     parser.add_argument(
         "--language", default="ch",
@@ -227,12 +279,26 @@ def main():
 
     args = parser.parse_args()
 
+    # ── 视角选择（必须询问，不得代选）────────────────────────────
+    # 放在最前：视角未确定前不得产生任何副作用（含创建输出目录）
+    perspective = args.perspective
+    if perspective is None:
+        perspective = select_perspective_interactive()
+        if perspective is None:
+            sys.exit(1)
+
     paper_content = read_markdown(args.paper_md)
     paper_stem = Path(args.paper_md).stem
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    perspective = args.perspective or "all"
+    if "advisor" not in (perspective, "all"):
+        print(
+            "  ⚠️ 未包含导师视角 → 不会产出 reproducibility_assessment.json，"
+            "G01 门禁将无法通过，无法进入复现流程（Phase 2+）。\n"
+            "     如需复现，请改用 --perspective advisor 或 all。",
+            file=sys.stderr,
+        )
 
     print(f"\n📖 论文: {args.paper_md}")
     print(f"📐 视角: {perspective}")
