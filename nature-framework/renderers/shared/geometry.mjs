@@ -1,4 +1,4 @@
-// nature-architecture / renderers / shared / geometry.mjs
+// nature-framework / renderers / shared / geometry.mjs
 // Bounding boxes, overlap tests, path computation. Pure functions, no DOM.
 
 export function bbox(pos, size) {

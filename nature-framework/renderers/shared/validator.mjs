@@ -1,4 +1,4 @@
-// nature-architecture / renderers / shared / validator.mjs
+// nature-framework / renderers / shared / validator.mjs
 // Lightweight JSON-schema-like validator + 11 showcase artifact checks.
 // We avoid pulling ajv to keep the skill zero-dependency (matches archify's no-install contract).
 

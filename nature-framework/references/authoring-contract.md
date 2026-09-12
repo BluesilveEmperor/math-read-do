@@ -1,6 +1,6 @@
 # Authoring Contract
 
-This document owns the field enums, spacing math, geometry repair rules, and mode-specific placement for nature-architecture model architecture diagrams. Read it only when `SKILL.md`'s fast authoring path does not cover your case.
+This document owns the field enums, spacing math, geometry repair rules, and mode-specific placement for nature-framework model architecture diagrams. Read it only when `SKILL.md`'s fast authoring path does not cover your case.
 
 ## Module type → shape default
 
