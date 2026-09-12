@@ -1,10 +1,10 @@
 ---
-name: nature-architecture
+name: nature-framework
 description: Create publication-grade research-paper diagrams as inline-SVG HTML figures and embedded-font vector PDF for LaTeX \includegraphics. Built for the whole research workflow — graduate students drafting thesis/proposal figures and group-meeting slides, supervisors preparing lecture notes, reviews and grant applications, and authors submitting to venues. Six diagram types share one typed IR — method/model architecture (transformer / CNN / diffusion with tensor shapes, residual skips, N× blocks), research framework (problem → content → outcome layers), technical route, system architecture, paper/chapter structure, and experiment pipeline (dataset → train → eval with baselines and ablations). White-first, print-friendly, serif/sans-serif typeset, ten visual presets including seven expressive styles. Use when the user asks to draw a research framework figure, technical route, model architecture, system architecture, paper structure diagram, or experiment pipeline for a thesis, dissertation, opening report (开题), group meeting, lecture, grant proposal, or NeurIPS / ICML / ICLR / CVPR / Nature / IEEE submission.
 license: MIT
 metadata:
   version: "0.1.0"
-  author: nature-architecture
+  author: nature-framework
   inspired_by: tt-a1i/archify (MIT, v2.17) — atomic delivery, typed JSON-IR, showcase artifact checks
 ---
 
@@ -22,20 +22,20 @@ A paper figure is a print artifact first and an interactive object second. It mu
 
 Use this bounded path for ordinary generation.
 
-1. Choose the diagram type from the question: `model`, `framework`, `route`, `system`, `structure`, or `experiment` (all six share one IR — same `modules` / `groups` / `connections` / `cards` fields; they differ in type vocabulary and layout conventions). When ambiguous, run `node bin/nature-architecture.mjs guide "<scenario>" --json`.
+1. Choose the diagram type from the question: `model`, `framework`, `route`, `system`, `structure`, or `experiment` (all six share one IR — same `modules` / `groups` / `connections` / `cards` fields; they differ in type vocabulary and layout conventions). When ambiguous, run `node bin/nature-framework.mjs guide "<scenario>" --json`.
 2. Read `schemas/diagram.schema.json`, `schemas/common.schema.json`, and one matching example in `examples/`. Read only those files. Fresh authorship means new stable IDs, domain wording, and layout; use the example for field shape, not facts.
 3. Artifact first: the next tool action must write the candidate. Write the candidate before inspecting renderer internals. Start with one clear forward main path (input → encoder → ... → output), short residual side branches, sparse tensor-shape annotations, and at most 14 primary modules. Set `meta.quality_profile` to `"showcase"` unless the user explicitly requests a denser `standard` map. Start with automatic routes and labels. Do not add `via`, `fromSide`, `toSide`, or `labelAt` before a diagnostic calls for one; apply at most one diagnosed geometry control per repair.
 4. Validate after every candidate edit and immediately before handoff:
 
    ```bash
-   node bin/nature-architecture.mjs validate model <candidate.json> --quality showcase --json
+   node bin/nature-framework.mjs validate model <candidate.json> --quality showcase --json
    ```
 
    A receipt with only 4 artifact checks is basic validation, never showcase acceptance. A showcase pass must report all 11 artifact checks with 0 composition errors and 0 warnings. If the candidate omits or misspells the exact `meta.quality_profile` field, fix it before geometry.
 5. For a delivered HTML, `deliver` is the final acceptance command. **Always ask the user which dataflow mode the figure should open in before delivering** — 静止 `off` / 悬停 `hover` / 流动 `flow` / 巡演 `tour` — and pass their choice as `--motion <mode>`. Never pick a mode silently on the user's behalf; if the user already stated a mode earlier in the conversation, reuse it without asking again. The same question applies to every figure in a batch (one shared answer may cover them all).
 
    ```bash
-   node bin/nature-architecture.mjs deliver model <candidate.json> <output.html> --quality showcase --motion flow --json
+   node bin/nature-framework.mjs deliver model <candidate.json> <output.html> --quality showcase --motion flow --json
    ```
 
    Add `--pdf <output.pdf>` to produce an embedded-font vector PDF alongside the HTML. A non-zero exit can never be described as success. A failed delivery preserves any previous output, so do not run `visual-check` on that path. If validation fails, change only the diagnosed `subject`, verify `evidence`, choose from `supportedFixes`, and rerun. Continue focused correction while the objective error count reaches a new minimum. If two consecutive rounds do not improve that best count, stop and report the unresolved diagnostics truthfully.
@@ -102,7 +102,7 @@ Use `validate` during repair and `deliver` once for final acceptance. Delivery f
 After delivery, collect bounded desktop evidence without modifying or rerendering the trusted HTML:
 
 ```bash
-node bin/nature-architecture.mjs visual-check <output.html> --json
+node bin/nature-framework.mjs visual-check <output.html> --json
 ```
 
 `visual-check` collects automated browser evidence from the exact delivered HTML without modifying or rerendering it. Its machine-readable measurements and screenshots do not approve perceptual polish. Follow `references/delivery-contract.md` for the canonical receipt fields, coverage, sidecars, exit behavior, and supplementary manual-record requirements.
@@ -138,8 +138,8 @@ Never start preview by default. Read `references/delivery-contract.md` when usin
 No install is required inside the skill package. Verify with:
 
 ```bash
-node bin/nature-architecture.mjs doctor
-node bin/nature-architecture.mjs demo <output-directory>
+node bin/nature-framework.mjs doctor
+node bin/nature-framework.mjs demo <output-directory>
 ```
 
 When shell access is unavailable, hand-place architecture SVG into `assets/template.html`, use CSS semantic classes rather than inline colors, and follow the visual review contract in `references/delivery-contract.md`.

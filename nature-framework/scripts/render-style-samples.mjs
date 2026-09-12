@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// nature-architecture / scripts / render-style-samples.mjs
+// nature-framework / scripts / render-style-samples.mjs
 // Render one example spec in every visual preset for side-by-side comparison.
 // Usage: node scripts/render-style-samples.mjs <example.json> [out-dir]
 
@@ -71,7 +71,7 @@ const indexHtml = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>nature-architecture 风格样张 — ${stem}</title>
+<title>nature-framework 风格样张 — ${stem}</title>
 <style>
   body { margin: 0; padding: 24px; font-family: "HarmonyOS Sans", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f2f2f2; color: #1a1a1a; }
   h1 { font-size: 18px; margin: 0 0 4px; }
@@ -84,7 +84,7 @@ const indexHtml = `<!DOCTYPE html>
 </style>
 </head>
 <body>
-<h1>nature-architecture 风格样张 — ${stem}</h1>
+<h1>nature-framework 风格样张 — ${stem}</h1>
 <p class="note">同一规格、同一几何，十种视觉预设。表现系风格需显式指定，默认始终为 paper。</p>
 ${written.map((w) => `<section><h2>${PRESET_NAMES[w.preset] || w.preset} <code>${w.preset}</code></h2><p class="note">${PRESET_NOTES[w.preset] || ""} · ${w.bytes} 字节</p><iframe src="${w.file}" loading="lazy"></iframe></section>`).join("\n")}
 </body>

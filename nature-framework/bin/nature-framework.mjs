@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// nature-architecture / bin / nature-architecture.mjs
+// nature-framework / bin / nature-framework.mjs
 // CLI entry: doctor | guide | validate | deliver | demo
 
 import { readFileSync, writeFileSync, renameSync, unlinkSync, existsSync, mkdirSync } from "node:fs";
@@ -47,7 +47,7 @@ function printJson(obj) {
 }
 
 function humanBanner(s) {
-  process.stderr.write(`nature-architecture: ${s}\n`);
+  process.stderr.write(`nature-framework: ${s}\n`);
 }
 
 async function main() {
@@ -86,17 +86,17 @@ async function main() {
 }
 
 function printHelp() {
-  process.stdout.write(`nature-architecture — publication-grade ML/DL model architecture diagrams
+  process.stdout.write(`nature-framework — publication-grade ML/DL model architecture diagrams
 
 Usage:
-  nature-architecture doctor                              Check environment (node, schemas, renderer)
-  nature-architecture guide "<scenario>" [--json]        Recommend a diagram type for a scenario
-  nature-architecture validate <type> <json> [--quality p] [--layout-json] [--json]
+  nature-framework doctor                              Check environment (node, schemas, renderer)
+  nature-framework guide "<scenario>" [--json]        Recommend a diagram type for a scenario
+  nature-framework validate <type> <json> [--quality p] [--layout-json] [--json]
                                               Validate a spec; default quality=standard
-  nature-architecture deliver <type> <json> <out.html> [--pdf <out.pdf>] [--quality p] [--open] [--json]
+  nature-framework deliver <type> <json> <out.html> [--pdf <out.pdf>] [--quality p] [--open] [--json]
                                               Render, check, atomically commit HTML (+PDF)
-  nature-architecture demo <output-dir>                  Render a built-in transformer example
-  nature-architecture visual-check <html> [--json]       (planned) Browser evidence for delivered HTML
+  nature-framework demo <output-dir>                  Render a built-in transformer example
+  nature-framework visual-check <html> [--json]       (planned) Browser evidence for delivered HTML
 
 Types: model | framework | route | system | structure | experiment (all share one IR)
 Quality profiles: standard | showcase
@@ -134,7 +134,7 @@ function cmdDoctor(_args) {
   for (const c of checks) {
     process.stdout.write(`  [${c.ok ? "OK" : "FAIL"}] ${c.name} — ${c.detail}\n`);
   }
-  process.stdout.write(`\nnature-architecture ${allOk ? "ready" : "not ready"}\n`);
+  process.stdout.write(`\nnature-framework ${allOk ? "ready" : "not ready"}\n`);
   process.exit(allOk ? 0 : 1);
 }
 
@@ -384,7 +384,7 @@ async function cmdDeliver(args) {
 // --- demo ---
 async function cmdDemo(args) {
   const positional = args.filter((a) => !a.startsWith("--"));
-  const outDir = positional[0] || "./nature-architecture-demo";
+  const outDir = positional[0] || "./nature-framework-demo";
   const motionIdx = args.indexOf("--motion");
   const motion = motionIdx >= 0 ? args[motionIdx + 1] : null;
   if (motion != null && !["off", "on", "hover", "flow", "tour"].includes(motion)) {

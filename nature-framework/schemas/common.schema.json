@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/nature-architecture/nature-architecture/schemas/common.schema.json",
+  "$id": "https://github.com/nature-framework/nature-framework/schemas/common.schema.json",
   "title": "Paperfig Common Definitions",
   "type": "object",
   "$defs": {

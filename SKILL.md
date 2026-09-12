@@ -28,7 +28,7 @@ compatibility:
   - python >= 3.9
   - numpy >= 1.21
   - 推荐: pytest (测试), matplotlib (可视化), meshlab (对比验证)
-  - nature-architecture: Node.js >= 18（CLI: nature-architecture/bin/nature-architecture.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_architecture_bridge.py
+  - nature-framework: Node.js >= 18（CLI: nature-framework/bin/nature-framework.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_architecture_bridge.py
 ---
 
 # General OBJ Experiment Reproduction Framework

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/nature-architecture/nature-architecture/schemas/diagram.schema.json",
+  "$id": "https://github.com/nature-framework/nature-framework/schemas/diagram.schema.json",
   "title": "Paperfig Research Diagram (shared IR)",
   "type": "object",
   "additionalProperties": false,

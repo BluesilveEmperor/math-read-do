@@ -1,12 +1,12 @@
 {
-  "name": "nature-architecture",
+  "name": "nature-framework",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "JSON-IR publication-grade research-figure renderer (HTML inline-SVG + embedded-font vector PDF) for graduate students, supervisors, and paper authors — 6 diagram types, 10 visual presets, 11 showcase checks.",
   "license": "MIT",
   "bin": {
-    "nature-architecture": "./bin/nature-architecture.mjs"
+    "nature-framework": "./bin/nature-framework.mjs"
   },
   "engines": {
     "node": ">=18"

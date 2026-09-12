@@ -1,4 +1,4 @@
-// nature-architecture / renderers / shared / shapes.mjs
+// nature-framework / renderers / shared / shapes.mjs
 // Canonical module-type → shape mapping. Shared by the renderer (draw) and the
 // validator (text-fit checks need to know the effective text width of a shape).
 
