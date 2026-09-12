@@ -125,6 +125,19 @@ skills:
       - reports/RUN_SUMMARY.zh.md
     requires_skills: [statistical_verification_skill]
 
+  - name: architecture_figure_skill
+    phase: reporting
+    path: nature-architecture
+    description: 科研架构图/框架图/流程图渲染器（Node CLI，6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体）
+    risk_level: low
+    requires_approval_for: []
+    output_artifacts:
+      - figures/*.html
+      - figures/receipt.json
+    requires_skills: []
+    runtime: Node.js >= 18 (zero external dependencies)
+    python_bridge: scripts/nature_architecture_bridge.py
+
   - name: artifact_packaging_skill
     phase: packaging
     path: skills/artifact_packaging_skill

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "experiment",
+  "meta": {
+    "title": "实验流程图",
+    "subtitle": "数据 → 训练 → 统一评估 → 指标，基线与消融汇入同一评估协议",
+    "column": "single",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [640, 520],
+    "legend": { "mode": "auto" }
+  },
+  "modules": [
+    { "id": "dataset", "type": "dataset", "label": "公开数据集", "sublabel": "train / val / test = 7:1:2", "pos": [240, 40], "size": [160, 50] },
+    { "id": "preprocess", "type": "preprocess", "label": "数据预处理", "sublabel": "清洗 · 归一化 · 增强", "pos": [240, 140], "size": [160, 50] },
+    { "id": "train", "type": "train", "label": "模型训练", "sublabel": "AdamW · 余弦调度", "pos": [240, 240], "size": [160, 50] },
+    { "id": "eval", "type": "eval", "label": "统一评估", "sublabel": "相同测试协议", "pos": [240, 340], "size": [160, 50] },
+    { "id": "metric", "type": "metric", "label": "性能指标", "sublabel": "Acc / F1 / mAP", "pos": [280, 435], "size": [80, 80] },
+    { "id": "baseline_b1", "type": "baseline", "label": "基线 A", "sublabel": "ResNet-50", "pos": [450, 230], "size": [150, 50] },
+    { "id": "baseline_b2", "type": "baseline", "label": "基线 B", "sublabel": "ViT-B/16", "pos": [450, 310], "size": [150, 50] },
+    { "id": "ablation_a1", "type": "ablation", "label": "消融配置", "sublabel": "逐模块移除", "pos": [30, 230], "size": [150, 50] }
+  ],
+  "groups": [
+    { "kind": "branch", "label": "对比基线", "wraps": ["baseline_b1", "baseline_b2"], "pad": 14 }
+  ],
+  "connections": [
+    { "from": "dataset", "to": "preprocess", "variant": "forward", "route": "straight" },
+    { "from": "preprocess", "to": "train", "variant": "forward", "route": "straight" },
+    { "from": "train", "to": "eval", "variant": "forward", "route": "straight" },
+    { "from": "eval", "to": "metric", "variant": "forward", "route": "straight" },
+    { "from": "baseline_b1", "to": "eval", "variant": "data", "route": "straight", "fromSide": "left", "toSide": "right" },
+    { "from": "baseline_b2", "to": "eval", "variant": "data", "route": "straight", "fromSide": "left", "toSide": "right" },
+    { "from": "ablation_a1", "to": "eval", "variant": "data", "route": "straight", "fromSide": "right", "toSide": "left" }
+  ],
+  "cards": [
+    { "dot": "blue", "title": "实验协议", "items": [
+      "所有模型（本文方法、基线、消融配置）使用完全相同的数据划分与测试协议",
+      "数据列 train/val/test = 7:1:2，随机种子固定为 42",
+      "消融实验通过逐模块移除验证每个组件的贡献"
+    ] },
+    { "dot": "gray", "title": "指标说明", "items": [
+      "Acc：总体准确率",
+      "F1：宏平均 F1 分数",
+      "mAP：平均精度均值（检测任务）"
+    ] }
+  ]
+}

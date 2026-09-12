@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "diagram_type": "framework",
+  "meta": {
+    "title": "研究框架图",
+    "subtitle": "研究问题 → 研究内容 → 研究成果 的对应关系",
+    "column": "double",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [740, 360],
+    "legend": { "mode": "auto" }
+  },
+  "modules": [
+    { "id": "problem_q1", "type": "problem", "label": "多源异构数据难以融合", "sublabel": "模态差异大、对齐困难", "pos": [40, 80], "size": [180, 60] },
+    { "id": "problem_q2", "type": "problem", "label": "模型可解释性不足", "sublabel": "决策过程黑盒", "pos": [40, 200], "size": [180, 60] },
+    { "id": "content_c1", "type": "content", "label": "多模态融合方法研究", "sublabel": "跨模态对齐与注意力融合", "pos": [320, 60], "size": [170, 60] },
+    { "id": "content_c2", "type": "content", "label": "可解释注意力机制", "sublabel": "注意力可视化与归因", "pos": [320, 150], "size": [170, 60] },
+    { "id": "content_c3", "type": "content", "label": "轻量化部署方案", "sublabel": "剪枝蒸馏与端侧推理", "pos": [320, 240], "size": [170, 60] },
+    { "id": "outcome_o1", "type": "outcome", "label": "融合模型与论文", "sublabel": "方法创新点一", "pos": [580, 90], "size": [120, 60] },
+    { "id": "outcome_o2", "type": "outcome", "label": "开源系统与专利", "sublabel": "方法创新点二", "pos": [580, 210], "size": [120, 60] }
+  ],
+  "groups": [
+    { "kind": "layer", "label": "研究问题", "wraps": ["problem_q1", "problem_q2"], "pad": 16 },
+    { "kind": "layer", "label": "研究内容", "wraps": ["content_c1", "content_c2", "content_c3"], "pad": 16 },
+    { "kind": "layer", "label": "研究成果", "wraps": ["outcome_o1", "outcome_o2"], "pad": 16 }
+  ],
+  "connections": [
+    { "from": "problem_q1", "to": "content_c1", "variant": "forward", "route": "straight" },
+    { "from": "problem_q1", "to": "content_c2", "variant": "forward", "route": "straight" },
+    { "from": "problem_q2", "to": "content_c2", "variant": "forward", "route": "straight" },
+    { "from": "problem_q2", "to": "content_c3", "variant": "forward", "route": "straight" },
+    { "from": "content_c1", "to": "outcome_o1", "variant": "forward", "route": "straight" },
+    { "from": "content_c2", "to": "outcome_o1", "variant": "forward", "route": "straight" },
+    { "from": "content_c2", "to": "outcome_o2", "variant": "forward", "route": "straight" },
+    { "from": "content_c3", "to": "outcome_o2", "variant": "forward", "route": "straight" }
+  ],
+  "cards": [
+    { "dot": "blue", "title": "框架说明", "items": [
+      "左列为两项研究问题，中列为三项研究内容，右列为对应研究成果",
+      "每条连线代表一个真实的研究问题-内容-成果对应关系",
+      "研究内容二同时支撑两项成果，是本课题的核心"
+    ] }
+  ]
+}

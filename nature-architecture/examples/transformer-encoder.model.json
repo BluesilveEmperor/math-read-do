@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "diagram_type": "model",
+  "meta": {
+    "title": "Transformer 编码器",
+    "subtitle": "Vaswani et al. (2017) — 编码器模块结构",
+    "column": "single",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [400, 880],
+    "legend": { "mode": "auto" }
+  },
+  "modules": [
+    {
+      "id": "inp",
+      "type": "input",
+      "shape": "parallelogram",
+      "label": "输入 Token",
+      "sublabel": "源序列",
+      "pos": [40, 60],
+      "size": [110, 50],
+      "tensor_shape": "[B, S]"
+    },
+    {
+      "id": "embed",
+      "type": "embedding",
+      "label": "Token 嵌入",
+      "sublabel": "vocab → d_model",
+      "pos": [40, 160],
+      "size": [120, 60],
+      "tensor_shape": "[B, S, D]",
+      "tensor_pos": [165, 173]
+    },
+    {
+      "id": "pos_enc",
+      "type": "embedding",
+      "variant": "dashed",
+      "label": "位置编码",
+      "sublabel": "正弦编码",
+      "pos": [240, 165],
+      "size": [110, 50]
+    },
+    {
+      "id": "attn",
+      "type": "attention",
+      "label": "多头自注意力",
+      "sublabel": "Q、K、V 投影",
+      "pos": [50, 300],
+      "size": [200, 50],
+      "tensor_shape": "[B, S, D]",
+      "tensor_pos": [255, 330]
+    },
+    {
+      "id": "attn_norm",
+      "type": "norm",
+      "shape": "rect",
+      "label": "相加与层归一化",
+      "pos": [50, 380],
+      "size": [200, 30]
+    },
+    {
+      "id": "ffn_rep",
+      "type": "encoder",
+      "variant": "repeated",
+      "repeat": 6,
+      "repeat_label": "×6",
+      "label": "逐位置 FFN",
+      "sublabel": "GELU 激活",
+      "pos": [50, 470],
+      "size": [200, 80],
+      "tensor_shape": "[B, S, D]",
+      "tensor_pos": [255, 515]
+    },
+    {
+      "id": "ffn_norm",
+      "type": "norm",
+      "shape": "rect",
+      "label": "相加与层归一化",
+      "pos": [50, 590],
+      "size": [200, 30]
+    },
+    {
+      "id": "out_lin",
+      "type": "custom",
+      "label": "输出线性层",
+      "sublabel": "d_model → vocab",
+      "pos": [50, 680],
+      "size": [200, 50],
+      "tensor_shape": "[B, S, V]",
+      "tensor_pos": [255, 710]
+    },
+    {
+      "id": "softmax",
+      "type": "activation",
+      "shape": "circle",
+      "label": "Softmax",
+      "pos": [110, 770],
+      "size": [80, 80],
+      "tensor_shape": "[B, S, V]",
+      "tensor_pos": [196, 814]
+    }
+  ],
+  "groups": [
+    {
+      "kind": "stage",
+      "label": "编码器（×6）",
+      "wraps": ["attn", "attn_norm", "ffn_rep", "ffn_norm"],
+      "pad": 16
+    }
+  ],
+  "connections": [
+    { "from": "inp", "to": "embed", "variant": "forward", "route": "straight" },
+    { "from": "embed", "to": "attn", "variant": "forward", "route": "orthogonal-v" },
+    { "from": "pos_enc", "to": "embed", "variant": "data", "label": "+ 位置", "labelAt": [200, 210], "route": "straight", "fromSide": "left", "toSide": "right" },
+    { "from": "attn", "to": "attn_norm", "variant": "forward", "route": "straight" },
+    { "from": "attn_norm", "to": "ffn_rep", "variant": "forward", "route": "straight" },
+    { "from": "ffn_rep", "to": "ffn_norm", "variant": "forward", "route": "straight" },
+    { "from": "ffn_norm", "to": "out_lin", "variant": "forward", "route": "straight" },
+    { "from": "out_lin", "to": "softmax", "variant": "forward", "route": "straight" }
+  ],
+  "cards": [
+    {
+      "dot": "blue",
+      "title": "架构",
+      "items": [
+        "6 层编码器堆叠，所有位置共享参数",
+        "每个子层后接残差相加与层归一化",
+        "正弦位置编码在词嵌入输出处注入"
+      ]
+    },
+    {
+      "dot": "gray",
+      "title": "张量形状",
+      "items": [
+        "B：批大小",
+        "S：序列长度",
+        "D：模型维度 d_model（如 512）",
+        "V：词表大小"
+      ]
+    }
+  ]
+}
