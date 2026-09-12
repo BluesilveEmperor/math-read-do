@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "diagram_type": "route",
+  "meta": {
+    "title": "技术路线图",
+    "subtitle": "目标 → 方法分支 → 具名结论（骨架，请替换为本课题真实路线）",
+    "column": "single",
+    "locale": "zh-CN",
+    "visual_preset": "paper",
+    "quality_profile": "showcase",
+    "viewBox": [460, 520],
+    "legend": { "mode": "auto" },
+    "language": { "mode": "zh-CN" }
+  },
+  "modules": [
+    { "id": "goal", "type": "goal", "label": "研究目标", "sublabel": "本课题要解决的问题", "pos": [150, 30], "size": [160, 56] },
+    { "id": "branch_a1", "type": "content", "label": "技术分支一", "sublabel": "理论方法路线", "pos": [60, 170], "size": [150, 56] },
+    { "id": "branch_a2", "type": "content", "label": "关键技术一", "sublabel": "分支一核心步骤", "pos": [60, 290], "size": [150, 56] },
+    { "id": "branch_b1", "type": "content", "label": "技术分支二", "sublabel": "实验验证路线", "pos": [250, 170], "size": [150, 56] },
+    { "id": "branch_b2", "type": "content", "label": "关键技术二", "sublabel": "分支二核心步骤", "pos": [250, 290], "size": [150, 56] },
+    { "id": "outcome_c1", "type": "outcome", "label": "结论一", "sublabel": "分支一对应结论", "pos": [60, 420], "size": [150, 56] },
+    { "id": "outcome_c2", "type": "outcome", "label": "结论二", "sublabel": "分支二对应结论", "pos": [250, 420], "size": [150, 56] }
+  ],
+  "connections": [
+    { "from": "goal", "to": "branch_a1", "variant": "forward", "route": "straight" },
+    { "from": "goal", "to": "branch_b1", "variant": "forward", "route": "straight" },
+    { "from": "branch_a1", "to": "branch_a2", "variant": "forward", "route": "straight" },
+    { "from": "branch_b1", "to": "branch_b2", "variant": "forward", "route": "straight" },
+    { "from": "branch_a2", "to": "outcome_c1", "variant": "forward", "route": "straight", "label": "分支一结论" },
+    { "from": "branch_b2", "to": "outcome_c2", "variant": "forward", "route": "straight", "label": "分支二结论" }
+  ],
+  "cards": [
+    { "dot": "ink", "title": "使用说明", "items": [
+      "目标 → 分支 → 关键技术 → 结论；分支必须显式汇合或终止于具名结论",
+      "复现阶段用 route-supplement 追加结果节点，禁改既有拓扑",
+      "新增连线必须写清 label，说明是什么结果"
+    ] }
+  ]
+}
