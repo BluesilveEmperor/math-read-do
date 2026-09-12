@@ -7,6 +7,12 @@ description: >-
   SIAM J. Financial Mathematics / Frontiers of Mathematical Finance, 2022–2025）
   为设计范本，构建面向"深度学习 + 金融数值实验"的复现框架。
 
+  集成四大 Nature 子技能：
+  - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
+  - nature-figure/：科研数据可视化顾问（先思考后绘制，8 步工作流，视觉自检闭环）
+  - nature-paper2ppt/：论文一键转为中文组会PPT (6类论文叙事弧)
+  - nature-framework/：科研架构图渲染器（6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验，self-contained inline-SVG HTML）；与 nature-figure 形成互补——本子技能专做架构/框架/流程图，nature-figure 专做数据可视化图
+
   框架结构：
     Phase 0-2:  通用层 — 宿主检测、双环境构建（TF / torch+signatory）、数据可得性分诊
     Phase 3-4:  适配层 — 基线验证、按 DAG 拓扑序增量实现与修复
@@ -32,7 +38,10 @@ compatibility:
   - conda 环境 B `sigtorch39`: Python 3.9.23, torch 1.9.1+cpu, signatory 1.2.6, numpy<2
   - fin_tool 本体: python >= 3.9, numpy >= 1.21（两个环境均可导入）
   - 可选: pytest（测试）, matplotlib（图表）, pandas/openpyxl（xlsx 产物）
-  - nature-architecture: Node.js >= 18（CLI: nature-architecture/bin/nature-architecture.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_architecture_bridge.py
+  - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
+  - nature-figure: matplotlib + seaborn + SciencePlots (静态) + plotly (交互)，CJK 字体自动配置
+  - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
+  - nature-framework: Node.js >= 18（CLI: nature-framework/bin/nature-framework.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_framework_bridge.py
 ---
 
 # Quantitative Finance Experiment Reproduction Framework
