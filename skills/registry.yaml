@@ -79,7 +79,7 @@ skills:
     implementation:
       - scripts/math_pdf_extract.py         # Phase 1.1 PDF 解析（MinerU）
       - scripts/literature_reader.py        # Phase 1.4 审阅报告 + reproducibility_assessment
-      - scripts/three_perspective_review.py # 旧版，待移入 scripts/legacy/
+      - scripts/three_perspective_review.py # Phase 1.4 视角审阅（本分支在用；视角必须询问）
       - templates/literature_reader.*.md    # 9 种排版模板
     description: 论文解析与三方视角深度分析 / Paper parsing with three-perspective deep analysis
     risk_level: low

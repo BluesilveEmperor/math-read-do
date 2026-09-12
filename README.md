@@ -45,7 +45,8 @@ pip install mineru-open-sdk pyyaml
 
 # 3. 运行复现
 python scripts/math_pdf_extract.py paper.pdf --output-dir analysis/
-python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/
+# 审阅视角必须由用户指定：未指定会进入交互询问，非交互环境（管道/CI）直接报错退出
+python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/ --perspective all
 ```
 
 ## 项目结构
