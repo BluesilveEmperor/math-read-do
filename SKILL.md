@@ -206,6 +206,8 @@ compatibility:
     - `needs_human_approval` → STOP: 展示风险标记, 获取用户确认
     - `discourage` → STOP: 不建议复现, 展示理由
 
+**nature-framework 参与（文献阅读阶段）**: 阅读完成后可用 nature-framework 绘制不依赖实验数据的图辅助理解与汇报——`structure` 论文结构图、`framework` 研究框架图、`route` 技术路线图（预计版）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 Phase 5 统计判决后（硬规则见 nature-framework/SKILL.md）。执行前遵守 nature-framework 第 0 步必问。
+
 ---
 
 ### Phase 2: 环境重建 / Environment Setup
@@ -461,7 +463,7 @@ pip install mineru-open-sdk pyyaml
 
 - **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。用户未指定审阅视角时，主动询问。
 - **nature-figure** 可增强 Phase 5 (图表导出)，作为"可视化顾问"：先剖析数据→推荐图型→拦截错误→绘制→视觉自检闭环，提供出版级图表样式和质量门禁。
-- **nature-framework** 可增强 Phase 5 (架构图导出) 与 Phase 6 (报告插图)，作为"架构图/框架图/流程图/技术路线图渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证；适用于论文 float / 开题报告技术路线 / 组会汇报里的方法架构图、实验流程图。Node CLI（`nature-framework/bin/nature-framework.mjs`）零外部依赖，Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
+- **nature-framework** 参与文献阅读与实验复现全程：Phase 1（论文结构图/研究框架图/技术路线图预计版）、Phase 4（系统架构图、方法/模型架构图主体）、Phase 5（实验流程图——统计判决后出最终版，判决前仅 draft predicted flow）、Phase 6（报告插图），作为"架构图/框架图/流程图/技术路线图渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证；适用于论文 float / 开题报告技术路线 / 组会汇报里的方法架构图、实验流程图。Node CLI（`nature-framework/bin/nature-framework.mjs`）零外部依赖，Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
 - **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
 
 ### 调用方式
