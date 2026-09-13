@@ -288,6 +288,8 @@ math-read-do-obj/
 
 **G01**: `analysis/algorithm_summary.json` 完成，用户确认算法理解无误
 
+1.5 **nature-framework 参与（算法理解阶段，可选）**: 理解确认后可用 nature-framework 绘制不依赖实验数据的图——`model` 方法/模型架构图（主体；维度/超参数/损失权重等细节实验跑通后确认）、`framework` 研究框架图、`structure` 论文结构图、`route` 技术路线图（预计版）。执行前遵守 nature-framework 第 0 步必问。
+
 ---
 
 ### Phase 2: 环境构建 / Environment Setup
@@ -407,6 +409,8 @@ math-read-do-obj/
     - 误差分布直方图 (error_distribution.png + 可选 error_distribution.pdf)
     - 每图附带独立可运行生成代码: Python (`plot_*.py`) + LaTeX/TikZ (`plot_*.tex`)
 
+5.6 **架构/流程图导出**（可选，走 nature-framework）: 数据图表走 nature-figure；`experiment` 实验流程图在 G5 判决产出后可出**最终版**，判决前仅允许 `"status": "draft"` 的 predicted flow 草案（硬规则见 nature-framework/SKILL.md）。数据可视化图以外的架构/框架/流程图一律经 nature-framework 渲染。
+
 **G5**: 判决产出，所有验证通过
 
 ---
@@ -415,6 +419,8 @@ math-read-do-obj/
 
 **输入**: 所有阶段产物
 **输出**: `实验复刻结果汇总/` 中英双语文档
+
+**nature-framework 参与（报告插图）**: 报告中的架构图/框架图/流程图由 nature-framework 产出（self-contained inline-SVG HTML + 嵌入字体 PDF）；实验流程图最终版以 G5 判决后的真实数据为准。
 
 ```
 实验复刻结果汇总/                     # 根目录
