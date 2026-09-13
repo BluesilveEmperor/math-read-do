@@ -22,6 +22,13 @@ A paper figure is a print artifact first and an interactive object second. It mu
 
 Use this bounded path for ordinary generation.
 
+0. **Ask before drawing (mandatory)** — before authoring any spec or loading any schema, ask the user for the details below and wait for the answers. Do not start from assumptions. Reuse items the user already stated without asking again; one shared answer covers every figure in a batch.
+   - **主题 / Subject** — what the figure must convey: the research topic, the forward main path (input → … → output), and the key modules / groups / stages.
+   - **图类型 / Diagram type** — `model` / `framework` / `route` / `system` / `structure` / `experiment`.
+   - **图语言 / Language** — `zh-CN` (Chinese theses/papers, Chinese-first hard rule) or `en`.
+   - **数据流动形式 / Motion mode** — 静止 `off` / 悬停 `hover` / 流动 `flow` / 巡演 `tour`; reuse this answer at step 5 when passing `--motion` to `deliver`, never pick a mode silently.
+   - **视觉风格 / Visual preset** — `paper` (default) or an explicitly named expressive style.
+   - **输出格式 / Artifacts** — HTML only, HTML + embedded-font PDF (`--pdf`), or EPS (`--eps`).
 1. Choose the diagram type from the question: `model`, `framework`, `route`, `system`, `structure`, or `experiment` (all six share one IR — same `modules` / `groups` / `connections` / `cards` fields; they differ in type vocabulary and layout conventions). When ambiguous, run `node bin/nature-framework.mjs guide "<scenario>" --json`.
 2. Read `schemas/diagram.schema.json`, `schemas/common.schema.json`, and one matching example in `examples/`. Read only those files. Fresh authorship means new stable IDs, domain wording, and layout; use the example for field shape, not facts.
 3. Artifact first: the next tool action must write the candidate. Write the candidate before inspecting renderer internals. Start with one clear forward main path (input → encoder → ... → output), short residual side branches, sparse tensor-shape annotations, and at most 14 primary modules. Set `meta.quality_profile` to `"showcase"` unless the user explicitly requests a denser `standard` map. Start with automatic routes and labels. Do not add `via`, `fromSide`, `toSide`, or `labelAt` before a diagnostic calls for one; apply at most one diagnosed geometry control per repair.
