@@ -448,7 +448,7 @@ pip install mineru-open-sdk pyyaml
 
 ## 集成 Nature 子技能 / Integrated Nature Skills
 
-本 skill 集成了三个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
+本 skill 集成了四个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`, `nature-framework`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
 
 ### 子技能路由
 
@@ -457,6 +457,7 @@ pip install mineru-open-sdk pyyaml
 | nature-reader | `nature-reader/` | `SKILL.md` + `manifest.yaml` | 科研论文智能阅读、结构化提取、6种来源格式路由 |
 | nature-figure | `nature-figure/` | `SKILL.md` | 科研数据可视化顾问：8 步工作流，matplotlib+seaborn+SciencePlots+plotly，视觉自检闭环 |
 | nature-paper2ppt | `nature-paper2ppt/` | `SKILL.md` + `manifest.yaml` | 论文→中文 PPTX，6类论文叙事弧，自审校循环 |
+| nature-framework | `nature-framework/` | `SKILL.md` | 科研架构图渲染器：6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验 |
 | _shared | `_shared/` | 无入口，被子技能引用 | 术语账本、论文类型分类法、伦理规范、Nat Communs 格式 |
 
 ### 与主流程的协同
