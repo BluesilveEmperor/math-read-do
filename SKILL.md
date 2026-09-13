@@ -59,7 +59,7 @@ compatibility:
 4️⃣ 制作PPT — 将论文或复现结果转为演示文稿
 ```
 
-用户做出选择后，按对应流程执行。用户未指定审阅视角时，默认使用**研究生视角**（学习理解导向）。
+用户做出选择后，按对应流程执行。用户未指定审阅视角时，**必须先向用户询问**（研究生 / 导师 / 审稿人 / 三方全出），禁止默认。
 
 ## 核心原则 / Core Principles
 
@@ -175,6 +175,8 @@ compatibility:
     - `proceed_with_caution` → 进 Phase 2, 记录已知风险
     - `needs_human_approval` → STOP: 展示风险标记, 获取用户确认
     - `discourage` → STOP: 不建议复现, 展示理由
+
+**nature-framework 参与（文献阅读阶段）**: 阅读完成后可用 nature-framework 绘制不依赖实验数据的图辅助理解与汇报——`structure` 论文结构图、`framework` 研究框架图、`route` 技术路线图（预计版）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 Phase 5 统计判决后（硬规则见 nature-framework/SKILL.md）。执行前遵守 nature-framework 第 0 步必问。
 
 ---
 
@@ -398,7 +400,7 @@ pip install mineru-open-sdk pyyaml
 
 ## 集成 Nature 子技能 / Integrated Nature Skills
 
-本 skill 集成了三个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
+本 skill 集成了四个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`, `nature-framework`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
 
 ### 子技能路由
 
@@ -407,13 +409,14 @@ pip install mineru-open-sdk pyyaml
 | nature-reader | `nature-reader/` | `SKILL.md` + `manifest.yaml` | 科研论文智能阅读、结构化提取、6种来源格式路由 |
 | nature-figure | `nature-figure/` | `SKILL.md` + `manifest.yaml` | 出版级图表生成，Python/R 双后端，含 QA 循环 |
 | nature-paper2ppt | `nature-paper2ppt/` | `SKILL.md` + `manifest.yaml` | 论文→中文 PPTX，6类论文叙事弧，自审校循环 |
+| nature-framework | `nature-framework/` | `SKILL.md` | 科研架构图渲染器：6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验 |
 | _shared | `_shared/` | 无入口，被子技能引用 | 术语账本、论文类型分类法、伦理规范、Nat Communs 格式 |
 
 ### 与主流程的协同
 
 - **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。用户未指定审阅视角时，主动询问。
 - **nature-figure** 可增强 Phase 5 (图表导出)，提供出版级图表样式和质量门禁。
-- **nature-framework** 可增强 Phase 5 (架构图导出) 与 Phase 6 (报告插图)，作为"架构图/框架图/流程图/技术路线图渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证；适用于论文 float / 开题报告技术路线 / 组会汇报里的方法架构图、实验流程图。Node CLI（`nature-framework/bin/nature-framework.mjs`）零外部依赖，Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
+- **nature-framework** 参与文献阅读与实验复现全程：Phase 1（论文结构图/研究框架图/技术路线图预计版）、Phase 4（系统架构图、方法/模型架构图主体）、Phase 5（实验流程图——统计判决后出最终版，判决前仅 draft predicted flow）、Phase 6（报告插图），作为"架构图/框架图/流程图/技术路线图渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证；适用于论文 float / 开题报告技术路线 / 组会汇报里的方法架构图、实验流程图。Node CLI（`nature-framework/bin/nature-framework.mjs`）零外部依赖，Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
 - **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
 
 ### 调用方式
