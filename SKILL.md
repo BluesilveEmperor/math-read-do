@@ -231,6 +231,8 @@ compatibility:
 
 **G2**: 目标数值清单确认
 
+**nature-framework 参与（论文理解阶段）**: 理解确认后可用 nature-framework 绘制不依赖实验数据的图——`structure` 论文结构图、`framework` 研究框架图、`route` 技术路线图（预计版）、`model` 方法/模型架构图主体（细节跑通后确认）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 G5 判决后（硬规则见 nature-framework/SKILL.md）。执行前遵守 nature-framework 第 0 步必问。
+
 ---
 
 ### Phase 3: 基线验证 / Baseline Verification
@@ -286,11 +288,15 @@ compatibility:
 
 **G5**: 每个目标数值均有判决 + CI
 
+**nature-framework 参与（实验流程图最终版）**: G5 判决产出后，`experiment` 实验流程图可出**最终版**（数字来自 `results/statistical_summary.json` 等真实产物）；判决前仅允许 draft predicted flow。架构/框架/流程图一律经 nature-framework 渲染，数据可视化图走 nature-figure。
+
 ---
 
 ### Phase 6: 报告生成 / Report Generation
 
-**输出**: `实验复现结果汇总/` 中英双语文档
+**输出**: `实验复刻结果汇总/` 中英双语文档
+
+**nature-framework 参与（报告插图）**: 报告中的架构图/框架图/流程图由 nature-framework 产出（self-contained inline-SVG HTML + 嵌入字体 PDF）；实验流程图最终版以 G5 判决后的真实数据为准。
 
 ```
 实验复现结果汇总/
