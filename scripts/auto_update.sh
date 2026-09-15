@@ -20,7 +20,7 @@ NC='\033[0m'
 
 REMOTE_NAME="origin"
 REPO_URL="https://github.com/BluesilveEmperor/math-read-do"
-BRANCH="financial"
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "financial")
 
 echo -e "${CYAN}[auto-update] 检查 ${REPO_URL} (${BRANCH}) 是否有更新...${NC}"
 
