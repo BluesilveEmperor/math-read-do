@@ -16,7 +16,17 @@ Do not try to apply the reading logic from memory or from this router. Always lo
 
 ## Routing protocol
 
-Follow these five steps every time the skill is invoked.
+Run **step 0 (ask before building)** first, then follow these five steps every time the skill is invoked.
+
+### 0. Ask before building
+
+Before loading any fragment, ask the user to confirm:
+
+1. **Output mode** — full side-by-side bilingual reader (default) or summary-only report. Never degrade to a summary silently; only produce one if the user explicitly chooses it.
+2. **审阅视角 / Review perspective** — 研究生（学习理解）/ 导师（把关评审）/ 审稿人（质量挑刺）/ 三方全出（+ 交叉对比）。The user must specify; never default silently. Required for the 三视角分析 / literature review report; a pure side-by-side reader job may skip it.
+3. **Artifacts** — whether to also export standalone figures/tables or additional reading notes.
+
+Wait for the user's answers before continuing. If the user already stated these in the request, confirm them in one line instead of asking again.
 
 ### 1. Load the manifest and the core layer
 
