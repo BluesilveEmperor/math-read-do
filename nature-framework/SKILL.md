@@ -1,13 +1,3 @@
----
-name: nature-framework
-description: Create publication-grade research-paper diagrams as inline-SVG HTML figures and embedded-font vector PDF for LaTeX \includegraphics. Built for the whole research workflow — graduate students drafting thesis/proposal figures and group-meeting slides, supervisors preparing lecture notes, reviews and grant applications, and authors submitting to venues. Six diagram types share one typed IR — method/model architecture (transformer / CNN / diffusion with tensor shapes, residual skips, N× blocks), research framework (problem → content → outcome layers), technical route, system architecture, paper/chapter structure, and experiment pipeline (dataset → train → eval with baselines and ablations). White-first, print-friendly, serif/sans-serif typeset, ten visual presets including seven expressive styles. Use when the user asks to draw a research framework figure, technical route, model architecture, system architecture, paper structure diagram, or experiment pipeline for a thesis, dissertation, opening report (开题), group meeting, lecture, grant proposal, or NeurIPS / ICML / ICLR / CVPR / Nature / IEEE submission.
-license: MIT
-metadata:
-  version: "0.1.0"
-  author: nature-framework
-  inspired_by: tt-a1i/archify (MIT, v2.17) — atomic delivery, typed JSON-IR, showcase artifact checks
----
-
 # Paperfig
 
 Create a self-contained, publication-grade ML/DL model architecture figure from a small typed JSON specification. Default output is a white-first, print-friendly HTML figure with inline SVG; an embedded-font vector PDF for LaTeX `\includegraphics` is produced alongside when `--pdf` is requested. Motion is opt-in and never enters canonical PDF export.
