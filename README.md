@@ -86,7 +86,7 @@
 |------|------|----------|
 | Phase 0 | 基础设施检测 | `infra_manifest.json` |
 | Phase 0.5 | 版本管理 | `version_spec.json` |
-| Phase 1 | 论文解析 & 视角审阅 | `reproducibility_assessment.json` |
+| Phase 1 | 论文解析 & 视角审阅 & 辅助架构图征询 | `reproducibility_assessment.json` |
 | Phase 2 | 环境重建 | `conda-lock.yml` |
 | Phase 3 | 基线验证 | `baseline_metrics.json` |
 | Phase 4 | 增量实现（按需） | `delta_report.json` |
@@ -95,6 +95,8 @@
 | Phase 7 | 最终整理 | `实验复刻结果汇总/` |
 
 **视角审阅**：研究生 / 导师 / 审稿人 / 三方全出（未指定时**必须先询问**，禁止默认）
+
+**Phase 1.5 辅助架构图征询**：论文阅读完成后必须主动征询是否制作 Nature 级别架构图，用户同意后强制 6 项逐项询问（主题/图类型/图语言/动效模式/视觉风格/输出格式），不重复提问。可交付 5 类图终版（framework/route/system/structure/model），experiment 类型仅 draft。
 
 ---
 
@@ -149,7 +151,7 @@ git clone -b main    https://github.com/BluesilveEmperor/math-read-do.git
 
 nature-framework 参与文献阅读与实验复现全程：
 
-- **阅读/理解期**：`structure` 论文结构图、`framework` 研究框架图、`route` 技术路线图（预计版）、`model` 方法/模型架构图主体
+- **Phase 1.5 辅助架构图征询**：论文阅读后必须主动征询，强制 6 项逐项询问（主题/图类型/图语言/动效模式/视觉风格/输出格式），可画 5 类图终版 + experiment draft
 - **判决后**：`experiment` 实验流程图最终版（统计判决前仅 `"status": "draft"` predicted flow）
 - **报告期**：报告中的架构/框架/流程图由 nature-framework 产出（inline-SVG HTML + 嵌入字体 PDF）
 
