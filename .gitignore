@@ -31,3 +31,5 @@ logs/
 *.npy
 *.pkl
 *.xlsx
+.arts/
+codedocs/
