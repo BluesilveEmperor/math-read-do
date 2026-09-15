@@ -93,6 +93,8 @@ python scripts/benchmark_qem.py -i model.obj
 | nature-reader | mineru-open-sdk |
 | nature-framework | Node.js (mjs 渲染器) |
 
+**Phase 1.6 辅助架构图征询**：论文阅读完成后必须主动征询是否制作架构图，用户同意后强制 6 项逐项询问（主题/图类型/图语言/动效模式/视觉风格/输出格式），不重复提问。
+
 ## 与 math-read-do 的关系
 
 | 维度 | math-read-do | math-read-do-obj |
