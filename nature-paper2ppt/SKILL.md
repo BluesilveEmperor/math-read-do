@@ -16,7 +16,17 @@ Do not try to apply the deck-building logic from memory or from this router. Alw
 
 ## Routing protocol
 
-Follow these five steps every time the skill is invoked.
+Run **step 0 (ask before building)** first, then follow these five steps every time the skill is invoked.
+
+### 0. Ask before building
+
+Before loading any fragment, ask the user to confirm:
+
+1. **汇报场合与听众 / Venue & audience** — journal club / group meeting / thesis seminar / lab meeting / department report / conference presentation; the intended audience shapes depth and pacing.
+2. **时长 / 页数 / Duration & length** — total time or slide count budget (e.g. 10 min / 12 slides); drives how many figures and how much detail per slide.
+3. **讲者备注形式 / Speaker notes** — full speaker notes (display script), bullet talking points, or none.
+
+Wait for the user's answers before continuing. If the user already stated these in the request, confirm them in one line instead of asking again.
 
 ### 1. Load the manifest and the core layer
 
