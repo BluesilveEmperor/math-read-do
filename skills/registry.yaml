@@ -38,6 +38,7 @@ skills:
     phase: analysis
     path: skills/paper_parsing_skill
     description: 论文解析与三方视角深度分析 / Paper parsing with three-perspective deep analysis
+    enhance_by: [nature-reader, nature-framework]
     risk_level: low
     requires_approval_for: [llm_api_call]
     output_artifacts:
