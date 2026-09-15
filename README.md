@@ -92,6 +92,8 @@ reproduction/
 
 `nature-framework` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
 
+**Phase 1.5 辅助架构图征询**：论文阅读完成后必须主动征询是否制作架构图，用户同意后强制 6 项逐项询问（主题/图类型/图语言/动效模式/视觉风格/输出格式），不重复提问。
+
 ## 许可
 
 MIT
