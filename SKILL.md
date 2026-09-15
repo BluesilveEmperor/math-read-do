@@ -233,6 +233,53 @@ compatibility:
 
 **nature-framework 参与（论文理解阶段）**: 理解确认后可用 nature-framework 绘制不依赖实验数据的图——`structure` 论文结构图、`framework` 研究框架图、`route` 技术路线图（预计版）、`model` 方法/模型架构图主体（细节跑通后确认）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 G5 判决后（硬规则见 nature-framework/SKILL.md）。执行前遵守 nature-framework 第 0 步必问。
 
+### 1.5 辅助架构图征询（可选但必须询问） / Auxiliary Architecture Diagram Offer
+
+**触发条件**: 论文理解阶段完成后、G01 门禁判决后，无论 proceed / caution / discourage 均须征询。用户未主动要求时也必须主动提出。
+
+**步骤 1 — 主动征询**:
+
+> 基于这篇论文的内容，我可以帮您制作 Nature 级别的研究框架图或技术路线图，方便组会汇报或开题使用。这些图不需要等实验跑完。您想现在制作吗？
+
+- 用户拒绝 → 记录到 `review_manifest.json`（`diagram_offer: "declined"`），跳到 G01 后的流程
+- 用户同意 → 进入步骤 2
+
+**步骤 2 — 强制 6 项逐项询问**（不可合并、不可默认、不可跳过，直接复用 nature-framework 第 0 步）:
+
+| # | 询问项 | 候选项 | 说明 |
+|---|--------|--------|------|
+| 1 | **主题 / Subject** | — | 论文核心研究问题与方法路径 |
+| 2 | **图类型** | `framework` / `route` / `model` / `system` / `structure` / `experiment`(draft) | 根据论文特征推荐 1-2 种 |
+| 3 | **图语言** | `zh-CN` / `en` | 中文论文必须 zh-CN |
+| 4 | **动效模式** | `off` / `hover` / `flow` / `tour` | 交互式展示用 |
+| 5 | **视觉风格** | `paper` / 其他 9 种 | 默认 paper |
+| 6 | **输出格式** | `HTML` / `HTML + PDF` / `EPS` | — |
+
+- 用户已声明过的项可复用，不重复问
+- 多张图可共享一轮回答
+- 若用户要求推荐，按论文领域给出 1-2 种建议并说明理由
+
+**步骤 3 — 执行**:
+
+按 nature-framework SKILL.md 第 0 步→第 5 步执行：选类型→读 schema/examples→写 candidate JSON→validate→deliver。
+
+**图类型可用矩阵**（依据 nature-framework 硬规则）:
+
+| 图类型 | 需要实验数据 | 当前阶段可产出 |
+|--------|:---:|------|
+| `framework` | ❌ | ✅ 终版 |
+| `route` | ❌ | ✅ 终版 |
+| `system` | ❌ | ✅ 终版 |
+| `structure` | ❌ | ✅ 终版 |
+| `model` | ⚠️ 主体不需要，超参数待 Phase 3 确认 | ✅ 终版（超参数后续可微调） |
+| `experiment` | ✅ | ⚠️ 仅 draft（`"status": "draft"`，最终版须等 Phase 5） |
+
+**约束**:
+- `experiment` 类型在 Phase 5 之前只交付 draft 草案，最终版必须等统计判决后
+- 其余 5 类可交付终版
+- 输出到 `figures/` 目录；每张图产出 `.html` (+ `.pdf` 如用户选择)
+- 用户偏好（语言/风格/格式）写入 `review_manifest.json`，Phase 4/5/6 复用，不重复询问
+
 ---
 
 ### Phase 3: 基线验证 / Baseline Verification
