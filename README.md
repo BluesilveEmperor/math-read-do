@@ -131,9 +131,9 @@ git clone -b main    https://github.com/BluesilveEmperor/math-read-do.git
 | 子技能 | 角色 | 与谁互补 |
 |--------|------|---------|
 | `nature-reader/` | 科研论文智能阅读、结构化提取（PDF/HTML/DOI/arXiv） | — |
-| `nature-figure/` | 科研数据可视化（matplotlib/seaborn/SciencePlots/plotly，8 步工作流 + 视觉自检闭环） | 跟 nature-framework 互补 |
+| `nature-figure/` | 科研数据可视化（matplotlib/seaborn/SciencePlots/plotly，8 步工作流 + 视觉自检闭环） | 跟 nature-archify 互补 |
 | `nature-paper2ppt/` | 论文→中文 PPTX（6 类叙事弧 + 自审校） | — |
-| `nature-framework/` | **科研架构图渲染器**（6 类图：model/framework/route/system/structure/experiment；10 视觉预设；11 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体） | 跟 nature-figure 互补——本子技能专做架构/框架/流程图 |
+| `nature-archify/` | **系统架构图渲染器**（5 类图：architecture/workflow/sequence/dataflow/lifecycle；13 视觉预设；9 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，深/浅双主题 + 可选 trace 动效） | 跟 nature-figure 互补——本子技能专做系统/流程/时序/数据流架构图 |
 
 ### 询问规则（第 0 步必问）
 
@@ -143,32 +143,32 @@ git clone -b main    https://github.com/BluesilveEmperor/math-read-do.git
 |------|--------|
 | 主 SKILL.md | 操作菜单选择、G01 确认、G3/G4 门禁决策 |
 | nature-figure | "这份数据主要想说服读者相信什么？"（组间差异/时间趋势/变量关系） |
-| nature-framework | 主题、图类型、图语言（zh-CN/en）、数据流动形式（off/hover/flow/tour）、视觉风格、输出格式 |
+| nature-archify | 主题、图类型（architecture/workflow/sequence/dataflow/lifecycle）、图语言（zh-CN/en）、动画模式（trace/none）、视觉预设（13 选 1）、输出格式 |
 | nature-reader | 输出模式、**审阅视角**（研究生/导师/审稿人/三方全出，禁止默认）、额外产物 |
 | nature-paper2ppt | 场合听众、时长页数、讲者备注形式 |
 
-### nature-framework 分阶段参与
+### nature-archify 分阶段参与
 
-nature-framework 参与文献阅读与实验复现全程：
+nature-archify 参与文献阅读与实验复现全程：
 
-- **Phase 1.5 辅助架构图征询**：论文阅读后必须主动征询，强制 6 项逐项询问（主题/图类型/图语言/动效模式/视觉风格/输出格式），可画 5 类图终版 + experiment draft
-- **判决后**：`experiment` 实验流程图最终版（统计判决前仅 `"status": "draft"` predicted flow）
-- **报告期**：报告中的架构/框架/流程图由 nature-framework 产出（inline-SVG HTML + 嵌入字体 PDF）
+- **Phase 1.5 辅助架构图征询**：论文阅读后必须主动征询，强制 6 项逐项询问（主题/图类型/图语言/动画模式/视觉预设/输出格式）
+- **报告期**：报告中的系统架构、技术流程、调用时序、数据流、状态机图由 nature-archify 产出（inline-SVG HTML，可加 trace 动效）
 
-`nature-framework` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_framework_bridge.py`（obj/financial）或 `scripts/nature_architecture_bridge.py`（main/routine）调用。详见 [nature-framework/SKILL.md](nature-framework/SKILL.md)。
+`nature-archify` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_archify_bridge.py` 调用（`NatureArchitecture` 类，自动定位模块根）。详见 [nature-archify/SKILL.md](nature-archify/SKILL.md)。
 
-## 六类图实验依赖规则
+## 图类型清单与数据依赖
 
-| 图类型 | 是否需要实验复现后才能画最终版 |
-|---|---|
-| 研究框架图 | ❌ 不需要，开题/研究设计阶段就能画 |
-| 技术路线图 | ❌ 不需要，计划阶段就能画；实验后补结果即可 |
-| 方法/模型架构图 | ⚠️ 主体不需要，设计确定就能画；细节最好代码跑通后确认 |
-| 系统架构图 | ❌ 不需要，设计阶段就能画 |
-| 论文结构图 | ❌ 不需要，写作前就能画 |
-| 实验流程图 | ✅ **需要**，最终版必须基于真实实验数据 |
+| 图类型 | 用途 | 是否需要实验复现后才能画最终版 |
+|---|---|---|
+| `architecture` | 系统架构：客户端/服务/存储分层、部署拓扑、云与安全边界 | ❌ 不需要，设计阶段就能画 |
+| `workflow` | 技术流程：节点与连线表达的步骤图 | ❌ 不需要，计划阶段就能画 |
+| `sequence` | 调用时序：参与者之间的消息往返 | ❌ 不需要 |
+| `dataflow` | 数据流：提取→转换→落库的管道与血缘 | ❌ 不需要 |
+| `lifecycle` | 状态机：状态、迁移与触发条件 | ❌ 不需要 |
 
-实验流程图依赖实验的原因：需写清初始样本量、排除数量及原因、最终纳入量、分组方式、每组人数、失访/退出/剔除情况、最终进入分析的人数、评价指标。这些数字和分支不能靠想象编。医学领域的 PRISMA、CONSORT 流程图尤其如此——计划阶段只能画"预计流程图"，最终版必须实验后画。
+五类图都只描述**结构与流程**，不承载实验数值，因此都可以在计划阶段出终版。
+
+> **实验流程图（PRISMA / CONSORT 等）不在本模块的图类型内**：这类图要求写入真实初始样本量、排除数与原因、分组人数、失访/剔除、最终分析人数，必须基于真实实验记录，不能靠想象编。原先承载 `model` / `experiment` 两类 ML 图形的 `nature-framework`（paperfig）已被本模块替换；如需模型架构图或实验流程图，请另行接入 paperfig 类渲染器。
 
 ## 许可 / License
 

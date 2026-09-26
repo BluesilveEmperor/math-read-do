@@ -38,7 +38,7 @@ skills:
     phase: analysis
     path: skills/paper_parsing_skill
     description: 论文解析与三方视角深度分析 / Paper parsing with three-perspective deep analysis
-    enhance_by: [nature-reader, nature-framework]
+    enhance_by: [nature-reader, nature-archify]
     risk_level: low
     requires_approval_for: [llm_api_call]
     output_artifacts:
@@ -128,8 +128,8 @@ skills:
 
   - name: architecture_figure_skill
     phase: reporting
-    path: nature-framework
-    description: 科研架构图/框架图/流程图渲染器（Node CLI，6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体）/ Architecture / framework / pipeline figure renderer — JSON → print-first inline-SVG HTML with deterministic SHA-256 receipts. Complements nature-figure (data-visualization plots) by owning the "the figure plate inside the LaTeX float" use case.
+    path: nature-archify
+    description: 系统架构图渲染器（Node CLI，5 类图 architecture/workflow/sequence/dataflow/lifecycle，13 视觉预设，9 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，深/浅双主题）/ System architecture, workflow, sequence, dataflow and lifecycle diagram renderer — JSON → self-contained inline-SVG HTML with deterministic SHA-256 receipts. Complements nature-figure (data-visualization plots) by owning the system/process diagram use case.
     risk_level: low
     requires_approval_for: []
     output_artifacts:
@@ -137,7 +137,7 @@ skills:
       - figures/receipt.json
     requires_skills: []
     runtime: Node.js >= 18 (zero external dependencies)
-    python_bridge: scripts/nature_architecture_bridge.py
+    python_bridge: scripts/nature_archify_bridge.py
 
   - name: artifact_packaging_skill
     phase: packaging
