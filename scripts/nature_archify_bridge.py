@@ -81,6 +81,17 @@ class NatureArchitecture:
         if not self.node_bin:
             raise FileNotFoundError("node executable not found on PATH. nature-archify requires Node >= 18.")
 
+    @staticmethod
+    def _abs(p: str | Path) -> str:
+        """Resolve a spec/output path against the caller's working directory.
+
+        The CLI itself runs with cwd set to the skill root, so a relative path
+        handed straight to it would be re-anchored there. A caller writing
+        ``cli.validate("architecture", "spec.json")`` means its own cwd.
+        """
+        path = Path(p)
+        return str(path if path.is_absolute() else (Path.cwd() / path).resolve())
+
     def _run(self, args: Iterable[str], json_output: bool = True, timeout: float = 180.0) -> CliResult:
         cmd = [self.node_bin, str(self.cli), *args]
         if json_output and "--json" not in args:
@@ -106,33 +117,33 @@ class NatureArchitecture:
             raise ValueError(f"unsupported diagram_type: {diagram_type}")
         if quality not in self.QUALITY_PROFILES:
             raise ValueError(f"unsupported quality profile: {quality}")
-        return self._run(["validate", diagram_type, str(spec_path), "--quality", quality])
+        return self._run(["validate", diagram_type, self._abs(spec_path), "--quality", quality])
 
     def deliver(self, diagram_type: str, spec_path: str | Path, out_html: str | Path, *, quality: str = "showcase", open_after: bool = False) -> CliResult:
         if diagram_type not in self.DIAGRAM_TYPES:
             raise ValueError(f"unsupported diagram_type: {diagram_type}")
         if quality not in self.QUALITY_PROFILES:
             raise ValueError(f"unsupported quality profile: {quality}")
-        args = ["deliver", diagram_type, str(spec_path), str(out_html), "--quality", quality]
+        args = ["deliver", diagram_type, self._abs(spec_path), self._abs(out_html), "--quality", quality]
         if open_after:
             args.append("--open")
         return self._run(args)
 
     def visual_check(self, html_path: str | Path) -> CliResult:
-        return self._run(["visual-check", str(html_path)])
+        return self._run(["visual-check", self._abs(html_path)])
 
     def inspect(self, diagram_type: str, spec_path: str | Path) -> CliResult:
-        return self._run(["inspect", diagram_type, str(spec_path)])
+        return self._run(["inspect", diagram_type, self._abs(spec_path)])
 
     def check(self, html_path: str | Path) -> CliResult:
-        return self._run(["check", str(html_path)])
+        return self._run(["check", self._abs(html_path)])
 
     def compare(self, base_path: str | Path, head_path: str | Path, out_html: Optional[str | Path] = None, *, receipt: Optional[str | Path] = None) -> CliResult:
-        args = ["compare", "architecture", str(base_path), str(head_path)]
+        args = ["compare", "architecture", self._abs(base_path), self._abs(head_path)]
         if out_html is not None:
-            args.append(str(out_html))
+            args.append(self._abs(out_html))
         if receipt is not None:
-            args += ["--receipt", str(receipt)]
+            args += ["--receipt", self._abs(receipt)]
         return self._run(args)
 
 
