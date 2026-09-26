@@ -4,3 +4,6 @@ codedocs/
 
 # nature-archify：输出路径安全检查留下的零字节探针，不应入库
 .archify-*
+
+# 本地工具会话配置（claude 的允许规则等），不入库
+.claude/
