@@ -11,7 +11,7 @@ description: >-
   - nature-reader/：科研论文智能阅读与结构化提取 (PDF/HTML/DOI/arXiv)
   - nature-figure/：科研数据可视化顾问（先思考后绘制，8 步工作流，视觉自检闭环）
   - nature-paper2ppt/：论文一键转为中文组会PPT (6类论文叙事弧)
-  - nature-framework/：科研架构图渲染器（6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验，self-contained inline-SVG HTML）；与 nature-figure 形成互补——本子技能专做架构/框架/流程图，nature-figure 专做数据可视化图
+  - nature-archify/：系统架构图渲染器（5 类图 architecture/workflow/sequence/dataflow/lifecycle，13 视觉预设，9 项 showcase 校验，self-contained inline-SVG HTML）；与 nature-figure 形成互补——本子技能专做系统/流程/时序/数据流架构图，nature-figure 专做数据可视化图
 
   框架结构：
     Phase 0-2:  通用层 — 宿主检测、双环境构建（TF / torch+signatory）、数据可得性分诊
@@ -41,7 +41,7 @@ compatibility:
   - nature-reader: python-pptx, Pillow (图提取), PyMuPDF (PDF渲染)
   - nature-figure: matplotlib + seaborn + SciencePlots (静态) + plotly (交互)，CJK 字体自动配置
   - nature-paper2ppt: python-pptx, PyMuPDF, Pillow, zipfile
-  - nature-framework: Node.js >= 18（CLI: nature-framework/bin/nature-framework.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_framework_bridge.py
+  - nature-archify: Node.js >= 18（CLI: nature-archify/bin/archify.mjs；零外部依赖）；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，离线可打印；Python 桥接：scripts/nature_archify_bridge.py
 ---
 
 # Quantitative Finance Experiment Reproduction Framework
@@ -231,7 +231,7 @@ compatibility:
 
 **G2**: 目标数值清单确认
 
-**nature-framework 参与（论文理解阶段）**: 理解确认后可用 nature-framework 绘制不依赖实验数据的图——`structure` 论文结构图、`framework` 研究框架图、`route` 技术路线图（预计版）、`model` 方法/模型架构图主体（细节跑通后确认）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 G5 判决后（硬规则见 nature-framework/SKILL.md）。执行前遵守 nature-framework 第 0 步必问。
+**nature-archify 参与（论文理解阶段）**: 理解确认后可用 nature-archify 绘制不依赖实验数据的系统与流程图——`architecture` 系统架构图、`workflow` 技术流程图、`sequence` 调用时序图、`dataflow` 数据流图、`lifecycle` 状态机图（预计版；五类图都不承载实验数值）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 G5 判决后（硬规则见 nature-archify/SKILL.md）。执行前遵守 nature-archify 第 0 步必问。
 
 ### 1.5 辅助架构图征询（可选但必须询问） / Auxiliary Architecture Diagram Offer
 
@@ -244,16 +244,16 @@ compatibility:
 - 用户拒绝 → 记录到 `review_manifest.json`（`diagram_offer: "declined"`），跳到 G01 后的流程
 - 用户同意 → 进入步骤 2
 
-**步骤 2 — 强制 6 项逐项询问**（不可合并、不可默认、不可跳过，直接复用 nature-framework 第 0 步）:
+**步骤 2 — 强制 6 项逐项询问**（不可合并、不可默认、不可跳过，直接复用 nature-archify 第 0 步）:
 
 | # | 询问项 | 候选项 | 说明 |
 |---|--------|--------|------|
 | 1 | **主题 / Subject** | — | 论文核心研究问题与方法路径 |
-| 2 | **图类型** | `framework` / `route` / `model` / `system` / `structure` / `experiment`(draft) | 根据论文特征推荐 1-2 种 |
+| 2 | **图类型** | `architecture` / `workflow` / `sequence` / `dataflow` / `lifecycle` | 根据论文特征推荐 1-2 种 |
 | 3 | **图语言** | `zh-CN` / `en` | 中文论文必须 zh-CN |
-| 4 | **动效模式** | `off` / `hover` / `flow` / `tour` | 交互式展示用 |
-| 5 | **视觉风格** | `paper` / 其他 9 种 | 默认 paper |
-| 6 | **输出格式** | `HTML` / `HTML + PDF` / `EPS` | — |
+| 4 | **动画模式** | `trace` / `none` | 默认 none（静态）；交互式展示用 trace |
+| 5 | **视觉预设** | `classic` / 其他 12 种 | 默认 classic；共 13 种，含 paper / brutalism / apple 等 |
+| 6 | **输出格式** | `HTML` / `HTML + PNG` / `HTML + SVG` | 产物为自包含 HTML，导出在 Viewer 内完成 |
 
 - 用户已声明过的项可复用，不重复问
 - 多张图可共享一轮回答
@@ -261,24 +261,23 @@ compatibility:
 
 **步骤 3 — 执行**:
 
-按 nature-framework SKILL.md 第 0 步→第 5 步执行：选类型→读 schema/examples→写 candidate JSON→validate→deliver。
+按 nature-archify SKILL.md 第 0 步→第 5 步执行：选类型→读 schema/examples→写 candidate JSON→validate→deliver。
 
-**图类型可用矩阵**（依据 nature-framework 硬规则）:
+**图类型可用矩阵**（依据 nature-archify 硬规则）:
 
-| 图类型 | 需要实验数据 | 当前阶段可产出 |
-|--------|:---:|------|
-| `framework` | ❌ | ✅ 终版 |
-| `route` | ❌ | ✅ 终版 |
-| `system` | ❌ | ✅ 终版 |
-| `structure` | ❌ | ✅ 终版 |
-| `model` | ⚠️ 主体不需要，超参数待 Phase 3 确认 | ✅ 终版（超参数后续可微调） |
-| `experiment` | ✅ | ⚠️ 仅 draft（`"status": "draft"`，最终版须等 Phase 5） |
+| 图类型 | 用途 | 需要实验数据 | 当前阶段可产出 |
+|--------|------|:---:|------|
+| `architecture` | 系统架构、部署拓扑、云与安全边界 | ❌ | ✅ 终版 |
+| `workflow` | 技术流程：节点与连线表达的步骤 | ❌ | ✅ 终版 |
+| `sequence` | 调用时序：参与者之间的消息往返 | ❌ | ✅ 终版 |
+| `dataflow` | 数据管道与血缘：提取→转换→落库 | ❌ | ✅ 终版 |
+| `lifecycle` | 状态机：状态、迁移与触发条件 | ❌ | ✅ 终版 |
 
 **约束**:
-- `experiment` 类型在 Phase 5 之前只交付 draft 草案，最终版必须等统计判决后
-- 其余 5 类可交付终版
-- 输出到 `figures/` 目录；每张图产出 `.html` (+ `.pdf` 如用户选择)
-- 用户偏好（语言/风格/格式）写入 `review_manifest.json`，Phase 4/5/6 复用，不重复询问
+- 五类图都只描述结构与流程，不承载实验数值，Phase 1-6 均可交付终版
+- 论文的**方法/模型架构图**与**实验流程图**不在 nature-archify 图类型内（PRISMA/CONSORT 等必须写入真实样本量与排除数），需要时另行接入 paperfig 类渲染器
+- 输出到 `figures/` 目录；每张图产出 `.html`（PNG/SVG 在 Viewer 内导出）
+- 用户偏好（语言/预设/格式）写入 `review_manifest.json`，Phase 4/5/6 复用，不重复询问
 
 ---
 
@@ -335,7 +334,7 @@ compatibility:
 
 **G5**: 每个目标数值均有判决 + CI
 
-**nature-framework 参与（实验流程图最终版）**: G5 判决产出后，`experiment` 实验流程图可出**最终版**（数字来自 `results/statistical_summary.json` 等真实产物）；判决前仅允许 draft predicted flow。架构/框架/流程图一律经 nature-framework 渲染，数据可视化图走 nature-figure。
+**nature-archify 参与（报告插图）**: G5 判决产出后，系统架构/技术流程/调用时序/数据流/状态机图一律经 nature-archify 渲染，数据可视化图走 nature-figure。注意：`experiment` 实验流程图（PRISMA/CONSORT 等，需真实样本量与排除数）**不在 nature-archify 的五类图内**，需要时另行接入 paperfig 类渲染器。
 
 ---
 
@@ -343,7 +342,7 @@ compatibility:
 
 **输出**: `实验复刻结果汇总/` 中英双语文档
 
-**nature-framework 参与（报告插图）**: 报告中的架构图/框架图/流程图由 nature-framework 产出（self-contained inline-SVG HTML + 嵌入字体 PDF）；实验流程图最终版以 G5 判决后的真实数据为准。
+**nature-archify 参与（报告插图）**: 报告中的系统架构图/技术流程图/时序图/数据流图/状态机图由 nature-archify 产出（self-contained inline-SVG HTML，可加 trace 动效；13 种视觉预设）；实验流程图不在其图类型内，另行接入 paperfig 类渲染器。
 
 ```
 实验复现结果汇总/
@@ -455,7 +454,7 @@ R.by_status(R.BLOCKED)                   # 哪些实验跑不了、为什么
 
 ## 集成 Nature 子技能 / Integrated Nature Skills
 
-本 skill 集成了四个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`, `nature-framework`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
+本 skill 集成了四个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`, `nature-archify`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
 
 ### 子技能路由
 
@@ -464,14 +463,14 @@ R.by_status(R.BLOCKED)                   # 哪些实验跑不了、为什么
 | nature-reader | `nature-reader/` | `SKILL.md` + `manifest.yaml` | 科研论文智能阅读、结构化提取、6种来源格式路由 |
 | nature-figure | `nature-figure/` | `SKILL.md` | 科研数据可视化顾问：8 步工作流，matplotlib+seaborn+SciencePlots+plotly，视觉自检闭环 |
 | nature-paper2ppt | `nature-paper2ppt/` | `SKILL.md` + `manifest.yaml` | 论文→中文 PPTX，6类论文叙事弧，自审校循环 |
-| nature-framework | `nature-framework/` | `SKILL.md` | 科研架构图渲染器：6 类图 model/framework/route/system/structure/experiment，10 视觉预设，11 项 showcase 校验 |
+| nature-archify | `nature-archify/` | `SKILL.md` | 系统架构图渲染器：5 类图 architecture/workflow/sequence/dataflow/lifecycle，13 视觉预设，9 项 showcase 校验 |
 | _shared | `_shared/` | 无入口，被子技能引用 | 术语账本、论文类型分类法、伦理规范、Nat Communs 格式 |
 
 ### 与主流程的协同
 
 - **nature-reader** 可增强文献阅读阶段（若需逐段中英对照阅读），提供替代 PDF 解析策略和结构化输出格式。未指定审阅视角时主动询问。
 - **nature-figure** 可增强 Phase 5（图表导出），提供出版级图表样式和质量门禁。
-- **nature-framework** 参与文献阅读与实验复现全程：Phase 2（论文理解后：structure 论文结构图 / framework 研究框架图 / route 技术路线图预计版 / model 方法架构图主体）、Phase 5（实验流程图——统计判决后出最终版，判决前仅 draft predicted flow）、Phase 6（报告插图），作为"架构图/框架图/流程图/技术路线图渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证；适用于论文 float / 开题报告技术路线 / 组会汇报里的方法架构图、实验流程图。Node CLI（`nature-framework/bin/nature-framework.mjs`）零外部依赖，Python 侧通过 `scripts/nature_framework_bridge.py` 调用。
+- **nature-archify** 参与文献阅读与实验复现全程：Phase 2（论文理解后：系统架构图 / 技术流程图 / 调用时序图 / 数据流图 / 状态机图预计版）、Phase 6（报告插图），作为"系统架构 / 流程 / 时序 / 数据流 / 状态机渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证，13 种视觉预设 + 深/浅双主题；适用于论文 float / 开题报告 / 组会汇报里的系统与流程图。Node CLI（`nature-archify/bin/archify.mjs`）零外部依赖，Python 侧通过 `scripts/nature_archify_bridge.py` 调用。论文的方法/模型架构图与实验流程图不在本模块图类型内，需要时另行接入 paperfig 类渲染器。
 - **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
 
 ### 调用方式
