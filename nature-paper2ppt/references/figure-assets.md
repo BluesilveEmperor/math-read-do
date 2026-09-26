@@ -19,16 +19,16 @@ Filter out figures that are:
 - dense supplement-style panels that are not discussed in the main text,
 - highly domain-specific technical quality checks.
 
-## When the source paper's own architecture / framework figure is missing
+## When the source paper's own system / process figure is missing
 
-Many slides need a **model architecture diagram**, **research framework diagram**, or **experiment pipeline diagram** that the original paper does not provide, or provides in an unusable form (raster only, missing labels, low-res). For those cases, do **not** redraw in python-pptx or matplotlib — instead:
+Many slides need a **system architecture diagram**, **technical workflow diagram**, **call-sequence diagram**, **data pipeline**, or **state machine** that the original paper does not provide, or provides in an unusable form (raster only, missing labels, low-res). For those cases, do **not** redraw in python-pptx or matplotlib — instead:
 
-- Use the sibling `nature-framework` sub-skill (`../../nature-framework/SKILL.md`).
-- It takes a typed JSON spec (`diagram_type: model | framework | route | system | structure | experiment`) and produces a self-contained inline-SVG HTML figure with embedded CJK fonts.
+- Use the sibling `nature-archify` sub-skill (`../../nature-archify/SKILL.md`).
+- It takes a typed JSON spec (`diagram_type: architecture | workflow | sequence | dataflow | lifecycle`) and produces a self-contained inline-SVG HTML figure with embedded CJK fonts, 13 visual presets, and light/dark themes.
 - Embed the HTML in the PPTX as a web-viewer object, or render a screenshot at 300 dpi for static embedding.
-- Always check the showcase 11-item receipt before locking the slide.
+- Always check the showcase 9-item receipt before locking the slide.
 
-**Hard constraint — experiment pipeline figures**: `experiment` (实验流程图) is the only `diagram_type` whose **final version MUST be drawn AFTER the experiment runs**. PRISMA/CONSORT-style flow diagrams in particular record real numbers (initial n, exclusions, group sizes, dropouts, final analysis n, evaluation metrics) — none of which can be fabricated. A "predicted flow" can be drawn at the proposal stage, but the **final version must wait until the experimental record is curated** (`raw_metrics.csv` / `reproducibility_assessment.json` / Phase-5 statistical summary). The other five types — `framework`, `route`, `model` (provisional until code runs), `system`, `structure` — are not blocked on experimental data and can be authored at any stage. See [`../../nature-framework/SKILL.md` → "Hard rule: experiment-data dependency per type"](../../nature-framework/SKILL.md) for the full rule.
+**Capability boundary — model / framework / experiment figures**: the `model`, `framework`, `route`, `structure`, and `experiment` diagram types are **not** provided by `nature-archify`. In particular, a PRISMA/CONSORT-style experiment pipeline figure records real numbers (initial n, exclusions, group sizes, dropouts, final analysis n, evaluation metrics) — none of which can be fabricated; a "predicted flow" may be drawn at the proposal stage, but the **final version must wait until the experimental record is curated** (`raw_metrics.csv` / `reproducibility_assessment.json` / Phase-5 statistical summary). For those five types, wire in a paperfig-class renderer instead of `nature-archify`.
 
 ## Extraction rules
 

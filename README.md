@@ -19,7 +19,7 @@ math-read-do/
 ├── nature-reader/           # 学术论文阅读与提取
 ├── nature-figure/           # 论文配图制作 (matplotlib/seaborn → PDF/SVG)
 ├── nature-paper2ppt/        # 论文转演示文稿
-├── nature-framework/        # 架构图/模型图渲染引擎
+├── nature-archify/        # 系统架构/流程/时序/数据流图渲染引擎
 ├── _shared/                 # 共享核心模块（伦理/术语/工作流）
 ├── tests/                   # 测试套件
 ├── scripts/                 # 验证 + 基准
@@ -74,7 +74,7 @@ python scripts/benchmark_qem.py -i model.obj
 | nature-reader | 学术论文阅读、提取、结构化 | `nature-reader/SKILL.md` |
 | nature-figure | 论文配图制作（结果图/示意图/多面板） | `nature-figure/SKILL.md` |
 | nature-paper2ppt | 论文转演示文稿 | `nature-paper2ppt/SKILL.md` |
-| nature-framework | 架构图/模型图 JSON → 渲染 | `nature-framework/SKILL.md` |
+| nature-archify | 系统架构/流程/时序图 JSON → 渲染 | `nature-archify/SKILL.md` |
 
 ## 依赖
 
@@ -91,7 +91,7 @@ python scripts/benchmark_qem.py -i model.obj
 | nature-figure | matplotlib, seaborn |
 | nature-paper2ppt | python-pptx |
 | nature-reader | mineru-open-sdk |
-| nature-framework | Node.js (mjs 渲染器) |
+| nature-archify | Node.js (mjs 渲染器) |
 
 **Phase 1.6 辅助架构图征询**：论文阅读完成后必须主动征询是否制作架构图，用户同意后强制 6 项逐项询问（主题/图类型/图语言/动效模式/视觉风格/输出格式），不重复提问。
 
