@@ -12,18 +12,38 @@
 - **9 项 showcase 校验**：单 SVG、有限坐标、正交箭头、标签避让、关系交叉、关系走廊、容器边框、路由节奏、图例间距
 - **产物自包含**：内嵌 HarmonyOS Sans Medium 子集字体，离线可开、可打印；PNG / SVG / WebM 导出在 Viewer 内完成
 - **确定性交付**：`deliver` 输出规格与产物的 SHA-256 回执，`visual-check` 提供独立于它的浏览器实测证据
+- **接受 Mermaid 作为素材**：读 `flowchart` / `sequenceDiagram` / `stateDiagram` 的拓扑与语义，再写成 Archify JSON —— 不照搬 Mermaid 的样式
+- **架构对比与版本迁移**：`compare` 出两份架构规格的 delta，`migrate` 把 workflow 旧规格升到 v2
 
 ## 命令
 
 ```bash
-node bin/archify.mjs doctor
+# 上手
+node bin/archify.mjs doctor                 # 15 项环境与资源自检
+node bin/archify.mjs examples               # 列出 examples/ 下已渲染的示例产物
+node bin/archify.mjs guide "<场景或问题>"    # 按场景给创作建议（--lang en|zh）
+node bin/archify.mjs demo [out-dir]         # 生成一套演示产物
+
+# 出图：核心三步
 node bin/archify.mjs validate <type> spec.json --quality showcase --json
 node bin/archify.mjs deliver  <type> spec.json out.html --quality showcase --json
 node bin/archify.mjs visual-check out.html --json
+
+# 其它
+node bin/archify.mjs render  <type> spec.json out.html      # 不走质量门禁，直接渲染
+node bin/archify.mjs preview <type> spec.json               # 热重载预览（只绑 127.0.0.1）
+node bin/archify.mjs inspect <type> spec.json               # 解析并打印规格结构
+node bin/archify.mjs check   out.html                       # 检查已生成的产物
+node bin/archify.mjs compare architecture base.json head.json delta.html --receipt r.json
+node bin/archify.mjs migrate workflow old.json new.json --to-schema 2
+node bin/archify.mjs brands [名称或类别]                     # 品牌徽标目录
+node bin/archify.mjs brands capture <url>                   # 抓取品牌徽标
 ```
 
 `<type>` ∈ `architecture` / `workflow` / `sequence` / `dataflow` / `lifecycle`。
-需要 Node.js ≥ 18，运行时零外部依赖。
+需要 Node.js ≥ 18，运行时零外部依赖。`examples/` 下有 14 份现成规格可作起点。
+
+**四个出图命令的差别**：`render` 不检查；`validate` 只检查、不写产物；`deliver` 校验通过才原子提交并给回执；`visual-check` 是独立的浏览器证据，**不能替代** `deliver` 的确定性检查。
 
 ## Python 调用
 
@@ -47,6 +67,7 @@ cli.visual_check("out.html")
 - 画流程图 / 技术路线 / 调用时序图 / 时序图
 - 数据流图 / 数据管道 / 数据血缘 / 状态机图 / 生命周期图
 - 把 Mermaid 转成好看的图 / 美化 mermaid
+- 架构对比 / 架构 delta / 新旧架构同屏
 - architecture diagram / sequence diagram / dataflow / state machine
 
 ## 能力边界
