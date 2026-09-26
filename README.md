@@ -133,7 +133,7 @@ git clone -b main    https://github.com/BluesilveEmperor/math-read-do.git
 | `nature-reader/` | 科研论文智能阅读、结构化提取（PDF/HTML/DOI/arXiv） | — |
 | `nature-figure/` | 科研数据可视化（matplotlib/seaborn/SciencePlots/plotly，8 步工作流 + 视觉自检闭环） | 跟 nature-archify 互补 |
 | `nature-paper2ppt/` | 论文→中文 PPTX（6 类叙事弧 + 自审校） | — |
-| `nature-archify/` | **系统架构图渲染器**（5 类图：architecture/workflow/sequence/dataflow/lifecycle；13 视觉预设；9 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，深/浅双主题 + 可选 trace 动效） | 跟 nature-figure 互补——本子技能专做系统/流程/时序/数据流架构图 |
+| `nature-archify/` | **系统架构图渲染器**（5 类图：architecture/workflow/sequence/dataflow/lifecycle；13 视觉预设；9 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，深/浅双主题 + 可选 trace 动效；可把 Mermaid 读成拓扑后重写为规格，可对两版架构做 delta 对比） | 跟 nature-figure 互补——本子技能专做系统/流程/时序/数据流架构图 |
 
 ### 询问规则（第 0 步必问）
 
@@ -154,7 +154,23 @@ nature-archify 参与文献阅读与实验复现全程：
 - **Phase 1.5 辅助架构图征询**：论文阅读后必须主动征询，强制 6 项逐项询问（主题/图类型/图语言/动画模式/视觉预设/输出格式）
 - **报告期**：报告中的系统架构、技术流程、调用时序、数据流、状态机图由 nature-archify 产出（inline-SVG HTML，可加 trace 动效）
 
-`nature-archify` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_archify_bridge.py` 调用（`NatureArchitecture` 类，自动定位模块根）。详见 [nature-archify/SKILL.md](nature-archify/SKILL.md)。
+`nature-archify` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_archify_bridge.py` 调用（`NatureArchitecture` 类，自动定位模块根）。
+
+### nature-archify 命令入口
+
+```bash
+node nature-archify/bin/archify.mjs doctor                     # 15 项环境与资源自检
+node nature-archify/bin/archify.mjs examples                   # 列出可作起点的示例
+node nature-archify/bin/archify.mjs validate architecture spec.json --quality showcase --json
+node nature-archify/bin/archify.mjs deliver  architecture spec.json out.html --quality showcase --json
+node nature-archify/bin/archify.mjs visual-check out.html --json
+node nature-archify/bin/archify.mjs compare architecture base.json head.json delta.html
+```
+
+出图类型的取值：`architecture` / `workflow` / `sequence` / `dataflow` / `lifecycle`。
+`deliver` 是唯一带确定性回执（SHA-256）的交付命令，`visual-check` 是独立于它的浏览器证据，两者不可互相替代。
+
+完整命令清单与能力边界见 [nature-archify/README.md](nature-archify/README.md)，创作契约与几何规则见 [nature-archify/SKILL.md](nature-archify/SKILL.md)。
 
 ## 图类型清单与数据依赖
 
