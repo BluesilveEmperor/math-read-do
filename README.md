@@ -86,13 +86,13 @@ reproduction/
 | 子技能 | 角色 | 与谁互补 |
 |--------|------|---------|
 | `nature-reader/` | 科研论文智能阅读、结构化提取 (PDF/HTML/DOI/arXiv) | — |
-| `nature-figure/` | 科研数据可视化（matplotlib/seaborn，8 步工作流 + 视觉自检闭环） | 跟 nature-framework 互补 |
+| `nature-figure/` | 科研数据可视化（matplotlib/seaborn，8 步工作流 + 视觉自检闭环） | 跟 nature-archify 互补 |
 | `nature-paper2ppt/` | 论文→中文 PPTX（6 类叙事弧 + 自审校） | — |
-| `nature-framework/` | 科研架构图渲染器（6 类图：model/framework/route/system/structure/experiment；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体） | 跟 nature-figure 互补——本子技能专做架构/框架/流程图 |
+| `nature-archify/` | 系统架构图渲染器（5 类图：architecture/workflow/sequence/dataflow/lifecycle，13 视觉预设，9 项 showcase 校验；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体，深/浅双主题） | 跟 nature-figure 互补——本子技能专做系统/流程/时序/数据流架构图 |
 
-`nature-framework` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_architecture_bridge.py` 调用。
+`nature-archify` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_archify_bridge.py` 调用。
 
-**Phase 1.5 辅助架构图征询**：论文阅读完成后必须主动征询是否制作架构图，用户同意后强制 6 项逐项询问（主题/图类型/图语言/动效模式/视觉风格/输出格式），不重复提问。
+**Phase 1.5 辅助架构图征询**：论文阅读完成后必须主动征询是否制作架构图，用户同意后强制 6 项逐项询问（主题/图类型/图语言/动画模式/视觉预设/输出格式），不重复提问。
 
 ## 许可
 
