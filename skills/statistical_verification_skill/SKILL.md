@@ -56,5 +56,6 @@ verification
 
 ## Outputs / 产出
 - `results/raw_metrics.csv`: 原始指标
-- `reports/verdict.json`: 判决结果 (含中英文字段)
-- `reports/diagnosis.md` / `reports/diagnosis.zh.md`: 诊断报告
+- `实验复刻结果汇总/实验报告/判决结果.json`: 判决结果 (含中英文字段)
+- `实验复刻结果汇总/实验报告/口径B通过率矩阵.md` / `-CN.md`: 口径 B (独立 checker) 通过率矩阵 (实例 × 算法), 与口径 A 并列报告, 两套数字不得混用; 报告须同时呈现两口径总通过率
+- `实验复刻结果汇总/实验报告/诊断分析.md` / `诊断分析-CN.md`: 诊断报告
