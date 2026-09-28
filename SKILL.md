@@ -84,7 +84,7 @@ compatibility:
 | 8 | 跳过可行性预判直接建环境 | 遇到私有数据/硬件时大量浪费 | Phase 0 先快速可行性标记 |
 | 9 | 基线失败时不记录偏离 | 丢失诊断信息 | 基线失败必须写 `analysis/gray_areas.md` |
 | 10 | conda + pip 一次性混合安装 | SAT 求解器死锁 | 严格 conda→pip 顺序，单步验证 |
-| 11 | 单点均值比较忽略方差 | CI 很宽时判决虚假积极 | 用 95% CI 区间验证, 报告 x-bar ± CI |
+| 11 | 单点均值比较忽略方差 | CI 很宽时判决虚假积极 | 用 95% CI 区间验证, 判决基准匹配论文口径 (中位数 CI / Wilson), 均值 x-bar ± CI 仅参考 |
 | 12 | 自动翻译不校对专业术语 | 术语混淆 (identification != 识别) | 术语先在 glossary.md 对齐, 翻译后人工校对 |
 | 13 | 增量实现时不标注论文出处 | 代码溯源断裂 | 每个函数 docstring 写 `Ref: Section X.Y, Eq.(Z)` |
 
@@ -281,7 +281,7 @@ compatibility:
 **输出**: `results/raw_metrics.csv` + `实验复刻结果汇总/实验报告/判决结果.json` + `实验复刻结果汇总/实验图表（含代码）/` (图 + 生成代码)
 
 5.1 **多轮运行**: 确认参数 (基线可行? N=5 种子? 运行时间? GPU 启用?) → 每轮独立执行 → `raw_metrics.csv`
-5.2 **统计计算**: 均值 x-bar + 标准差 s + 95% t-CI: x-bar +/- t*s/sqrt(N) → `statistical_summary.json`
+5.2 **统计计算**: 判决基准匹配论文报告口径——连续指标 = 成功试验**中位数** + percentile bootstrap 95% CI (≥20,000 重采样、固定种子、有放回抽 N 点), 比例指标 = Wilson score 区间; 容差判定双侧语义 (|Δ| 超容差即判); 均值 x-bar ± t-CI 仅作**参考输出** (论文明确报告均值时可切换 t-CI 判决, 登记 ci_method) → `statistical_summary.json`
 5.3 **五态判决**: `within_ci`→OK / `close_outside_ci`→approx / `outside_tolerance`→FAIL / `not_testable`→WARN / `static_check_failed`→FAIL
 5.4 **诊断输出**: >=2 条诊断假说 + Top-12 失败模式 + 引用审稿人视角发现 → `实验复刻结果汇总/实验报告/诊断分析.md` / `诊断分析-CN.md`
 5.5 **交互式轨迹可视化** (机器人路径优化论文):
