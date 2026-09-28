@@ -39,8 +39,20 @@ verification
 | not_testable | Could not execute |
 | static_check_failed | Config/check failed |
 
+### Step 3.5: Robustness Self-Check / 稳健性自检（判决后强制）
+- **双种子一致性校验**: 用 ≥2 个固定种子各执行一遍 bootstrap 判决，不一致格须复核并在诊断报告中登记（判决 JSON `seed_agree` 字段）
+- **翻转风险分级**: 每格输出 `flip_risk` ∈ {none, low, medium, high}
+  - 比例指标: 单试验成功位翻转 × N 变体探测
+  - 连续指标: 留一法 (leave-one-out) 扰动
+- `flip_risk=high` 的格在报告中显式标注"若重跑一次判决可能翻转"
+
 ### Step 4: Diagnostic Output / 诊断输出
 失败时生成诊断，链接到 Top-12 失败模式。
+
+**逐格根因归因**（每个非 within_ci 单元格必附）:
+- `attribution` 字段: 根因归类 ∈ {数据差异, 统计口径, 种子差异, 配置或输入偏差（如基元池/时限）, 基线自身波动, 我们优于论文}
+- 归因须引用证据并标注分级 `attribution_evidence_grade` ∈ {实证 empirical, 推断 inferred, 估计 estimated}
+- "我们优于论文"的 outside_tolerance 格显式标注有利方向，与"复现失败"区分
 
 ## Outputs / 产出
 - `results/raw_metrics.csv`: 原始指标
