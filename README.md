@@ -21,6 +21,16 @@ SIAM J. Financial Mathematics / Frontiers of Mathematical Finance, 2022–2025�
 所以框架的第一优先级不是"跑通"，而是**在开跑前分清"跑不通的原因"**，
 并用五态判决（pass / approx / fail / not_testable / blocked）诚实地表达出来。
 
+## 分支特性（financial）
+
+financial 分支 = 量化金融专用的复现落地形态，与 routine（通用数学文献工作流）互补：
+
+- **fin_tool 框架层**：金融指标（年化 Sharpe / Sortino / MaxDrawdown / hedge_prob）+ 五态判决引擎 + 确定性 bootstrap 95% CI，仅依赖 `numpy>=1.21`，双环境均可导入
+- **10 篇顶刊论文复现档案**（registry.py）：QF/MF/SIFIN/FMF 2022–2025 真实复现数据，完全 5 / 部分 3 / 无法 2；适配新论文只需追加一条记录，框架层不变
+- **双环境强制隔离**：TF 2.15（python 3.11）与 torch 1.9 + signatory（python 3.9 源码编译）依赖互斥，不可共存
+- **数据分诊优先**：开跑前先判商业授权数据（CRSP/WRDS/Bloomberg/ICAP）、环境冲突、上游残缺、内存硬墙
+- **已验证修复补丁**：实验 02（discriminator shape）/ 10（keras_metadata 兼容）/ 04（BCVA 挂起）的最小改动修复均有记录
+
 ## 框架架构
 
 ```
@@ -140,7 +150,7 @@ WSL2 Ubuntu, 8 核 CPU, 3.7 GB RAM, 纯 CPU 无 GPU）
 | `nature-reader/` | 科研论文智能阅读、结构化提取 (PDF/HTML/DOI/arXiv) | — |
 | `nature-figure/` | 科研数据可视化（matplotlib/seaborn，8 步工作流 + 视觉自检闭环） | 跟 nature-archify 互补 |
 | `nature-paper2ppt/` | 论文→中文 PPTX（6 类叙事弧 + 自审校） | — |
-| `nature-archify/` | 系统架构图渲染器（5 类图：architecture/workflow/sequence/dataflow/lifecycle；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体） | 跟 nature-figure 互补——本子技能专做系统/流程/时序/数据流架构图 |
+| `nature-archify/` | 系统架构图渲染器（5 类图：architecture/workflow/sequence/dataflow/lifecycle；16 条命令：doctor/examples/guide/demo/出图三步 render·validate·deliver + visual-check/preview/inspect/check/compare/migrate/brands 等；接受 Mermaid 素材、支持架构 delta 对比与规格迁移；产物 self-contained inline-SVG HTML，内嵌 HarmonyOS Sans Medium 子集字体） | 跟 nature-figure 互补——本子技能专做系统/流程/时序/数据流架构图 |
 
 `nature-archify` 需要 Node.js ≥ 18，零外部依赖；Python 侧通过 `scripts/nature_archify_bridge.py` 调用。
 
