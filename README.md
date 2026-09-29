@@ -8,6 +8,15 @@
 
 一句话：**输入 .obj + 算法规格 → 自动复现 → 输出简化 .obj + 双语对比报告**
 
+## 分支特性（obj）
+
+obj 分支 = 面向"输出 .obj 文件"的计算机图形学/几何处理实验的复刻落地形态：
+
+- **qem_tool 工具链**：QEM 网格简化（Garland & Heckbert, SIGGRAPH 1997）纯 Python + NumPy 实现，CLI 支持 `--faces` / `--ratio` 两种简化模式与 `--info` 模型检查
+- **对原始 C++ 实现的关键改进**：最优位置解 4×4 线性系统（论文 Eq.5）、增量 heapq O(log n)/步、标记-清理面删除 O(1)、法线加权平均重建、边界约束保护
+- **验证 + 基准闭环**：`scripts/verify_qem.py`（支持 Hausdorff 距离检查）+ `scripts/benchmark_qem.py` 性能基准 + `tests/` 测试套件
+- **多模型交叉验证**：区别于通用流程的多随机种子统计验证，本分支以多模型交叉对比作为正确性依据
+
 ## 项目结构
 
 ```
@@ -74,7 +83,7 @@ python scripts/benchmark_qem.py -i model.obj
 | nature-reader | 学术论文阅读、提取、结构化 | `nature-reader/SKILL.md` |
 | nature-figure | 论文配图制作（结果图/示意图/多面板） | `nature-figure/SKILL.md` |
 | nature-paper2ppt | 论文转演示文稿 | `nature-paper2ppt/SKILL.md` |
-| nature-archify | 系统架构/流程/时序图 JSON → 渲染 | `nature-archify/SKILL.md` |
+| nature-archify | 系统架构/流程/时序/数据流/生命周期图渲染（16 条命令：doctor/guide/demo/出图三步 render·validate·deliver + visual-check/compare/migrate/brands 等；接受 Mermaid 素材、支持架构 delta 对比） | `nature-archify/SKILL.md` |
 
 ## 依赖
 
