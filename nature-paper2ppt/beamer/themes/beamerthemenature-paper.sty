@@ -1,0 +1,174 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemenature-paper}[2026/10/01 v1.0 Paper: warm white, serif headings, print-first]
+
+% --- Palette -----------------------------------------------------------------
+% A warm off-white field rather than pure white, so projected and printed
+% output both read softer. Ink is a warm near-black, not neutral grey.
+\definecolor{ntPaperField}{HTML}{FBF9F5}
+\definecolor{ntPaperText}{HTML}{23201C}
+\definecolor{ntPaperMuted}{HTML}{8C857C}
+\definecolor{ntPaperAccent}{HTML}{8A6D3B}
+\definecolor{ntPaperRule}{HTML}{DED8CE}
+\definecolor{ntPaperPanel}{HTML}{F2EDE4}
+
+\newcommand{\ntPaletteText}{ntPaperText}
+\newcommand{\ntPaletteMuted}{ntPaperMuted}
+\newcommand{\ntPaletteAccent}{ntPaperAccent}
+\newcommand{\ntPaletteRule}{ntPaperRule}
+\newcommand{\ntPalettePanel}{ntPaperPanel}
+
+% Figure-page vertical budget for this theme (fractions of \textheight).
+% Tuned so the frame title, the graphic, the caption slot and the footer
+% strip together never exceed the page.
+\providecommand{\ntFigGraphicFrac}{0.455}
+\providecommand{\ntFigCaptionFrac}{0.125}
+% --- Typography --------------------------------------------------------------
+% Headings in a serif face, body in sans: the contrast is what gives this theme
+% its print-like character. Source Serif Pro comes from TeX Live, so no
+% Windows-only serif is required.
+\newcommand{\ntFontTitleCn}{HarmonyOS Sans SC}
+\newcommand{\ntFontBodyCn}{HarmonyOS Sans SC}
+\newcommand{\ntFontTitleEn}{Source Serif Pro}
+\newcommand{\ntFontBodyEn}{Source Sans Pro}
+\providecommand{\ntFontTitleCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontTitleCnBoldFace}{HarmonyOS Sans SC Medium}
+\providecommand{\ntFontBodyCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontBodyCnBoldFace}{HarmonyOS Sans SC Medium}
+
+\RequirePackage{../common/beamer-nature-common}
+\RequirePackage{tikz}
+
+% Warm field applied to the whole page. The colour name is written bare:
+% wrapping a \definecolor name in a macro makes xcolor match the macro token
+% rather than the expanded name and fail with "Undefined color ''".
+\setbeamercolor{background canvas}{bg=ntPaperField}
+
+% --- Chrome: a thin frame rule, like a printed page margin -------------------
+\newcommand{\ntFooter}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south,inner sep=0pt]
+      at ([yshift=2.6mm]current page.south)
+      {\fontsize{6}{6.8}\selectfont\color{\ntPaletteMuted}\insertframenumber};
+    \node[anchor=south west,inner sep=0pt]
+      at ([xshift=7mm,yshift=2.6mm]current page.south west)
+      {\fontsize{6}{6.8}\selectfont\color{\ntPaletteMuted}\insertshorttitle};
+  \end{tikzpicture}%
+}
+
+\setbeamertemplate{frametitle}{%
+  \vspace{1.8mm}%
+  {\fontsize{15}{18}\selectfont\color{ntPaperText}\bfseries
+   \setlength{\baselineskip}{18pt}\insertframetitle\par}%
+  \vspace{1.1mm}%
+  {\color{\ntPaletteRule}\rule{22mm}{0.6pt}\par}%
+  \vspace{2.2mm}%
+}
+\setbeamertemplate{footline}{}
+\addtobeamertemplate{frametitle}{\ntFooter}{}
+
+% --- Body slides -------------------------------------------------------------
+\setbeamertemplate{itemize item}{\color{\ntPaletteAccent}\raise0.1ex\hbox{\fontsize{6}{6}\selectfont$\bullet$}}
+\setbeamertemplate{itemize subitem}{\color{\ntPaletteMuted}\textendash}
+\setbeamertemplate{enumerate item}{%
+  {\fontsize{8.4}{8.8}\selectfont\color{\ntPaletteAccent}\bfseries\insertenumlabel.}%
+}
+\setbeamerfont{itemize/enumerate body}{size=\fontsize{9}{11.2}}
+\setbeamerfont{itemize/enumerate subbody}{size=\fontsize{8}{10}}
+
+% Blocks read as a tinted inset, matching the warm field.
+% beamer stitches "block begin" and "block end" together, so each template must
+% be brace-balanced on its own: an \hbox-based inset is used instead of
+% \colorbox, whose braced argument would otherwise straddle the two templates
+% and produce "Extra }, or forgotten \endgroup" at \end{frame}.
+\setbeamertemplate{block begin}{%
+  \vskip3mm%
+  \setlength{\fboxsep}{2.4mm}%
+  \noindent\hbox\bgroup
+  \color{ntPaperPanel}\vrule width 0pt
+  \hskip1.2mm
+  {\color{ntPaperAccent}\vrule width 1.2mm}%
+  \hskip2mm
+  \begin{minipage}[t]{\dimexpr\linewidth-4.4mm\relax}%
+    \vspace{1.6mm}%
+    {\fontsize{8.8}{10.4}\selectfont\color{ntPaperAccent}\bfseries
+     \insertblocktitle\par}\vspace{0.8mm}%
+}
+\setbeamertemplate{block end}{%
+    \vspace{1.6mm}%
+  \end{minipage}%
+  \egroup
+  \vskip1mm%
+}
+
+% --- Title page --------------------------------------------------------------
+\newcommand{\naturetitlepage}{%
+  \begin{frame}[plain]
+    \vspace{14mm}
+    \centering
+    {\color{\ntPaletteAccent}\rule{14mm}{0.8pt}\par}
+    \vspace{4mm}
+    {\fontsize{6.8}{8.4}\selectfont\color{\ntPaletteMuted}\MakeUppercase{文献汇报}\par}
+    \vspace{3mm}
+    {\fontsize{19}{23}\selectfont\color{ntPaperText}\bfseries
+     \setlength{\baselineskip}{23pt}\inserttitle\par}
+    \vspace{5mm}
+    {\color{\ntPaletteRule}\rule{30mm}{0.5pt}\par}
+    \vspace{4mm}
+    {\fontsize{9.2}{11.4}\selectfont\color{ntPaperText}\insertauthor\par}
+    \vspace{1.4mm}
+    {\fontsize{7.6}{9.4}\selectfont\color{\ntPaletteMuted}\insertinstitute\par}
+    \vfill
+    {\fontsize{7.2}{8.8}\selectfont\color{\ntPaletteMuted}%
+     \ifx\ntVenue\undefined\else\ntVenue\quad·\quad\fi\insertdate\par}
+    \vspace{4mm}
+  \end{frame}%
+}
+
+% --- Section divider ---------------------------------------------------------
+\newcommand{\naturesection}[1]{%
+  \begin{frame}[plain]
+    \vfill
+    \centering
+    {\fontsize{7}{8.4}\selectfont\color{\ntPaletteAccent}\MakeUppercase{Part}\par}
+    \vspace{2.8mm}
+    {\fontsize{16}{19}\selectfont\color{ntPaperText}\bfseries #1\par}
+    \vspace{3.4mm}
+    {\color{\ntPaletteRule}\rule{18mm}{0.6pt}\par}
+    \vfill
+  \end{frame}%
+}
+
+% --- Two-column comparison ---------------------------------------------------
+\newcommand{\naturetwocol}[5]{%
+  \begin{frame}{#1}
+    \begin{columns}[T,onlytextwidth]
+      \begin{column}{0.48\textwidth}
+        {\fontsize{8.8}{10.4}\selectfont\color{ntPaperAccent}\bfseries #2\par}
+        \vspace{1.1mm}
+        {\color{\ntPaletteRule}\rule{\linewidth}{0.5pt}\par}
+        \vspace{1.4mm}
+        {\fontsize{8.8}{11}\selectfont #3\par}
+      \end{column}
+      \hfill
+      \begin{column}{0.48\textwidth}
+        {\fontsize{8.8}{10.4}\selectfont\color{\ntPaletteMuted}\bfseries #4\par}
+        \vspace{1.1mm}
+        {\color{\ntPaletteRule}\rule{\linewidth}{0.5pt}\par}
+        \vspace{1.4mm}
+        {\fontsize{8.8}{11}\selectfont #5\par}
+      \end{column}
+    \end{columns}
+  \end{frame}%
+}
+
+% --- Closing -----------------------------------------------------------------
+\newcommand{\natureclosing}[1]{%
+  \begin{frame}[plain]
+    \vfill
+    \centering
+    {\fontsize{15}{18}\selectfont\color{ntPaperText}\bfseries #1\par}
+    \vspace{3mm}
+    {\color{\ntPaletteAccent}\rule{14mm}{0.8pt}\par}
+    \vfill
+  \end{frame}%
+}
