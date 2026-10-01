@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "description": "Intrinsic simplification 实验网格语料清单",
+  "meshes": [
+    {
+      "filename": "boxpart.obj",
+      "bytes": 60862,
+      "sha256": "b5d00c62bfdf7c689539133127e4974c0c9d3d144a2b52b1b296f8d1d7155f17",
+      "vertices": 451,
+      "faces": 930,
+      "euler": -14,
+      "boundary_edges": 0,
+      "topology": "closed_genus",
+      "genus": 8,
+      "uv": true,
+      "source": "ICE_Experiment_Logs/meshes_copy/boxpart.obj",
+      "stages": [
+        "06"
+      ],
+      "notes": "高亏格测试网格（genus 8）；Stage 06 BEFORE 细化模式输入"
+    },
+    {
+      "filename": "bs_rest.obj",
+      "bytes": 3780333,
+      "sha256": "4666c4a1bc1d11956edcbe7b401e90390e4bb404dc8c5572fb28560682998333",
+      "vertices": 19985,
+      "faces": 39856,
+      "euler": 1,
+      "boundary_edges": 112,
+      "topology": "with_boundary",
+      "genus": null,
+      "uv": true,
+      "source": "ICE_Experiment_Logs/meshes_copy/bs_rest.obj",
+      "stages": [
+        "00"
+      ],
+      "notes": "Stage 00 最大输入（19,985 顶点）；带边界开网格（112 条边界边）"
+    },
+    {
+      "filename": "capsule.obj",
+      "bytes": 1734479,
+      "sha256": "1bd9a692d9af6fe8ca3e7b6febf25e95c16ef438654631f2590018e4d51e29dc",
+      "vertices": 10658,
+      "faces": 21312,
+      "euler": 2,
+      "boundary_edges": 0,
+      "topology": "closed_sphere",
+      "genus": 0,
+      "uv": true,
+      "source": "ICE_Experiment_Logs/meshes_copy/capsule.obj",
+      "stages": [
+        "02"
+      ],
+      "notes": "Stage 02 混合权重（curvature/area）实验输入"
+    },
+    {
+      "filename": "dragon_fat.obj",
+      "bytes": 3599195,
+      "sha256": "8601e20bf875f946c6ab78946506106c40f606a949f90a7633f2cf5d7c2d5e32",
+      "vertices": 15746,
+      "faces": 31488,
+      "euler": 2,
+      "boundary_edges": 0,
+      "topology": "closed_sphere",
+      "genus": 0,
+      "uv": true,
+      "source": "ICE_Experiment_Logs/meshes_copy/dragon_fat.obj",
+      "stages": [
+        "00",
+        "01",
+        "05",
+        "06"
+      ],
+      "notes": "dragon 系列金样本矩阵源（Stage 01/05 导出）；Stage 00/06 输入"
+    },
+    {
+      "filename": "spot.obj",
+      "bytes": 428033,
+      "sha256": "7c2beb44dc58aa98116f15fbdb9b771fe8f2e0d5059dfa0000e0a160c902c19a",
+      "vertices": 2930,
+      "faces": 5856,
+      "euler": 2,
+      "boundary_edges": 0,
+      "topology": "closed_sphere",
+      "genus": 0,
+      "uv": true,
+      "source": "ICE_Experiment_Logs/meshes_copy/spot.obj",
+      "stages": [
+        "00",
+        "01",
+        "03",
+        "04",
+        "05",
+        "06"
+      ],
+      "notes": "主语料网格；spot 系列金样本矩阵源（Stage 01/05 导出）；全阶段基准"
+    },
+    {
+      "filename": "spot_subdiv.obj",
+      "bytes": 3125741,
+      "sha256": "48e6c45df457a1c65e7a5144edced7e45946e8282d326645f80540bfcea3e384",
+      "vertices": 24755,
+      "faces": 49506,
+      "euler": 2,
+      "boundary_edges": 0,
+      "topology": "closed_sphere",
+      "genus": 0,
+      "uv": true,
+      "source": "ICE_Experiment_Logs/meshes_copy/spot_subdiv.obj",
+      "stages": [],
+      "notes": "实验未使用的备用网格（spot 细分版）"
+    }
+  ]
+}
