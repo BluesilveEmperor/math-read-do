@@ -29,18 +29,25 @@
 
 ## 竖排与横排
 
-全部为 16:9，`paperwidth=128mm`、`paperheight=72mm`。这是演示场合的默认值。
+全部为 16:9 标准 beamer 画幅，`paperwidth=160mm`、`paperheight=90mm`。
 改成 4:3 只需在 `\documentclass` 里把 `aspectratio=169` 换成 `43`，版式宏会自适应。
 
 ## 正文字号
 
 正文字号不随主题变化，由 `beamer-nature-common.sty` 统一设定：
 
-- 标题 14–17pt（各主题不同，见下）
-- 正文 9.2pt / 行距 11.4pt
-- 图注 5.6pt
-- takeaway 8.2pt
-- 页脚 6.2pt
+- 标题 15–19pt（各主题不同，见上）
+- 正文 10pt / 行距 13.2pt
+- 图注 6.4pt
+- takeaway 9pt
+- 页脚 6.8pt
 
 改正文大小应改 `\setbeamerfont{itemize/enumerate body}`，不要在单个 frame 里调字号——
 同一页超过 3 种字号会被自检环判为缺陷。
+
+## frame 顶对齐
+
+写 deck 时 `\documentclass` 必须带 `t` 类选项
+（`\documentclass[aspectratio=169,10pt,t]{beamer}`）。beamer 默认把 frame 内容
+**垂直居中**，短页会在标题与正文之间留一条死白带。六个版式宏内部已强制 `[t]`，
+类选项负责 deck 里手写的普通 frame。

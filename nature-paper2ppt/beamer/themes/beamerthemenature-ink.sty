@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamerthemenature-ink}[2026/10/01 v1.0 Ink: near-black, achromatic, figure-first]
+\ProvidesPackage{beamerthemenature-ink}[2026/10/01 v2.0 Ink: near-black, achromatic, figure-first]
 
 % --- Palette -----------------------------------------------------------------
 % Deliberately achromatic. Emphasis is expressed through weight and scale, not
@@ -18,13 +18,10 @@
 \newcommand{\ntPalettePanel}{ntInkPanel}
 
 % --- Typography --------------------------------------------------------------
-% HarmonyOS Sans SC ships three files: Regular / Medium / Bold. Faces are named
-% explicitly because the bold face is a separate file, not a style of the same
-% family string (see the CJK setup in the common layer).
 % This theme is figure-first, so the graphic slot is taller than the family
 % default and the caption slot correspondingly tighter.
-\providecommand{\ntFigGraphicFrac}{0.50}
-\providecommand{\ntFigCaptionFrac}{0.115}
+\providecommand{\ntFigGraphicFrac}{0.55}
+\providecommand{\ntFigCaptionFrac}{0.13}
 \newcommand{\ntFontTitleCn}{HarmonyOS Sans SC}
 \newcommand{\ntFontBodyCn}{HarmonyOS Sans SC}
 \newcommand{\ntFontTitleEn}{Source Sans Pro}
@@ -41,62 +38,62 @@
 \newcommand{\ntFooter}{%
   \begin{tikzpicture}[remember picture,overlay]
     \draw[\ntPaletteRule,line width=0.3pt]
-      ([yshift=3.4mm]current page.south west) --
-      ([yshift=3.4mm]current page.south east);
+      ([yshift=4.6mm]current page.south west) --
+      ([yshift=4.6mm]current page.south east);
     \node[anchor=south west,inner sep=0pt]
-      at ([xshift=8mm,yshift=1.8mm]current page.south west)
-      {\fontsize{6}{6.8}\selectfont\color{\ntPaletteMuted}\insertshorttitle};
+      at ([xshift=10mm,yshift=2.2mm]current page.south west)
+      {\fontsize{6.8}{7.8}\selectfont\color{\ntPaletteMuted}\insertshorttitle};
     \node[anchor=south east,inner sep=0pt]
-      at ([xshift=-8mm,yshift=1.8mm]current page.south east)
-      {\fontsize{6}{6.8}\selectfont\color{\ntPaletteMuted}\insertframenumber};
+      at ([xshift=-10mm,yshift=2.2mm]current page.south east)
+      {\fontsize{6.8}{7.8}\selectfont\color{\ntPaletteMuted}\insertframenumber};
   \end{tikzpicture}%
 }
 
 % Oversized, tight-leading title: the defining gesture of this theme.
 \setbeamertemplate{frametitle}{%
-  \vspace{2.4mm}%
-  {\fontsize{17}{19.5}\selectfont\color{ntInkBlack}\bfseries
-   \setlength{\baselineskip}{19.5pt}\insertframetitle\par}%
-  \vspace{2.2mm}%
+  \vspace{2.6mm}%
+  {\fontsize{19}{22}\selectfont\color{ntInkBlack}\bfseries
+   \setlength{\baselineskip}{22pt}\insertframetitle\par}%
+  \vspace{2mm}%
 }
 \setbeamertemplate{footline}{}
 \addtobeamertemplate{frametitle}{\ntFooter}{}
 
 % --- Body slides -------------------------------------------------------------
 % Square markers, no colour; numbers carry the emphasis instead.
-\setbeamertemplate{itemize item}{\color{ntInkAccent}\rule[0.40ex]{1.3mm}{1.3mm}}
+\setbeamertemplate{itemize item}{\color{ntInkAccent}\rule[0.40ex]{1.4mm}{1.4mm}}
 \setbeamertemplate{itemize subitem}{\color{\ntPaletteMuted}\textendash}
 \setbeamertemplate{enumerate item}{%
-  {\fontsize{8.4}{8.8}\selectfont\color{ntInkBlack}\bfseries\insertenumlabel}%
+  {\fontsize{9.2}{9.8}\selectfont\color{ntInkBlack}\bfseries\insertenumlabel}%
 }
-\setbeamerfont{itemize/enumerate body}{size=\fontsize{9}{11}}
-\setbeamerfont{itemize/enumerate subbody}{size=\fontsize{8}{10}}
+\setbeamerfont{itemize/enumerate body}{size=\fontsize{10}{13}}
+\setbeamerfont{itemize/enumerate subbody}{size=\fontsize{9}{11.4}}
 
 \setbeamertemplate{block begin}{%
   \vskip3mm%
-  {\fontsize{8.8}{10.4}\selectfont\color{ntInkBlack}\bfseries\insertblocktitle\par}%
-  \vspace{0.8mm}%
+  {\fontsize{9.6}{11.4}\selectfont\color{ntInkBlack}\bfseries\insertblocktitle\par}%
+  \vspace{1mm}%
   {\color{\ntPaletteRule}\rule{\linewidth}{0.4pt}\par}%
-  \vspace{1.2mm}%
+  \vspace{1.4mm}%
 }
 \setbeamertemplate{block end}{\vskip1mm}
 
 % --- Title page --------------------------------------------------------------
 \newcommand{\naturetitlepage}{%
   \begin{frame}[plain]
-    \vspace{12mm}
-    {\fontsize{6.8}{8.4}\selectfont\color{\ntPaletteMuted}\MakeUppercase{文献汇报}\par}
-    \vspace{3mm}
-    {\fontsize{22}{26}\selectfont\color{ntInkBlack}\bfseries
-     \setlength{\baselineskip}{26pt}\inserttitle\par}
-    \vspace{5mm}
-    {\fontsize{9}{11}\selectfont\color{\ntPaletteMuted}\insertauthor\par}
-    \vspace{1.2mm}
-    {\fontsize{7.4}{9}\selectfont\color{\ntPaletteMuted}\insertinstitute\par}
+    \vspace{14mm}
+    {\fontsize{7.6}{9.4}\selectfont\color{\ntPaletteMuted}\MakeUppercase{文献汇报}\par}
+    \vspace{3.6mm}
+    {\fontsize{24}{28}\selectfont\color{ntInkBlack}\bfseries
+     \setlength{\baselineskip}{28pt}\inserttitle\par}
+    \vspace{6mm}
+    {\fontsize{9.8}{12}\selectfont\color{\ntPaletteMuted}\insertauthor\par}
+    \vspace{1.4mm}
+    {\fontsize{8.2}{10}\selectfont\color{\ntPaletteMuted}\insertinstitute\par}
     \vfill
-    {\fontsize{7}{8.4}\selectfont\color{\ntPaletteMuted}%
+    {\fontsize{7.8}{9.4}\selectfont\color{\ntPaletteMuted}%
      \ifx\ntVenue\undefined\else\ntVenue\quad·\quad\fi\insertdate\par}
-    \vspace{4mm}
+    \vspace{5mm}
   \end{frame}%
 }
 
@@ -105,33 +102,33 @@
 \newcommand{\naturesection}[1]{%
   \begin{frame}[plain]
     \vfill
-    {\fontsize{7}{8.4}\selectfont\color{\ntPaletteMuted}\MakeUppercase{Part}\par}
-    \vspace{2.6mm}
-    {\fontsize{19}{22}\selectfont\color{ntInkBlack}\bfseries
-     \setlength{\baselineskip}{22pt}#1\par}
-    \vspace{4mm}
+    {\fontsize{7.6}{9.4}\selectfont\color{\ntPaletteMuted}\MakeUppercase{Part}\par}
+    \vspace{3mm}
+    {\fontsize{21}{24}\selectfont\color{ntInkBlack}\bfseries
+     \setlength{\baselineskip}{24pt}#1\par}
+    \vspace{5mm}
   \end{frame}%
 }
 
 % --- Two-column comparison ---------------------------------------------------
 % Distinguish the columns with weight, not colour.
 \newcommand{\naturetwocol}[5]{%
-  \begin{frame}{#1}
+  \begin{frame}[t]{#1}
     \begin{columns}[T,onlytextwidth]
       \begin{column}{0.48\textwidth}
-        {\fontsize{9}{10.6}\selectfont\color{ntInkBlack}\bfseries #2\par}
-        \vspace{1.1mm}
-        {\color{ntInkBlack}\rule{8mm}{1.1pt}\par}
-        \vspace{1.4mm}
-        {\fontsize{8.6}{10.8}\selectfont #3\par}
+        {\fontsize{10}{11.8}\selectfont\color{ntInkBlack}\bfseries #2\par}
+        \vspace{1.3mm}
+        {\color{ntInkBlack}\rule{9mm}{1.1pt}\par}
+        \vspace{1.8mm}
+        {\fontsize{9.4}{12}\selectfont #3\par}
       \end{column}
       \hfill
       \begin{column}{0.48\textwidth}
-        {\fontsize{9}{10.6}\selectfont\color{\ntPaletteMuted}\bfseries #4\par}
-        \vspace{1.1mm}
-        {\color{\ntPaletteRule}\rule{8mm}{1.1pt}\par}
-        \vspace{1.4mm}
-        {\fontsize{8.6}{10.8}\selectfont #5\par}
+        {\fontsize{10}{11.8}\selectfont\color{\ntPaletteMuted}\bfseries #4\par}
+        \vspace{1.3mm}
+        {\color{\ntPaletteRule}\rule{9mm}{1.1pt}\par}
+        \vspace{1.8mm}
+        {\fontsize{9.4}{12}\selectfont #5\par}
       \end{column}
     \end{columns}
   \end{frame}%
@@ -142,9 +139,9 @@
   \begin{frame}[plain]
     \vfill
     \raggedright
-    {\fontsize{17}{20}\selectfont\color{ntInkBlack}\bfseries #1\par}
-    \vspace{3mm}
-    {\color{\ntPaletteRule}\rule{20mm}{0.8pt}\par}
+    {\fontsize{19}{22.5}\selectfont\color{ntInkBlack}\bfseries #1\par}
+    \vspace{3.6mm}
+    {\color{\ntPaletteRule}\rule{22mm}{0.8pt}\par}
     \vfill
   \end{frame}%
 }

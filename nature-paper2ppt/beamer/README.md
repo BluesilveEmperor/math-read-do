@@ -42,7 +42,7 @@ bash build/build.sh path/to/deck.tex
 ## 在文档里使用
 
 ```latex
-\documentclass[aspectratio=169,10pt]{beamer}
+\documentclass[aspectratio=169,10pt,t]{beamer}
 
 \makeatletter
 \def\input@path{{../common/}{../themes/}}
@@ -53,6 +53,8 @@ bash build/build.sh path/to/deck.tex
 \InputIfFileExists{ntsettings.tex}{}{}   % 由 build.sh 生成
 \usetheme{nature-\ntThemeName}
 ```
+
+`t` 类选项不可省：beamer 默认垂直居中 frame 内容，短页会留出死白带（见坑 14）。
 
 `ntsettings.tex` 由 `build.sh` 每次编译前重写，只含两行 `\def`：
 
@@ -149,6 +151,22 @@ fontspec 会把它当成一个字体族字符串（`"HarmonyOS Sans SCBold"`）�
 用 `grep -cE '^!|Unable to load'` 数日志里的错误，并核对页数与宽高比。
 「编译没报错」不等于「页面没错」——面板压页脚这类问题只在渲染图上才看得见。
 
+**14. beamer 默认把 frame 内容垂直居中，不是顶对齐。**
+短内容的正文会被推到页面中段，标题和正文之间留下一条死白带——v1 所有
+「难看」的观感的最大来源。解法：`t` 类选项（`\documentclass[...,t]{beamer}`）
+覆盖普通 frame，版式宏内部一律 `\begin{frame}[t]`。
+
+**15. overlay 后面的 `\hspace` 不会把后续内容右移。**
+navy v1 的章节页在 `tikzpicture[overlay]` 后写 `\hspace{32mm}`，结果章节标题
+压进左侧色带、和旋转的 PART 标签叠在一起。只要页面位置是固定的，
+就把**全部**元素都画成 overlay 节点，不要 overlay 与正文流混排。
+
+**16. `\color` 不加分组会泄漏到模板之外。**
+paper v1 的 `block begin` 里 `\color{ntPaperPanel}\vrule width 0pt` 没包进
+分组，后续 block 正文全部继承了这个近白的 Panel 色，在暖白底上彻底隐形。
+要么给 `\color` 加分组，要么用 `beamercolorbox`——它显式持有 bg/fg，
+颜色不可能逃逸。
+
 ## 验收流程
 
 改完主题或版式宏后：
@@ -164,10 +182,10 @@ fontspec 会把它当成一个字体族字符串（`"HarmonyOS Sans SCBold"`）�
 
 ```
 theme     page  panel_y1  footer_y0  clearance  status
-slate        4     187.1      190.3        3.2  OK
-navy         4     183.3      188.0        4.7  OK
-ink          4     181.7      191.6        9.9  OK
-paper        4     187.2      189.4        2.1  OK
+slate        4     236.6      238.9        2.2  OK
+navy         4     229.0      236.0        7.0  OK
+ink          4     227.4      240.6       13.2  OK
+paper        4     235.5      237.7        2.3  OK
 ```
 
 `clearance > 0` 才算通过；任一主题为负，脚本返回非零退出码。

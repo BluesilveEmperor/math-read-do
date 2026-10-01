@@ -10,7 +10,11 @@
 %   bash build/build.sh slate              # XeLaTeX, two passes
 %   bash build/build.sh all                # every theme
 %   bash build/build.sh slate --bib        # latexmk + biber
-\documentclass[aspectratio=169,10pt]{beamer}
+% The `t` class option top-aligns every plain frame. Without it beamer
+% vertically *centres* short content, leaving a dead band between the frame
+% title and the body. The family's layout macros force [t] on the frames they
+% open themselves; this option covers the plain frames written in the deck.
+\documentclass[aspectratio=169,10pt,t]{beamer}
 
 \makeatletter
 \def\input@path{{../common/}{../themes/}}
