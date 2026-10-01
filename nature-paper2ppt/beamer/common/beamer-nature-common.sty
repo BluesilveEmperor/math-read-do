@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamer-nature-common}[2026/10/01 v1.0 Common layer for nature-* beamer themes]
+\ProvidesPackage{beamer-nature-common}[2026/10/01 v2.0 Common layer for nature-* beamer themes]
 
 % ---------------------------------------------------------------------------
 % Shared engine for the nature-* beamer theme family.
@@ -26,10 +26,15 @@
 \RequirePackage{pgfpages}
 
 % ---------------------------------------------------------------------------
-% 1. Global geometry: 16:9 presentation.
+% 1. Global geometry: standard beamer 16:9 (160mm x 90mm).
+%
+% v1 used 128mm x 72mm with a 10pt base, which made every glyph occupy ~25%
+% more of the page than standard beamer -- pages felt cramped and oversized at
+% the same time. The standard canvas gives the type room to breathe; every
+% theme's measurements are tuned against this canvas.
 % ---------------------------------------------------------------------------
-\geometry{paperwidth=128mm,paperheight=72mm}
-\setbeamersize{text margin left=7mm,text margin right=7mm}
+\geometry{paperwidth=160mm,paperheight=90mm}
+\setbeamersize{text margin left=10mm,text margin right=10mm}
 
 % Frame numbering must be captured *after* the slide counter is finalised,
 % otherwise \inserttotalframenumber reports 1 on the first pass and the footer
@@ -160,8 +165,8 @@
 % 5. Universally useful bits used by the layout macros.
 % ---------------------------------------------------------------------------
 \newcommand{\ntsource}[1]{%
-  \par\vspace{1.2mm}%
-  {\fontsize{5.6}{6.6}\selectfont\color{\ntPaletteMuted}#1\par}%
+  \par\vspace{1.4mm}%
+  {\fontsize{6.4}{7.8}\selectfont\color{\ntPaletteMuted}#1\par}%
 }
 % Takeaway panel: a tinted bar holding one sentence.
 % \colorbox with the default \fboxsep added ~4.4mm of padding on all four sides
@@ -170,19 +175,19 @@
 % only horizontally here, and must be applied to the whole \colorbox argument
 % (including the \par) so no extra line box is created.
 \newcommand{\nttakeaway}[1]{%
-  \par\vspace{1.2mm}%
+  \par\vspace{1.6mm}%
   \noindent
-  {\setlength{\fboxsep}{1.5mm}%
+  {\setlength{\fboxsep}{1.8mm}%
    \colorbox{\ntPalettePanel}{%
-     \parbox{\dimexpr\linewidth-3mm\relax}{%
-       \fontsize{8.2}{9.6}\selectfont\color{\ntPaletteText}\raggedright #1}}%
+     \parbox{\dimexpr\linewidth-3.6mm\relax}{%
+       \fontsize{9}{11}\selectfont\color{\ntPaletteText}\raggedright #1}}%
   }%
   \par%
 }
 
 % Section-divider and title scaffolding share the same kicker style.
 \newcommand{\ntkicker}[1]{%
-  {\fontsize{7.2}{8.6}\selectfont\color{\ntPaletteAccent}%
+  {\fontsize{8}{9.6}\selectfont\color{\ntPaletteAccent}%
    \MakeUppercase{#1}}%
 }
 
@@ -194,24 +199,28 @@
 % is therefore shared, and themes only tune two lengths:
 %   \ntFigGraphicFrac  height of the graphic slot, as a fraction of \textheight
 %   \ntFigCaptionFrac  height of the source+takeaway slot
-% Leaving the slots at a total of ~0.60\textheight leaves the remaining ~0.25
-% for the frame title, the footer strip and slack.
 %
 % The caption slot is bottom-aligned ([b]) so the takeaway panel always ends at
 % the same place no matter how long the source line is.
-\providecommand{\ntFigGraphicFrac}{0.47}
-\providecommand{\ntFigCaptionFrac}{0.125}
+%
+% The frame is opened with [t] (top-aligned): beamer's default frame alignment
+% is *vertical centering*, which pushes short content into the middle of the
+% page and leaves a dead band between the frame title and the body. Every
+% layout macro in this family forces top alignment for the same reason, and
+% decks should carry the `t` class option for their plain frames.
+\providecommand{\ntFigGraphicFrac}{0.52}
+\providecommand{\ntFigCaptionFrac}{0.14}
 
 % \naturefigurepage[width fraction]{title}{graphic path}{source}{takeaway}
 % #1 optional width, #2 title, #3 graphic, #4 source, #5 takeaway
 \newcommand{\naturefigurepage}[5][0.80]{%
-  \begin{frame}{#2}
+  \begin{frame}[t]{#2}
     \centering
     \begin{minipage}[c][\ntFigGraphicFrac\textheight][c]{\linewidth}
       \centering
-      \includegraphics[width=#1\linewidth,height=\linewidth,keepaspectratio]{#3}%
+      \includegraphics[width=#1\linewidth,height=\ntFigGraphicFrac\textheight,keepaspectratio]{#3}%
     \end{minipage}%
-    \par\vspace{0.6mm}%
+    \par\vspace{0.8mm}%
     \begin{minipage}[b][\ntFigCaptionFrac\textheight][b]{\linewidth}
       \ifx\relax#4\relax\else\ntsource{#4}\fi
       \ifx\relax#5\relax\else\nttakeaway{#5}\fi

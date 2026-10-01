@@ -35,8 +35,8 @@ Fonts are fixed by the theme family so output is reproducible:
 
 - Chinese: HarmonyOS Sans SC (Regular / Medium / Bold).
 - Latin and math: Source Sans Pro / Source Serif Pro.
-- Title 14–17pt depending on theme; body 9.2pt / 11.4pt leading; caption 5.6pt;
-  takeaway 8.2pt; footer 6.2pt.
+- Title 15–19pt depending on theme; body 10pt / 13.2pt leading; caption 6.4pt;
+  takeaway 9pt; footer 6.8pt.
 
 Do not change font size inside a single frame to make text fit. Rewrite the copy
 shorter, or move detail into `\note{}`. At most three distinct font sizes per slide.
