@@ -1,0 +1,31 @@
+# Algo plugin registry skeleton (RFC: docs/rfc/001-algos-registry.md)
+# 算法插件注册表骨架 — schema_version: 1
+#
+# status 语义:
+#   active  — entry 指向可运行的 CLI 入口，且有专属回归测试
+#   planned — 设计占位，entry 必须为 null，接入时须通过 active 准入检查
+#
+# 本文件当前仅供人与文档消费（RFC §5 非目标：不实现加载器）。
+
+schema_version: 1
+
+algorithms:
+  - name: qem
+    paper_ref: "Garland & Heckbert 1997, Surface Simplification Using Quadric Error Metrics (SIGGRAPH)"
+    entry: "qem_tool/cli.py"        # CLI 入口（迁移前指向现有位置；E1 迁移后切到 algos/qem/cli.py）
+    params:
+      faces: 1000                   # 目标面数（示例默认）
+      ratio: 0.5                    # 简化比（示例默认）
+    capabilities:
+      - simplify
+      - boundary_preservation
+    status: active
+
+  - name: ice
+    paper_ref: "Liu et al. 2023, Surface Simplification Using Intrinsic Error Metrics (SIGGRAPH / ACM TOG)"
+    entry: null                     # planned 阶段为 null（adapter: subprocess wrapper 优先，FFI 后备）
+    params: {}
+    capabilities:
+      - simplify
+      - intrinsic_field_transport
+    status: planned
