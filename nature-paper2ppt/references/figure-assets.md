@@ -25,7 +25,7 @@ Many slides need a **system architecture diagram**, **technical workflow diagram
 
 - Use the sibling `nature-archify` sub-skill (`../../nature-archify/SKILL.md`).
 - It takes a typed JSON spec (`diagram_type: architecture | workflow | sequence | dataflow | lifecycle`) and produces a self-contained inline-SVG HTML figure with embedded CJK fonts, 13 visual presets, and light/dark themes.
-- Embed the HTML in the PPTX as a web-viewer object, or render a screenshot at 300 dpi for static embedding.
+- Render the HTML to PDF (vector, preferred) or PNG at 300 dpi, save into `output/assets/figures/`, and pull it in with `\includegraphics` on a `\naturefigurepage`. Do not embed HTML directly — Beamer takes image files, not web objects.
 - Always check the showcase 9-item receipt before locking the slide.
 
 **Capability boundary — model / framework / experiment figures**: the `model`, `framework`, `route`, `structure`, and `experiment` diagram types are **not** provided by `nature-archify`. In particular, a PRISMA/CONSORT-style experiment pipeline figure records real numbers (initial n, exclusions, group sizes, dropouts, final analysis n, evaluation metrics) — none of which can be fabricated; a "predicted flow" may be drawn at the proposal stage, but the **final version must wait until the experimental record is curated** (`raw_metrics.csv` / `reproducibility_assessment.json` / Phase-5 statistical summary). For those five types, wire in a paperfig-class renderer instead of `nature-archify`.
@@ -44,7 +44,7 @@ Many slides need a **system architecture diagram**, **technical workflow diagram
 
 - Accept SVG or PDF source when the author provides it.
 - Render at the highest resolution available; do not upsample or smooth.
-- Save as PNG only for PPTX insertion; keep original SVG/PDF in archive if available.
+- Save as PNG for `\includegraphics`; PDF source is preferred when available (vector, resolution-independent). Keep the original SVG/PDF in archive.
 
 ### Dense multi-panel figures
 
@@ -69,9 +69,9 @@ Before inserting the figure into the deck:
 
 ## Table assets
 
-- For small tables (≤ 5 rows × 4 columns): recreate as native PPTX table for clarity.
+- For small tables (≤ 5 rows × 4 columns): set them natively in LaTeX (`tabular` / `booktabs`) for clarity and crisp text.
 - For large tables (more than 5 rows or 4 columns): render as high-resolution image.
-- For benchmark tables: use native table with bold header row and alternating shading.
+- For benchmark tables: native LaTeX table with a bold header row and alternating shading.
 - Never insert raw table PDF screenshots.
 
 ## Asset manifest
