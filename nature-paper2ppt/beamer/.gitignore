@@ -1,0 +1,26 @@
+# 构建产物：每次 build.sh 都会重生成，不入库。
+# 两个脚本是例外，由仓库根的 .gitignore 负责放行（见那里的说明）。
+build/*.aux
+build/*.log
+build/*.nav
+build/*.out
+build/*.snm
+build/*.toc
+build/*.pdf
+build/*.fls
+build/*.fdb_latexmk
+build/*.bbl
+build/*.bcf
+build/*.blg
+build/*.run.xml
+build/log-*.txt
+build/log-*.latexmk.txt
+build/ntsettings.tex
+build/preview/
+build/compare/
+
+# 预览图与散落的临时图
+*.png
+
+# build.sh 每次编译前重写这个文件，不入库
+demo/ntsettings.tex

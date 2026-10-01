@@ -10,6 +10,15 @@ build/
 venv/
 *.so
 
+# Python 的 build/ 规则会连「构建脚本目录」一起吞掉，
+# 这里把 nature-paper2ppt 的 beamer 构建层放回来（脚本要入库，产物不要）。
+!nature-paper2ppt/beamer/build/
+nature-paper2ppt/beamer/build/*
+!nature-paper2ppt/beamer/build/build.sh
+!nature-paper2ppt/beamer/build/pdf_tools.py
+!nature-paper2ppt/beamer/build/check_clearance.py
+!nature-paper2ppt/beamer/build/compare_sheet.py
+
 # IDE
 .vscode/
 .idea/

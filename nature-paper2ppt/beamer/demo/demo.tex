@@ -1,0 +1,102 @@
+% Demo deck: covers every layout macro in the nature-* beamer family.
+%
+% The theme is selected by \ntThemeName, which the build script injects through
+% a generated settings file, so this single source renders all four themes.
+% Do NOT try to pass it with -usepretex: XeLaTeX applies that switch after the
+% preamble, so it cannot override the \def below (verified -- every theme came
+% out as slate). Always go through build.sh.
+%
+% Build (from the beamer/ directory):
+%   bash build/build.sh slate              # XeLaTeX, two passes
+%   bash build/build.sh all                # every theme
+%   bash build/build.sh slate --bib        # latexmk + biber
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\makeatletter
+\def\input@path{{../common/}{../themes/}}
+\makeatother
+
+% Build parameters are read from ntsettings.tex, which the build script writes
+% before each compile. This indirection is required because XeLaTeX applies
+% -usepretex *after* the document preamble, so an injected \def can never
+% override a definition made here -- neither \providecommand nor a plain \def
+% would give way. A file sourced at the top has no such restriction.
+%
+% The file is looked up by absolute path first, then by bare name, because
+% \InputIfFileExists resolves relative names against the *output* directory
+% when one is in use, not against this source file.
+%
+% Recognised keys (write plain \def lines in ntsettings.tex):
+%   \ntThemeName{slate|navy|ink|paper}
+%   \ntFiguresRoot{<absolute path>}
+\providecommand{\ntFiguresRoot}{}
+\def\ntThemeName{slate}
+\providecommand{\ntSettingsFile}{ntsettings.tex}
+\InputIfFileExists{\ntSettingsFile}{}{}
+\usetheme{nature-\ntThemeName}
+
+\title{单细胞转录组揭示肿瘤微环境中的耗竭T细胞亚群}
+\author{汇报人：老大}
+\institute{某某大学生命科学学院}
+\newcommand{\ntVenue}{组会汇报}
+\date{2026 年 10 月 1 日}
+
+\begin{document}
+
+\naturetitlepage
+
+\naturesection{研究背景与科学问题}
+
+\begin{frame}{为什么这个问题重要}
+  \begin{itemize}
+    \item 免疫检查点抑制剂在实体瘤中应答率仅约 \alert{20\%--30\%}
+    \item 耗竭 T 细胞（\ntenterm{exhausted T cell}）是耐药的核心瓶颈
+    \item 既往研究多基于 bulk RNA-seq，掩盖了细胞异质性
+  \end{itemize}
+  \vspace{1mm}
+  \nttakeaway{核心矛盾：细胞状态异质性 vs.\ 治疗方案同质化}
+\end{frame}
+
+\naturefigurepage[0.8]{耗竭T细胞出现三个独立亚群}{assets/fig1.pdf}{Source: Fig.~2b, \textit{Nature}, 2024}{三个亚群在耗竭程度上呈连续谱，而非离散状态}
+
+\naturetwocol{亚群 TEX1 与 TEX3 的转录特征对比}
+  {TEX1：终末耗竭}
+  {\begin{itemize}
+     \item \ntenterm{PDCD1} 高表达
+     \item 细胞周期停滞
+     \item 效应分子分泌缺失
+   \end{itemize}}
+  {TEX3：祖细胞样}
+  {\begin{itemize}
+     \item \ntenterm{TCF7} 高表达
+     \item 保留增殖潜能
+     \item 对 \ntenterm{PD-1} 阻断敏感
+   \end{itemize}}
+
+\begin{frame}{定量的关键证据}
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+    亚群 & 占比 (\%) & 应答比值比 \\
+    \midrule
+    TEX1 & 41.2 & 0.38 \\
+    TEX2 & 27.5 & 0.91 \\
+    TEX3 & 31.3 & \alert{2.74} \\
+    \bottomrule
+  \end{tabular}
+  \ntsource{整理自 Supplementary Table~3}
+\end{frame}
+
+\begin{frame}{机制模型}
+  \begin{block}{工作假说}
+    \ntenterm{TCF7}$^{+}$ 祖细胞样亚群在 \ntenterm{PD-1} 阻断后扩增，
+    并持续补充终末耗竭池。
+  \end{block}
+  \vspace{1mm}
+  公式表达：$E(t) = E_0 e^{-\lambda t} + \dfrac{k}{\lambda}\left(1 - e^{-\lambda t}\right)$
+  \note{讲者备注：强调该模型只能解释短期动态，长期需要引入空间约束。}
+\end{frame}
+
+\natureclosing{讨论与提问}
+
+\end{document}

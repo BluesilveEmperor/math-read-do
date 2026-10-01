@@ -1,0 +1,220 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamer-nature-common}[2026/10/01 v1.0 Common layer for nature-* beamer themes]
+
+% ---------------------------------------------------------------------------
+% Shared engine for the nature-* beamer theme family.
+%
+% A concrete theme (beamerthemenature-*.sty) must define these before loading
+% this package:
+%   \ntPaletteText, \ntPaletteMuted, \ntPaletteAccent, \ntPaletteRule,
+%   \ntPalettePanel, \ntFontTitleCn, \ntFontBodyCn, \ntFontTitleEn, \ntFontBodyEn
+%
+% It then gets, for free, the six layout macros used by the paper2ppt skill:
+%   \naturetitlepage  \naturesection  \naturefigurepage
+%   \naturetwocol     \natureclosing  (+ plain frame = body slide)
+% ---------------------------------------------------------------------------
+
+\RequirePackage{iftex}
+\RequirePackage{etoolbox}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{fontspec}
+\RequirePackage{unicode-math}
+\RequirePackage{xeCJK}
+\RequirePackage{pgfpages}
+
+% ---------------------------------------------------------------------------
+% 1. Global geometry: 16:9 presentation.
+% ---------------------------------------------------------------------------
+\geometry{paperwidth=128mm,paperheight=72mm}
+\setbeamersize{text margin left=7mm,text margin right=7mm}
+
+% Frame numbering must be captured *after* the slide counter is finalised,
+% otherwise \inserttotalframenumber reports 1 on the first pass and the footer
+% reads "3/1". Deferring the assignment to the end of the run fixes both passes.
+\newcommand{\ntframetotal}{}
+\makeatletter
+\AtEndDocument{%
+  \immediate\write\@auxout{\gdef\noexpand\ntframetotal{\the\c@framenumber}}%
+}
+\makeatother
+\newcommand{\ntframecount}{\ntframetotal}
+
+% Suppress beamer's own navigation chrome; each theme draws its own.
+% The built-in title page is disabled too: themes compose the cover themselves
+% with overlays, and leaving the default template active would print \inserttitle
+% / \insertauthor / \insertinstitute a second time underneath that overlay.
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{title page}{}
+\setbeamercolor{normal text}{fg=\ntPaletteText}
+\setbeamercolor{structure}{fg=\ntPaletteAccent}
+\setbeamercolor{alerted text}{fg=\ntPaletteAccent}
+\setbeamercolor{title}{fg=\ntPaletteText}
+\setbeamercolor{frametitle}{fg=\ntPaletteText}
+\setbeamercolor{itemize item}{fg=\ntPaletteRule}
+\setbeamercolor{itemize subitem}{fg=\ntPaletteRule}
+\setbeamercolor{caption name}{fg=\ntPaletteAccent}
+
+% ---------------------------------------------------------------------------
+% 2. Fonts. Chinese = HarmonyOS Sans SC (system-installed; its Bold face exists
+%    only as style "Bold" of the family, and its default/Regular weight is
+%    "Medium", so both are addressed by explicit Font= / BoldFont= file names).
+%    Latin and math = Source Sans Pro from TeX Live, so decks stay reproducible
+%    without depending on Windows-only Latin fonts.
+% ---------------------------------------------------------------------------
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{\ntFontBodyEn}
+\setsansfont{\ntFontTitleEn}
+\setmonofont{Source Code Pro}[Scale=MatchLowercase]
+% An OpenType *Math* font must be loaded first; Source Sans Pro is a text font,
+% so seed with Latin Modern Math and then override the upright/italic Latin
+% ranges only. `up`/`it`/`bfup`/`bfit` are output-glyph alphabets; `bf`/`sf`
+% are input commands and unicode-math rejects them here.
+\setmathfont{Latin Modern Math}
+\setmathfont{Source Sans Pro}[range={up,it,bfup,bfit}]
+
+\RequirePackage{zhnumber}
+
+% ---------------------------------------------------------------------------
+% Figure resolution.
+%
+% Two traps, both verified on TeX Live 2026 / Windows:
+%   a) XeLaTeX resolves a relative \includegraphics path against the *output*
+%      directory, not the .tex file, so -output-directory=build breaks figures.
+%   b) A path containing "../" (or "." or "..") is rejected outright by
+%      kpathsea whenever an output directory is in play -- including the same
+%      path placed inside \graphicspath. Only absolute paths survive.
+%   c) \currfiledir collapses to an empty string in that same situation, so it
+%      cannot be used to build the absolute path either.
+%
+% Therefore a deck must declare one absolute root before loading the theme:
+%     \def\ntFiguresRoot{D:/path/to/project}   % or forward slashes, either is fine
+% and every figure is then written relative to that root:
+%     \naturefigurepage{标题}{assets/fig1.pdf}{来源}{结论}
+% The build script passes this in automatically through a generated settings
+% file that the deck \InputIfFileExists's -- not through -usepretex, which
+% XeLaTeX applies only after the preamble and which therefore cannot override
+% anything the document defines for itself. Authors can normally ignore it.
+% ---------------------------------------------------------------------------
+\makeatletter
+\providecommand{\ntFiguresRoot}{}
+\newcommand{\ntSetFiguresRoot}[1]{\gdef\ntFiguresRoot{#1}}
+\makeatother
+% Normalise a trailing slash away, then register the absolute root.
+\newcommand{\ntFiguresPath}{%
+  \ifx\ntFiguresRoot\@empty\else\graphicspath{{\ntFiguresRoot/}}\fi
+}
+\ntFiguresPath
+\AtBeginDocument{\ntFiguresPath}
+
+% Chinese scale of 1.05 keeps Han glyphs optically matched to the Latin size.
+% Faces are addressed by explicit file names, not by "Family Bold" name
+% concatenation, because fontspec would otherwise read that as one family
+% string ("HarmonyOS Sans SCBold") and fail to resolve it. HarmonyOS Sans SC
+% ships Regular / Medium / Bold; Medium (500) is used as the bold face, which
+% is what the family does when bolded in normal text. Themes may override the
+% two \ntFont...Face commands before loading this package.
+\providecommand{\ntFontBodyCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontBodyCnBoldFace}{HarmonyOS Sans SC Medium}
+\providecommand{\ntFontTitleCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontTitleCnBoldFace}{HarmonyOS Sans SC Medium}
+
+\newcommand{\ntSetupCJK}{%
+  \setCJKmainfont{\ntFontBodyCn}[%
+    Font={\ntFontBodyCnFace},BoldFont={\ntFontBodyCnBoldFace},Scale=1.05]%
+  \setCJKsansfont{\ntFontTitleCn}[%
+    Font={\ntFontTitleCnFace},BoldFont={\ntFontTitleCnBoldFace},Scale=1.05]%
+  \setCJKmonofont{\ntFontBodyCn}[Font={\ntFontBodyCnFace},Scale=1.05]%
+}
+\ntSetupCJK
+
+% Chinese typography. xeCJK rejects unknown keys with a hard error, and its key
+% set changed across TeX Live releases, so only universally valid keys are set
+% here. Line breaking between Han characters is enabled below through XeTeX's
+% own line-break locale, which is the mechanism that actually matters for CJK
+% paragraphs.
+\xeCJKsetup{
+  CJKmath=true,
+  CheckSingle=true,
+}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+\hbadness=10000
+\vbadness=10000
+
+% ---------------------------------------------------------------------------
+% 3. Language. Deck content is Chinese-by-default with English terms kept.
+% ---------------------------------------------------------------------------
+\RequirePackage[english,main=chinese]{babel}
+\babelprovide[import]{chinese}
+\newcommand{\ntenterm}[1]{\textsf{#1}}   % keep an English technical term upright
+
+% ---------------------------------------------------------------------------
+% 4. Quotation glyphs for Chinese copy.
+% ---------------------------------------------------------------------------
+\newcommand{\ntqq}[1]{\textquotedblleft#1\textquotedblright}
+
+% ---------------------------------------------------------------------------
+% 5. Universally useful bits used by the layout macros.
+% ---------------------------------------------------------------------------
+\newcommand{\ntsource}[1]{%
+  \par\vspace{1.2mm}%
+  {\fontsize{5.6}{6.6}\selectfont\color{\ntPaletteMuted}#1\par}%
+}
+% Takeaway panel: a tinted bar holding one sentence.
+% \colorbox with the default \fboxsep added ~4.4mm of padding on all four sides
+% and baseline-aligned the box, so the panel grew past the space budgeted for
+% it and collided with the footer overlay on figure pages. Padding is applied
+% only horizontally here, and must be applied to the whole \colorbox argument
+% (including the \par) so no extra line box is created.
+\newcommand{\nttakeaway}[1]{%
+  \par\vspace{1.2mm}%
+  \noindent
+  {\setlength{\fboxsep}{1.5mm}%
+   \colorbox{\ntPalettePanel}{%
+     \parbox{\dimexpr\linewidth-3mm\relax}{%
+       \fontsize{8.2}{9.6}\selectfont\color{\ntPaletteText}\raggedright #1}}%
+  }%
+  \par%
+}
+
+% Section-divider and title scaffolding share the same kicker style.
+\newcommand{\ntkicker}[1]{%
+  {\fontsize{7.2}{8.6}\selectfont\color{\ntPaletteAccent}%
+   \MakeUppercase{#1}}%
+}
+
+% ---------------------------------------------------------------------------
+% Figure page, implemented once for the whole theme family.
+%
+% Themes previously defined this individually and each got the vertical rhythm
+% slightly wrong, which put the takeaway panel on top of the footer. The layout
+% is therefore shared, and themes only tune two lengths:
+%   \ntFigGraphicFrac  height of the graphic slot, as a fraction of \textheight
+%   \ntFigCaptionFrac  height of the source+takeaway slot
+% Leaving the slots at a total of ~0.60\textheight leaves the remaining ~0.25
+% for the frame title, the footer strip and slack.
+%
+% The caption slot is bottom-aligned ([b]) so the takeaway panel always ends at
+% the same place no matter how long the source line is.
+\providecommand{\ntFigGraphicFrac}{0.47}
+\providecommand{\ntFigCaptionFrac}{0.125}
+
+% \naturefigurepage[width fraction]{title}{graphic path}{source}{takeaway}
+% #1 optional width, #2 title, #3 graphic, #4 source, #5 takeaway
+\newcommand{\naturefigurepage}[5][0.80]{%
+  \begin{frame}{#2}
+    \centering
+    \begin{minipage}[c][\ntFigGraphicFrac\textheight][c]{\linewidth}
+      \centering
+      \includegraphics[width=#1\linewidth,height=\linewidth,keepaspectratio]{#3}%
+    \end{minipage}%
+    \par\vspace{0.6mm}%
+    \begin{minipage}[b][\ntFigCaptionFrac\textheight][b]{\linewidth}
+      \ifx\relax#4\relax\else\ntsource{#4}\fi
+      \ifx\relax#5\relax\else\nttakeaway{#5}\fi
+    \end{minipage}%
+  \end{frame}%
+}

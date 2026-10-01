@@ -1,6 +1,7 @@
 # Workflow
 
-Run these nine steps for any paper-to-deck job.
+Run these nine steps for any paper-to-deck job. Steps 1–6 and 8–9 are unchanged
+from the PPTX era; step 7 now produces a Beamer deck instead of a `.pptx`.
 
 ## Step 1. Read and extract source material
 
@@ -26,14 +27,43 @@ Extract or render only selected figures, crop dense panels, keep original data v
 
 For each slide write: Chinese title (conclusion-style where possible), slide purpose, suggested layout, 2-4 concise Chinese bullets, the selected figure/table asset if any, Chinese caption and interpretation, one core takeaway sentence, and a concise Chinese speaker note.
 
-## Step 7. Build the actual PPTX deck
+Map the layout to a macro from the theme family:
 
-Create a real `.pptx` as the primary deliverable with `python-pptx` using 16:9 by default, Chinese titles/bullets/captions/notes, source labels on figure slides, and consistent typography.
+| Intended layout | Macro |
+|---|---|
+| Cover | `\naturetitlepage` |
+| Story beat | `\naturesection{…}` |
+| Figure callout | `\naturefigurepage{…}` |
+| Two-panel comparison | `\naturetwocol{…}` |
+| Data table | a `frame` with `booktabs` |
+| Text / bullets | a plain `frame` |
+| Closing | `\natureclosing{…}` |
+
+## Step 7. Write and compile the Beamer deck
+
+Pick one theme from `beamer/THEMES.md` (default `nature-slate`), write
+`output/slides/slides.tex` using the macros above, and compile it:
+
+```bash
+bash build/build.sh <theme>
+```
+
+Compile twice for the frame counter; `build.sh` handles this. Do not write speaker
+notes as separate prose files — use Beamer's `\note{}` so they travel with the slides.
+
+Require zero `!` errors and an aspect ratio of 1.778 before moving on.
 
 ## Step 8. Self-review and corrective revision loop
 
-After the first draft, run at least one explicit self-review pass. Write a severity-graded defect list, fix every high-severity issue and every reasonable medium one, regenerate, and update `output/qa_report.md`.
+After the first draft, run at least one explicit self-review pass. Write a severity-graded defect list, fix every high-severity issue and every reasonable medium one, recompile, and update `output/qa_report.md`.
+
+Check both the log and the rendered pages. Layout defects such as a takeaway panel
+overlapping the footer do not appear in the log — measure them
+(`beamer/README.md` has the snippet).
 
 ## Step 9. Final verification
 
-Reopen the PPTX, check slide count, embedded media count, and speaker-notes presence. Do not stop at "PPTX opens" if self-review found high-severity issues.
+Recompile and confirm: zero errors; aspect ratio 1.778; the expected slide count;
+figures all present and legible; every `\note{}` retained; no page overflowing the
+text block. Do not stop at "it compiles" if self-review found high-severity issues.
+
