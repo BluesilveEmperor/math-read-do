@@ -16,6 +16,10 @@ obj 分支 = 面向"输出 .obj 文件"的计算机图形学/几何处理实验�
 - **对原始 C++ 实现的关键改进**：最优位置解 4×4 线性系统（论文 Eq.5）、增量 heapq O(log n)/步、标记-清理面删除 O(1)、法线加权平均重建、边界约束保护
 - **验证 + 基准闭环**：`scripts/verify_qem.py`（支持 Hausdorff 距离检查）+ `scripts/benchmark_qem.py` 性能基准 + `tests/` 测试套件
 - **多模型交叉验证**：区别于通用流程的多随机种子统计验证，本分支以多模型交叉对比作为正确性依据
+- **网格语料清单（corpus/）**：`corpus/MANIFEST.json` 以 sha256 + 顶点/面数锚定 6 个实验网格（bs_rest / dragon_fat / capsule / spot / boxpart / spot_subdiv），`scripts/verify_corpus.py` 提供完整性校验（篡改/缺失即 FAIL）与 `--regen` 重生成
+- **金样本回归测试（corpus/golden/）**：ICE（Intrinsic Error Metrics, SIGGRAPH 2023）18 个已验证稀疏矩阵（延拓/拉普拉斯/质量矩阵，标量与向量版）作为金样本；spot 系列 9 个入仓全量断言，dragon 系列 9 个按需启用（设 `ICE_GOLDEN_DRAGON_DIR` 指向本地矩阵目录，未设则 SKIP）；解析库 `corpus/spmat.py`
+- **G9 发布前交叉校验门**：SKILL.md Phase 7 + 门禁总表——报告数字与验证产物逐格核对、表格标签行列双重核对、参数声称对账（含"输入数=目标数+移除数"自洽检查）；以 `EXPERIMENT_REPORT.md` 7 处手抄数字错误为登记回归案例
+- **algos 插件化架构（RFC + 骨架）**：`docs/rfc/001-algos-registry.md`（registry schema、qem_tool→algos/qem 三阶段迁移、ICE adapter subprocess-wrapper 优先、金样本版本化）+ `algos/registry.yaml` 骨架（qem active + ice planned）——多算法基准平台的 E1/E2 设计依据
 
 ## 项目结构
 
@@ -25,13 +29,21 @@ math-read-do/
 │   ├── cli.py               # CLI 入口
 │   ├── qem_core.py          # QEM 算法引擎
 │   └── obj_io.py            # 通用 .obj 解析/导出
+├── corpus/                  # 网格语料清单 + 金样本矩阵
+│   ├── MANIFEST.json        # 语料清单（sha256 锚定）
+│   ├── spmat.py             # 稀疏矩阵解析库
+│   └── golden/              # ICE 金样本（spot 入仓 + dragon 外部）
+├── algos/                   # 算法插件注册表骨架
+│   └── registry.yaml        # qem(active) + ice(planned)
+├── docs/
+│   └── rfc/                 # RFC（001: algos 插件化注册表）
 ├── nature-reader/           # 学术论文阅读与提取
 ├── nature-figure/           # 论文配图制作 (matplotlib/seaborn → PDF/SVG)
 ├── nature-paper2ppt/        # 论文转演示文稿
 ├── nature-archify/        # 系统架构/流程/时序/数据流图渲染引擎
 ├── _shared/                 # 共享核心模块（伦理/术语/工作流）
 ├── tests/                   # 测试套件
-├── scripts/                 # 验证 + 基准
+├── scripts/                 # 验证 + 基准 + 语料校验
 ├── templates/               # 报告模板
 └── results/                 # 运行结果
 ```
@@ -76,6 +88,32 @@ python scripts/verify_qem.py -i model.obj -f 2000 --check-hausdorff
 python scripts/benchmark_qem.py -i model.obj
 ```
 
+### 网格语料与金样本测试
+
+```bash
+# 校验网格语料清单（MANIFEST.json 对照 sha256/顶点/面数；篡改或缺失即 FAIL）
+python scripts/verify_corpus.py --mesh-dir <meshes_dir>
+python scripts/verify_corpus.py --regen --mesh-dir <meshes_dir>   # 重生成 MANIFEST
+
+# 金样本矩阵回归测试（spot 9 矩阵全量断言；dragon 9 矩阵未设目录时 SKIP）
+python -m pytest tests/test_golden_matrices.py -v
+```
+
+dragon 系列金样本不入仓（体积原因）。如本地已有矩阵目录（来源：obj_exp
+`ICE_Experiment_Logs/matrices/`，快照 `ICE_Experiment_Logs.7z`），设置环境变量后
+测试自动启用其全量校验（sha256/维度/nnz/统计值/数值性质）：
+
+```bash
+# PowerShell
+$env:ICE_GOLDEN_DRAGON_DIR = "<path/to/matrices>"; python -m pytest tests/test_golden_matrices.py -v
+
+# bash
+ICE_GOLDEN_DRAGON_DIR=<path/to/matrices> python -m pytest tests/test_golden_matrices.py -v
+```
+
+各矩阵性质断言与已知现象（dragon 向量延拓行偏差 ≈8.9e-2、上游空行 HACK 等）见
+`corpus/golden/README.md`；发布前请走 SKILL.md Phase 7 的 G9 交叉校验门。
+
 ### Nature 系列子技能
 
 | 子技能 | 功能 | 入口 |
@@ -89,8 +127,9 @@ python scripts/benchmark_qem.py -i model.obj
 
 | 包 | 用途 | 必要 |
 |----|------|------|
-| numpy | 矩阵运算 (QEM) | ✅ |
+| numpy | 矩阵运算 (QEM) + 金样本断言 | ✅ |
 | pytest | 测试运行 | ❌ (推荐) |
+| PyYAML | `algos/registry.yaml` 解析 | ❌ (推荐) |
 | matplotlib | 可视化 | ❌ (可选) |
 
 ## Nature 子技能依赖
