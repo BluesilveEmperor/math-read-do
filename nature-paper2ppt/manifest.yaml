@@ -1,10 +1,11 @@
 name: nature-paper2ppt
-version: 2.0.0
+version: 3.0.0
 description: >
   Declarative manifest for the static/dynamic split. SKILL.md uses this to
-  decide which fragments to load for a given paper-to-PPTX request. The main
+  decide which fragments to load for a given paper-to-slides request. The main
   axis is the paper type, which selects the presentation narrative arc and the
-  default slide structure.
+  default slide structure. Decks are built with XeLaTeX + Beamer (see
+  beamer/README.md); the build layer was previously python-pptx.
 
 always_load:
   - ../_shared/core/terminology-ledger.md
@@ -33,11 +34,34 @@ axes:
     default: discovery
     multi: false
 
+  theme:
+    detect: |
+      Pick one Beamer theme for the deck; it changes look only, never structure.
+        slate  — grey-blue monochrome, top hairline. Safest general choice. Default.
+        navy   — deep blue with a warm accent and a bottom progress bar. Formal
+                 venues, defences, long reports with clear section structure.
+        ink    — near-black, achromatic, oversized titles, figure-first. Group
+                 meetings and image-heavy short reports.
+        paper  — warm off-white field, serif-flavoured headings. Reading reports
+                 and anything that will be printed.
+    values:
+      slate:  beamer/themes/beamerthemenature-slate.sty
+      navy:   beamer/themes/beamerthemenature-navy.sty
+      ink:    beamer/themes/beamerthemenature-ink.sty
+      paper:  beamer/themes/beamerthemenature-paper.sty
+    default: slate
+    multi: false
+
 references:
   on_demand:
     - condition: designing or auditing slide composition, visual rhythm, layout, typography, anti-template, archetypes, on-slide text budget
       path: references/design-and-layout.md
+    - condition: choosing a theme, or working on theme internals, the shared layout macros, build script, or known XeLaTeX/kpathsea traps
+      path: beamer/README.md
+    - condition: comparing the four themes and picking one for a venue
+      path: beamer/THEMES.md
     - condition: selecting, extracting, cropping, and quality-checking figure/table assets
       path: references/figure-assets.md
-    - condition: running the self-review/corrective revision loop, severity grading, programmatic python-pptx checks, rendered-preview policy, final verification
+    - condition: running the self-review/corrective revision loop, severity grading, compile and rendered-page checks, final verification
       path: references/self-review.md
+

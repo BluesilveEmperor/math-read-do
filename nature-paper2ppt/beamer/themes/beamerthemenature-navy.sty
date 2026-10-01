@@ -1,0 +1,214 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemenature-navy}[2026/10/01 v1.0 Navy: deep blue with a warm accent]
+
+% --- Palette -----------------------------------------------------------------
+% One cool dominant, one warm accent used sparingly for emphasis only.
+\definecolor{ntNavyText}{HTML}{152238}
+\definecolor{ntNavyMuted}{HTML}{6B7A90}
+\definecolor{ntNavyAccent}{HTML}{2E4A6B}
+\definecolor{ntNavyWarm}{HTML}{B5651D}
+\definecolor{ntNavyRule}{HTML}{C9D2DE}
+\definecolor{ntNavyPanel}{HTML}{EDF1F6}
+
+\newcommand{\ntPaletteText}{ntNavyText}
+\newcommand{\ntPaletteMuted}{ntNavyMuted}
+\newcommand{\ntPaletteAccent}{ntNavyAccent}
+\newcommand{\ntPaletteWarm}{ntNavyWarm}
+\newcommand{\ntPaletteRule}{ntNavyRule}
+\newcommand{\ntPalettePanel}{ntNavyPanel}
+
+% Figure-page vertical budget for this theme (fractions of \textheight).
+% Tuned so the frame title, the graphic, the caption slot and the footer
+% strip together never exceed the page.
+\providecommand{\ntFigGraphicFrac}{0.45}
+\providecommand{\ntFigCaptionFrac}{0.120}
+% --- Typography --------------------------------------------------------------
+\newcommand{\ntFontTitleCn}{HarmonyOS Sans SC}
+\newcommand{\ntFontBodyCn}{HarmonyOS Sans SC}
+\newcommand{\ntFontTitleEn}{Source Sans Pro}
+\newcommand{\ntFontBodyEn}{Source Sans Pro}
+\providecommand{\ntFontTitleCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontTitleCnBoldFace}{HarmonyOS Sans SC Medium}
+\providecommand{\ntFontBodyCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontBodyCnBoldFace}{HarmonyOS Sans SC Medium}
+
+\RequirePackage{../common/beamer-nature-common}
+\RequirePackage{tikz}
+
+% Warm accent also drives beamer's own alert colour.
+\setbeamercolor{alerted text}{fg=\ntPaletteWarm}
+
+% --- Chrome: a rule under the title, a progress bar along the bottom ---------
+\newcommand{\ntFooter}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    % Progress bar sits on the very bottom edge; its labels sit above it.
+    \fill[\ntPaletteRule]
+      ([yshift=1.4mm]current page.south west) rectangle
+      ([yshift=2.0mm]current page.south east);
+    \fill[\ntPaletteAccent]
+      ([yshift=1.4mm]current page.south west) rectangle
+      ([xshift=\dimexpr\paperwidth*\insertframenumber/\ntframecount\relax,
+        yshift=2.0mm]current page.south west);
+    \node[anchor=south west,inner sep=0pt]
+      at ([xshift=7mm,yshift=3.0mm]current page.south west)
+      {\fontsize{6.2}{7}\selectfont\color{\ntPaletteMuted}\insertshorttitle};
+    \node[anchor=south east,inner sep=0pt]
+      at ([xshift=-7mm,yshift=3.0mm]current page.south east)
+      {\fontsize{6.2}{7}\selectfont\color{\ntPaletteMuted}%
+       \insertframenumber\,/\,\ntframecount};
+  \end{tikzpicture}%
+}
+
+\setbeamertemplate{frametitle}{%
+  \vspace{1.5mm}%
+  {\fontsize{14}{16.5}\selectfont\color{\ntPaletteText}\bfseries
+   \insertframetitle\par}%
+  \vspace{0.8mm}%
+  {\color{\ntPaletteAccent}\rule{14mm}{0.9pt}\hspace{0.4mm}%
+   \color{\ntPaletteRule}\rule{\dimexpr\linewidth-14.4mm\relax}{0.9pt}\par}%
+  \vspace{1.7mm}%
+}
+\setbeamertemplate{footline}{}
+% Reserve the progress bar strip so ordinary content stops above it.
+\addtobeamertemplate{frametitle}{\ntFooter}{}
+
+% --- Body slides -------------------------------------------------------------
+\setbeamertemplate{itemize item}{\color{\ntPaletteAccent}\rule[0.42ex]{1.5mm}{1.5mm}}
+\setbeamertemplate{itemize subitem}{\color{\ntPaletteWarm}\textendash}
+\setbeamertemplate{enumerate item}{%
+  {\fontsize{8.6}{9}\selectfont\color{\ntPaletteWarm}\bfseries\insertenumlabel}%
+}
+\setbeamerfont{itemize/enumerate body}{size=\fontsize{9.2}{11.4}}
+\setbeamerfont{itemize/enumerate subbody}{size=\fontsize{8.2}{10.2}}
+
+% Blocks take the warm accent as a left bar rather than a filled box.
+\setbeamertemplate{block begin}{%
+  \vskip3mm%
+  \begin{beamercolorbox}[wd=\linewidth,sep=0pt]{block body}%
+    {\color{\ntPaletteWarm}\rule{1.4mm}{0pt}%
+     \hspace{-1.4mm}\color{\ntPaletteWarm}\vrule width 1.4mm}%
+    \hspace{1.6mm}%
+    \begin{minipage}[t]{\dimexpr\linewidth-4mm\relax}%
+      {\fontsize{9.2}{11}\selectfont\color{\ntPaletteWarm}\bfseries
+       \insertblocktitle\par}\vspace{0.6mm}%
+}
+\setbeamertemplate{block end}{%
+    \end{minipage}%
+  \end{beamercolorbox}%
+  \vskip1mm%
+}
+
+% --- Title page --------------------------------------------------------------
+% The navy band is a full-bleed overlay; all cover text is drawn as overlay
+% nodes too, so the vertical rhythm is fixed and cannot drift when the title
+% wraps to a second line. Drawing some text in the overlay and some in the
+% normal text flow is what previously pushed the author line into the band.
+\newcommand{\naturetitlepage}{%
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      % Band across the upper ~42% of the page.
+      \fill[\ntPaletteAccent]
+        (current page.north west) rectangle
+        ([yshift=-30mm]current page.north east);
+      \fill[\ntPaletteWarm]
+        ([yshift=-30mm]current page.north west) rectangle
+        ([yshift=-31mm]current page.north east);
+
+      % Kicker sits at the top of the band, well clear of the title below it.
+      \node[anchor=north west,inner sep=0pt,
+            text width=\dimexpr\paperwidth-16mm\relax]
+        at ([xshift=8mm,yshift=-8mm]current page.north west)
+        {\fontsize{7}{8.4}\selectfont\color{white!70!ntNavyAccent}%
+         \MakeUppercase{文献汇报}};
+
+      % Title anchored to the bottom of the band so a two-line title grows
+      % upward instead of colliding with the kicker.
+      \node[anchor=south west,inner sep=0pt,
+            text width=\dimexpr\paperwidth-16mm\relax]
+        at ([xshift=8mm,yshift=-27mm]current page.north west)
+        {\setlength{\baselineskip}{10.5pt}%
+         \fontsize{16}{19}\selectfont\color{white}\bfseries\inserttitle};
+
+      % Attribution block on the light field below the band.
+      \node[anchor=north west,inner sep=0pt,
+            text width=\dimexpr\paperwidth-16mm\relax]
+        at ([xshift=8mm,yshift=-38mm]current page.north west)
+        {\fontsize{9.4}{11.6}\selectfont\color{ntNavyText}\insertauthor\par
+         \vspace{1.3mm}%
+         \fontsize{7.6}{9.4}\selectfont\color{ntNavyMuted}\insertinstitute};
+
+      \node[anchor=south west,inner sep=0pt]
+        at ([xshift=8mm,yshift=6mm]current page.south west)
+        {\fontsize{7.2}{8.8}\selectfont\color{ntNavyMuted}%
+         \ifx\ntVenue\undefined\else\ntVenue\quad·\quad\fi\insertdate};
+    \end{tikzpicture}%
+  \end{frame}%
+}
+
+% --- Section divider ---------------------------------------------------------
+% Navy band on the left edge, phrase sitting on the light field.
+\newcommand{\naturesection}[1]{%
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[\ntPaletteAccent]
+        (current page.north west) rectangle
+        ([xshift=26mm]current page.south west);
+      \fill[\ntPaletteWarm]
+        ([xshift=26mm]current page.north west) rectangle
+        ([xshift=27mm]current page.south west);
+      \node[anchor=west,inner sep=0pt,rotate=90,text=white]
+        at ([xshift=13mm]current page.west)
+        {\fontsize{7}{8.4}\selectfont\MakeUppercase{Part}};
+    \end{tikzpicture}
+    \hspace{32mm}%
+    \begin{minipage}[c][\textheight][c]{\dimexpr\linewidth-32mm\relax}
+      \raggedright
+      {\fontsize{15.5}{19}\selectfont\color{\ntPaletteText}\bfseries #1\par}
+      \vspace{2.2mm}
+      {\color{\ntPaletteWarm}\rule{16mm}{0.9pt}\par}
+    \end{minipage}%
+  \end{frame}%
+}
+
+% --- Two-column comparison ---------------------------------------------------
+\newcommand{\naturetwocol}[5]{%
+  \begin{frame}{#1}
+    \begin{columns}[T,onlytextwidth]
+      \begin{column}{0.48\textwidth}
+        {\fontsize{8.6}{10}\selectfont\color{\ntPaletteAccent}\bfseries #2\par}
+        \vspace{1.1mm}
+        {\color{\ntPaletteAccent}\rule{8mm}{0.8pt}\par}
+        \vspace{1.4mm}
+        {\fontsize{8.8}{11}\selectfont #3\par}
+      \end{column}
+      \hfill
+      \begin{column}{0.48\textwidth}
+        {\fontsize{8.6}{10}\selectfont\color{\ntPaletteWarm}\bfseries #4\par}
+        \vspace{1.1mm}
+        {\color{\ntPaletteWarm}\rule{8mm}{0.8pt}\par}
+        \vspace{1.4mm}
+        {\fontsize{8.8}{11}\selectfont #5\par}
+      \end{column}
+    \end{columns}
+  \end{frame}%
+}
+
+% --- Closing -----------------------------------------------------------------
+\newcommand{\natureclosing}[1]{%
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[\ntPaletteAccent]
+        ([yshift=0mm]current page.south west) rectangle
+        ([yshift=14mm]current page.south east);
+      \fill[\ntPaletteWarm]
+        ([yshift=14mm]current page.south west) rectangle
+        ([yshift=15mm]current page.south east);
+    \end{tikzpicture}
+    \vfill
+    \centering
+    {\fontsize{15}{18}\selectfont\color{\ntPaletteText}\bfseries #1\par}
+    \vspace{2.6mm}
+    {\color{\ntPaletteWarm}\rule{16mm}{0.9pt}\par}
+    \vspace{18mm}
+  \end{frame}%
+}
