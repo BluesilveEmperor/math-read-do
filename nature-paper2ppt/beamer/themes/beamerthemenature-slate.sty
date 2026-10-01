@@ -1,0 +1,155 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemenature-slate}[2026/10/01 v1.0 Slate: grey-blue monochrome]
+
+% --- Palette -----------------------------------------------------------------
+\definecolor{ntSlateText}{HTML}{1F2933}
+\definecolor{ntSlateMuted}{HTML}{8A93A0}
+\definecolor{ntSlateAccent}{HTML}{6B7C8C}
+\definecolor{ntSlateRule}{HTML}{D8DEE6}
+\definecolor{ntSlatePanel}{HTML}{F3F5F7}
+
+\newcommand{\ntPaletteText}{ntSlateText}
+\newcommand{\ntPaletteMuted}{ntSlateMuted}
+\newcommand{\ntPaletteAccent}{ntSlateAccent}
+\newcommand{\ntPaletteRule}{ntSlateRule}
+\newcommand{\ntPalettePanel}{ntSlatePanel}
+
+% Figure-page vertical budget for this theme (fractions of \textheight).
+% Tuned so the frame title, the graphic, the caption slot and the footer
+% strip together never exceed the page.
+\providecommand{\ntFigGraphicFrac}{0.47}
+\providecommand{\ntFigCaptionFrac}{0.125}
+% --- Typography --------------------------------------------------------------
+% HarmonyOS Sans SC ships three files: Regular / Medium / Bold. Faces are named
+% explicitly because the bold face is a separate file, not a style of the same
+% family string (see the CJK setup in the common layer).
+\newcommand{\ntFontTitleCn}{HarmonyOS Sans SC}
+\newcommand{\ntFontBodyCn}{HarmonyOS Sans SC}
+\newcommand{\ntFontTitleEn}{Source Sans Pro}
+\newcommand{\ntFontBodyEn}{Source Sans Pro}
+\providecommand{\ntFontTitleCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontTitleCnBoldFace}{HarmonyOS Sans SC Medium}
+\providecommand{\ntFontBodyCnFace}{HarmonyOS Sans SC Regular}
+\providecommand{\ntFontBodyCnBoldFace}{HarmonyOS Sans SC Medium}
+
+\RequirePackage{../common/beamer-nature-common}
+\RequirePackage{tikz}
+
+% --- Chrome: a 1.1mm accent bar across the very top, nothing else ------------
+\newcommand{\ntTopbar}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[\ntPaletteAccent]
+      (current page.north west) rectangle ([yshift=-1.1mm]current page.north east);
+  \end{tikzpicture}%
+}
+
+\setbeamertemplate{frametitle}{%
+  \vspace{1.6mm}%
+  {\fontsize{14.5}{17}\selectfont\color{\ntPaletteText}\bfseries\insertframetitle\par}%
+  \vspace{0.9mm}%
+  {\color{\ntPaletteRule}\rule{\linewidth}{0.5pt}\par}%
+  \vspace{1.8mm}%
+}
+
+% The footer is drawn as an overlay pinned to the page bottom. Beamer's normal
+% footline template participates in the text block and therefore overlapped the
+% \nttakeaway panel on figure slides; an overlay cannot collide with content.
+\setbeamertemplate{footline}{}
+\newcommand{\ntFooter}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south west,inner sep=0pt]
+      at ([xshift=7mm,yshift=2.2mm]current page.south west)
+      {\fontsize{6.2}{7}\selectfont\color{\ntPaletteMuted}\insertshorttitle};
+    \node[anchor=south east,inner sep=0pt]
+      at ([xshift=-7mm,yshift=2.2mm]current page.south east)
+      {\fontsize{6.2}{7}\selectfont\color{\ntPaletteMuted}%
+       \insertframenumber\,/\,\ntframecount};
+  \end{tikzpicture}%
+}
+% Reserve the footer strip so ordinary text never runs into it.
+\addtobeamertemplate{frametitle}{\ntFooter}{}
+
+% --- Body slides -------------------------------------------------------------
+\setbeamertemplate{itemize item}{\color{\ntPaletteRule}\rule[0.42ex]{1.5mm}{1.5mm}}
+\setbeamertemplate{itemize subitem}{\color{\ntPaletteMuted}\textendash}
+\setbeamertemplate{enumerate item}{%
+  {\fontsize{8.6}{9}\selectfont\color{\ntPaletteAccent}\bfseries\insertenumlabel}%
+}
+
+\setbeamerfont{itemize/enumerate body}{size=\fontsize{9.2}{11.4}}
+\setbeamerfont{itemize/enumerate subbody}{size=\fontsize{8.2}{10.2}}
+
+% --- Title page --------------------------------------------------------------
+\newcommand{\naturetitlepage}{%
+  \begin{frame}[plain]
+    \ntTopbar
+    \vspace{9mm}
+    {\ntkicker{文献汇报}\par}
+    \vspace{2.4mm}
+    {\fontsize{19}{23}\selectfont\color{\ntPaletteText}\bfseries
+     \inserttitle\par}
+    \vspace{3.2mm}
+    {\color{\ntPaletteRule}\rule{28mm}{0.7pt}\par}
+    \vspace{3.0mm}
+    {\fontsize{9.4}{11.6}\selectfont\color{\ntPaletteMuted}%
+     \insertauthor\par}
+    \vspace{1.4mm}
+    {\fontsize{7.6}{9.4}\selectfont\color{\ntPaletteMuted}%
+     \insertinstitute\par}
+    \vfill
+    {\fontsize{7.2}{8.8}\selectfont\color{\ntPaletteMuted}%
+     \ifx\ntVenue\undefined\else\ntVenue\quad·\quad\fi\insertdate\par}
+    \vspace{3mm}
+  \end{frame}%
+}
+
+% --- Section divider ---------------------------------------------------------
+\newcommand{\naturesection}[1]{%
+  \begin{frame}[plain]
+    \ntTopbar
+    \vfill
+    {\ntkicker{Part}\par}
+    \vspace{2.0mm}
+    {\fontsize{16}{19.5}\selectfont\color{\ntPaletteText}\bfseries #1\par}
+    \vspace{2.4mm}
+    {\color{\ntPaletteRule}\rule{18mm}{0.7pt}\par}
+    \vfill
+  \end{frame}%
+}
+
+% --- Two-column comparison ---------------------------------------------------
+% \naturetwocol{title}{left head}{left body}{right head}{right body}
+\newcommand{\naturetwocol}[5]{%
+  \begin{frame}{#1}
+    \begin{columns}[T,onlytextwidth]
+      \begin{column}{0.48\textwidth}
+        {\fontsize{8.6}{10}\selectfont\color{\ntPaletteAccent}\bfseries #2\par}
+        \vspace{1.2mm}
+        {\color{\ntPaletteRule}\rule{\linewidth}{0.5pt}\par}
+        \vspace{1.4mm}
+        {\fontsize{8.8}{11}\selectfont #3\par}
+      \end{column}
+      \hfill
+      \begin{column}{0.48\textwidth}
+        {\fontsize{8.6}{10}\selectfont\color{\ntPaletteAccent}\bfseries #4\par}
+        \vspace{1.2mm}
+        {\color{\ntPaletteRule}\rule{\linewidth}{0.5pt}\par}
+        \vspace{1.4mm}
+        {\fontsize{8.8}{11}\selectfont #5\par}
+      \end{column}
+    \end{columns}
+  \end{frame}%
+}
+
+% --- Closing -----------------------------------------------------------------
+\newcommand{\natureclosing}[1]{%
+  \begin{frame}[plain]
+    \ntTopbar
+    \vfill
+    \centering
+    {\fontsize{15}{18}\selectfont\color{\ntPaletteText}\bfseries #1\par}
+    \vspace{3mm}
+    {\color{\ntPaletteRule}\rule{18mm}{0.7pt}\par}
+    \vfill
+  \end{frame}%
+}
