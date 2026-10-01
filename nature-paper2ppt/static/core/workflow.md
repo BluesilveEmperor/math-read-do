@@ -48,6 +48,12 @@ Pick one theme from `beamer/THEMES.md` (default `nature-slate`), write
 bash build/build.sh <theme>
 ```
 
+The deck's `\documentclass` must carry the `t` class option
+(`\documentclass[aspectratio=169,10pt,t]{beamer}`): beamer vertically centres
+frame content by default, and short slides then show a dead band between title
+and body. The six layout macros already force `[t]` internally; the class
+option covers the plain frames written in the deck.
+
 Compile twice for the frame counter; `build.sh` handles this. Do not write speaker
 notes as separate prose files — use Beamer's `\note{}` so they travel with the slides.
 
