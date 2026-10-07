@@ -1,7 +1,8 @@
 # Workflow
 
-Run these nine steps for any paper-to-deck job. Steps 1–6 and 8–9 are unchanged
-from the PPTX era; step 7 now produces a Beamer deck instead of a `.pptx`.
+Run these ten steps for any paper-to-deck job. Steps 1–5 are unchanged from the
+PPTX era; step 6 (table recreation) and step 7 (slide content) are new; steps 8–10
+produce and verify the Beamer deck.
 
 ## Step 1. Read and extract source material
 
@@ -23,7 +24,26 @@ Prioritize figures that carry the argument: design/workflow, main evidence, vali
 
 Extract or render only selected figures, crop dense panels, keep original data visuals unchanged, save under `output/assets/figures/`, and record traceability in `output/asset_manifest.md`.
 
-## Step 6. Write slide-by-slide content
+When converting PNG figures to PDF for XeLaTeX, **always use `img2pdf`** — never use
+Pillow's `Image.save('PDF')`, which produces non-renderable PDFs (path/outline data
+instead of embedded raster images):
+
+```python
+import img2pdf
+with open('output.pdf', 'wb') as f:
+    f.write(img2pdf.convert('input.png'))
+```
+
+## Step 6. Recreate tables from source data
+
+When the source paper contains numerical tables (benchmark results, ablation studies,
+comparison matrices), **recreate them as LaTeX `booktabs` tables** — never embed a
+screenshot. Use `\toprule`/`\midrule`/`\bottomrule`/`\cmidrule`, wrap in a
+`\fontsize{6.8}{8.2}\selectfont` block for dense tables, highlight the proposed
+method with `\alert{}`, and cite with `\ntsource{}`. Split large tables across
+slides. See `static/core/output-and-quality.md` for the full rationale.
+
+## Step 7. Write slide-by-slide content
 
 For each slide write: Chinese title (conclusion-style where possible), slide purpose, suggested layout, 2-4 concise Chinese bullets, the selected figure/table asset if any, Chinese caption and interpretation, one core takeaway sentence, and a concise Chinese speaker note.
 
@@ -39,7 +59,7 @@ Map the layout to a macro from the theme family:
 | Text / bullets | a plain `frame` |
 | Closing | `\natureclosing{…}` |
 
-## Step 7. Write and compile the Beamer deck
+## Step 8. Write and compile the Beamer deck
 
 Pick one theme from `beamer/THEMES.md` (default `nature-slate`), write
 `output/slides/slides.tex` using the macros above, and compile it:
@@ -59,7 +79,7 @@ notes as separate prose files — use Beamer's `\note{}` so they travel with the
 
 Require zero `!` errors and an aspect ratio of 1.778 before moving on.
 
-## Step 8. Self-review and corrective revision loop
+## Step 9. Self-review and corrective revision loop
 
 After the first draft, run at least one explicit self-review pass. Write a severity-graded defect list, fix every high-severity issue and every reasonable medium one, recompile, and update `output/qa_report.md`.
 
@@ -67,7 +87,7 @@ Check both the log and the rendered pages. Layout defects such as a takeaway pan
 overlapping the footer do not appear in the log — measure them
 (`beamer/README.md` has the snippet).
 
-## Step 9. Final verification
+## Step 10. Final verification
 
 Recompile and confirm: zero errors; aspect ratio 1.778; the expected slide count;
 figures all present and legible; every `\note{}` retained; no page overflowing the

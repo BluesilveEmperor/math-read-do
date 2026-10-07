@@ -28,6 +28,28 @@ sees; the `.tex` is what the next person edits.
 Figure paths inside `slides.tex` are written **relative to the deck's figure root**,
 e.g. `assets/fig1.pdf`, never with a leading `../`.
 
+## Tables from source data
+
+When the source paper provides structured data (benchmark tables, ablation results,
+comparison matrices), **always render them as LaTeX `booktabs` tables** — never embed
+a screenshot or PDF of the original table. Reasons:
+
+- Text remains selectable and searchable in the output PDF.
+- File size shrinks dramatically (a table image at 10–15 KB vs. an embedded PDF
+  page at 150+ KB).
+- Fonts and typography match the deck theme.
+- The table can be edited directly in `.tex` without re-extraction.
+
+Use `\booktabs` rules (`\toprule`, `\midrule`, `\bottomrule`, `\cmidrule`), a
+`tabular` or `tabularx` environment, and `\fontsize{6.8}{8.2}\selectfont` for dense
+tables. Highlight the proposed method's column with `\alert{}` and label the source
+with `\ntsource{}`. Split large tables across multiple slides if needed.
+
+## Closing slide
+
+默认不包含"讨论与提问"尾页（`\natureclosing{...}`）。以"核心贡献总结"作为最后一页，
+让听众带着完整的结论离开。仅在用户明确要求时添加尾页。
+
 ## Quality rules
 
 - The deck must compile: zero `!` errors in the log.
@@ -39,6 +61,8 @@ e.g. `assets/fig1.pdf`, never with a leading `../`.
 - Figures must be legible at 1/4 projection height.
 - Run at least one self-review and corrective revision pass.
 - Document uncertainty and missing source material clearly.
+- **Tables with numerical data from the source paper must be recreated as LaTeX
+  `booktabs` tables, never embedded as images.**
 
 ## Mechanical checks
 
