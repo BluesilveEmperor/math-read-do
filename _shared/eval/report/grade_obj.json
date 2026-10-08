@@ -1,0 +1,143 @@
+{
+  "branch": "obj",
+  "total": 3,
+  "passed": 0,
+  "failed": 3,
+  "score_avg": 0.0,
+  "by_branch": {
+    "obj": {
+      "total": 3,
+      "passed": 0,
+      "failed": 3,
+      "score_avg": 0.0
+    }
+  },
+  "cases": [
+    {
+      "case_id": 1,
+      "branch": "obj",
+      "prompt": "简化 cube.obj 到 50% 面数",
+      "passed": false,
+      "score": 0.0,
+      "evidence": {
+        "exit_code": 0,
+        "mode": "dry-run",
+        "elapsed": 0.0,
+        "stderr": null
+      },
+      "assertions_detail": [
+        {
+          "index": 0,
+          "type": "file_exists",
+          "passed": false
+        },
+        {
+          "index": 1,
+          "type": "json_field",
+          "passed": false
+        },
+        {
+          "index": 2,
+          "type": "exit_code",
+          "passed": true
+        }
+      ],
+      "rubric_detail": [
+        {
+          "item": "产物存在",
+          "weight": 1.0,
+          "passed": false
+        },
+        {
+          "item": "判决合法",
+          "weight": 1.0,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "case_id": 2,
+      "branch": "obj",
+      "prompt": "用 QEM 边收缩简化 dragon.obj，目标面数 5000，并计算 Hausdorff 距离验证几何误差",
+      "passed": false,
+      "score": 0.0,
+      "evidence": {
+        "exit_code": 0,
+        "mode": "dry-run",
+        "elapsed": 0.0,
+        "stderr": null
+      },
+      "assertions_detail": [
+        {
+          "index": 0,
+          "type": "file_exists",
+          "passed": false
+        },
+        {
+          "index": 1,
+          "type": "json_field",
+          "passed": false
+        },
+        {
+          "index": 2,
+          "type": "exit_code",
+          "passed": true
+        }
+      ],
+      "rubric_detail": [
+        {
+          "item": "Hausdorff 产物存在",
+          "weight": 1.0,
+          "passed": false
+        },
+        {
+          "item": "距离字段合法",
+          "weight": 1.0,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "case_id": 3,
+      "branch": "obj",
+      "prompt": "对简化后的网格做退化面与重复面检测，生成诊断报告",
+      "passed": false,
+      "score": 0.0,
+      "evidence": {
+        "exit_code": 0,
+        "mode": "dry-run",
+        "elapsed": 0.0,
+        "stderr": null
+      },
+      "assertions_detail": [
+        {
+          "index": 0,
+          "type": "file_exists",
+          "passed": false
+        },
+        {
+          "index": 1,
+          "type": "json_field",
+          "passed": false
+        },
+        {
+          "index": 2,
+          "type": "exit_code",
+          "passed": true
+        }
+      ],
+      "rubric_detail": [
+        {
+          "item": "诊断报告存在",
+          "weight": 1.0,
+          "passed": false
+        },
+        {
+          "item": "计数字段合法",
+          "weight": 1.0,
+          "passed": false
+        }
+      ]
+    }
+  ]
+}

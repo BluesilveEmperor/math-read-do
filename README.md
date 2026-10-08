@@ -153,6 +153,25 @@ ICE_GOLDEN_DRAGON_DIR=<path/to/matrices> python -m pytest tests/test_golden_matr
 | 验证 | 多随机种子统计 | 多模型交叉验证 |
 | 核心依赖 | mineru-open-sdk | numpy |
 
+## 性能优化记录（2026-10-09）
+
+### P0（关键修复）
+- **G1**: QEM O(F2) 消除 -> 增量邻接 O(deg)，6400 面 4.4s->0.565s（提速 8x）
+- **H2**: preserve_boundary 参数失效修复
+- **E2/E3**: 门禁统一 + 五态判决枚举统一
+
+### P1（高价值优化）
+- **G2**: Hausdorff 向量化（scipy.cKDTree），5.3x 提速
+- **H5**: obj_io 错误路径校验（ValueError + 行号）
+- **F1**: SKILL.md 外移低频道到 references/（-31.5%）
+
+### P2（一致性收敛）
+- **G3**: benchmark 复用 simplifier 实例
+- **G10**: _compute_all_quadrics 向量化（numpy 批量）
+- **H6/H7**: dragon 金样本文档化 + corpus 标准几何体入库
+
+### 测试：90 passed, 9 skipped
+
 ## 许可
 
 MIT

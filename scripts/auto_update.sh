@@ -5,6 +5,12 @@
 #
 # 远程仓库: https://github.com/BluesilveEmperor/math-read-do
 # 分支:     math-read-do-obj
+#
+# 特性:
+#   - TTL 缓存 (24h)，缓存命中时跳过网络请求
+#   - --force  跳过缓存，立即联网检查
+#   - --background  后台执行同步，不阻塞主流程
+#   - 网络操作加超时 (curl --max-time 10, timeout 30 git fetch)
 #=============================================================================
 
 set -e
@@ -23,7 +29,72 @@ REMOTE_NAME="origin"
 REPO_URL="https://github.com/BluesilveEmperor/math-read-do"
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "obj")
 
+# ----- 参数解析 -----
+FORCE=0
+BACKGROUND=0
+for arg in "$@"; do
+    case "$arg" in
+        --force|-f)     FORCE=1 ;;
+        --background|-b) BACKGROUND=1 ;;
+        --help|-h)
+            echo "用法: auto_update.sh [--force] [--background]"
+            echo "  --force      跳过 TTL 缓存，立即联网检查"
+            echo "  --background 后台执行同步，不阻塞主流程"
+            exit 0 ;;
+    esac
+done
+
+# ----- TTL 缓存配置 -----
+CACHE_DIR=".cache"
+CACHE_FILE="${CACHE_DIR}/update_cache.json"
+TTL_SECONDS=86400  # 24 小时
+
+# 读取缓存：返回 0 表示缓存有效（跳过更新），1 表示需联网
+cache_valid() {
+    [ "$FORCE" -eq 1 ] && return 1
+    [ ! -f "$CACHE_FILE" ] && return 1
+    # 提取上次检查时间戳（ISO 8601 → epoch）
+    local last_check
+    last_check=$(grep -o '"last_check"[[:space:]]*:[[:space:]]*"[^"]*"' "$CACHE_FILE" \
+        | sed 's/.*: *"//;s/"$//' 2>/dev/null || echo "")
+    [ -z "$last_check" ] && return 1
+    local now_epoch last_epoch
+    now_epoch=$(date +%s)
+    last_epoch=$(date -d "$last_check" +%s 2>/dev/null || echo 0)
+    [ "$last_epoch" -eq 0 ] && return 1
+    local age=$(( now_epoch - last_epoch ))
+    [ "$age" -lt "$TTL_SECONDS" ]
+}
+
+# 写入缓存
+write_cache() {
+    local remote_hash="$1"
+    mkdir -p "$CACHE_DIR"
+    cat > "$CACHE_FILE" <<EOF
+{
+  "last_check": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "branch": "${BRANCH}",
+  "remote_hash": "${remote_hash}"
+}
+EOF
+}
+
 echo -e "${CYAN}[auto-update] 检查 ${REPO_URL} (${BRANCH}) 是否有更新...${NC}"
+
+# ----- 缓存检查 -----
+if cache_valid; then
+    echo -e "${GREEN}  ✅ 缓存有效（24h 内已检查），跳过网络请求${NC}"
+    echo -e "${CYAN}  提示: 使用 --force 立即联网检查${NC}"
+    exit 0
+fi
+
+# ----- 后台模式：把自身放到后台运行 -----
+if [ "$BACKGROUND" -eq 1 ]; then
+    echo -e "${YELLOW}  🔄 后台启动更新检查...${NC}"
+    nohup bash "$0" --force > /dev/null 2>&1 &
+    disown 2>/dev/null || true
+    exit 0
+fi
 
 # ----- 检查是否已是 git 仓库 -----
 if [ ! -d .git ]; then
@@ -37,15 +108,26 @@ if ! git remote | grep -q "^${REMOTE_NAME}$"; then
     git remote add "$REMOTE_NAME" "$REPO_URL"
 fi
 
-# ----- fetch 远程 -----
-if ! git fetch --depth=1 "$REMOTE_NAME" "$BRANCH" --quiet 2>/dev/null; then
-    echo -e "${RED}  ⚠️ 无法连接远程仓库，跳过更新（使用本地版本）${NC}"
+# ----- 网络可达性探测（超时 10s）-----
+if ! curl --max-time 10 --silent --head --fail "${REPO_URL}" > /dev/null 2>&1; then
+    echo -e "${RED}  ⚠️ 网络不可达（curl 超时 10s），跳过更新（使用本地版本）${NC}"
+    write_cache "unknown"
+    exit 0
+fi
+
+# ----- fetch 远程（超时 30s）-----
+if ! timeout 30 git fetch --depth=1 "$REMOTE_NAME" "$BRANCH" --quiet 2>/dev/null; then
+    echo -e "${RED}  ⚠️ 无法连接远程仓库（fetch 超时 30s），跳过更新（使用本地版本）${NC}"
+    write_cache "unknown"
     exit 0
 fi
 
 # ----- 比较本地与远程 -----
 LOCAL_HASH=$(git rev-parse HEAD 2>/dev/null || echo "0")
 REMOTE_HASH=$(git rev-parse "${REMOTE_NAME}/${BRANCH}" 2>/dev/null || echo "0")
+
+# ----- 更新缓存 -----
+write_cache "$REMOTE_HASH"
 
 if [ "$LOCAL_HASH" = "$REMOTE_HASH" ]; then
     echo -e "${GREEN}  ✅ 已是最新版本${NC}"

@@ -88,5 +88,94 @@ class TestObjIO(unittest.TestCase):
             self.assertAlmostEqual(length, 1.0, places=5)
 
 
+class TestObjIOErrorPaths(unittest.TestCase):
+    """H5: obj_io 坏输入/索引越界的错误路径测试"""
+
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+
+    def _write_fixture(self, content, name="err.obj"):
+        path = os.path.join(self.tmpdir, name)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        return path
+
+    def _tri_header(self):
+        # 三个合法顶点，供面引用
+        return "o T\nv 0 0 0\nv 1 0 0\nv 0 1 0\n"
+
+    def test_vertex_missing_field_raises(self):
+        """顶点行缺少坐标分量 → ValueError 含中文消息"""
+        path = self._write_fixture("v 1.0 2.0\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("顶点", str(cm.exception))
+
+    def test_vertex_non_numeric_raises(self):
+        """顶点坐标非数字 → ValueError 含中文消息"""
+        path = self._write_fixture("v 1.0 abc 3.0\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("不是合法数字", str(cm.exception))
+
+    def test_normal_missing_field_raises(self):
+        """法线行缺少分量 → ValueError"""
+        path = self._write_fixture("vn 1.0 2.0\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("法线", str(cm.exception))
+
+    def test_texcoord_missing_field_raises(self):
+        """纹理坐标缺少 u 分量 → ValueError"""
+        path = self._write_fixture("vt\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("纹理", str(cm.exception))
+
+    def test_face_non_numeric_index_raises(self):
+        """面顶点索引非整数 → ValueError 含中文消息"""
+        path = self._write_fixture(self._tri_header() + "f 1 x 3\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("不是合法整数", str(cm.exception))
+
+    def test_face_vertex_out_of_range_raises(self):
+        """面引用不存在的顶点 → ValueError 含中文消息"""
+        path = self._write_fixture(self._tri_header() + "f 1 2 9\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        msg = str(cm.exception)
+        self.assertIn("不存在的顶点索引", msg)
+        self.assertIn("9", msg)
+
+    def test_face_vertex_zero_index_raises(self):
+        """面引用 0 号顶点（OBJ 1-based，0 非法）→ ValueError"""
+        path = self._write_fixture(self._tri_header() + "f 0 2 3\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("不存在的顶点索引", str(cm.exception))
+
+    def test_face_texcoord_out_of_range_raises(self):
+        """面引用不存在的纹理坐标 → ValueError"""
+        path = self._write_fixture(self._tri_header() + "f 1/5 2/5 3/5\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("不存在的纹理坐标索引", str(cm.exception))
+
+    def test_face_normal_out_of_range_raises(self):
+        """面引用不存在的法线 → ValueError"""
+        path = self._write_fixture(self._tri_header() + "f 1//5 2//5 3//5\n")
+        with self.assertRaises(ValueError) as cm:
+            load_obj(path)
+        self.assertIn("不存在的法线索引", str(cm.exception))
+
+    def test_valid_file_still_loads(self):
+        """回归：合法四面体仍能正常加载（错误校验不影响正常路径）"""
+        path = self._write_fixture(TETRA_OBJ, "tetra.obj")
+        model = load_obj(path)
+        self.assertEqual(len(model.vertices), 4)
+        self.assertEqual(len(model.faces), 4)
+
+
 if __name__ == '__main__':
     unittest.main()

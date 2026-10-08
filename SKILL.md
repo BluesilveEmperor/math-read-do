@@ -158,32 +158,13 @@ math-read-do-obj/
 
 ## 通用反模式 / Anti-Patterns & Blacklist
 
-| # | 反模式 | 后果 | 正确做法 |
-|---|--------|------|---------|
-| 1 | 只在一个测试模型上验证 | 算法泛化性未知 | 至少 3 个不同复杂度模型（cube/sphere/用户输入） |
-| 2 | 仅视觉判断正确性 | 微小偏差不可感知 | 定量指标：Hausdorff 距离 + 面数精确匹配 |
-| 3 | 忽略退化面/重复面检查 | 下游工具崩溃 | 自动后处理检查，退化面率 < 0.1% |
-| 4 | OBJ 导出用默认 GBK/cp1252 | 跨平台乱码 | 始终指定 `encoding='utf-8'` |
-| 5 | 用中点代替最优位置 (QEM) | 简化质量降低 | 始终解线性系统（或算法指定的最优解） |
-| 6 | 导出时不输出法线 vn | 着色异常 | 输出前重建法线 |
-| 7 | .obj 中 0-based vs 1-based 混淆 | 面崩溃 | 内部 0-based，导出 +1 |
-| 8 | 多次运行用不同参数不记录 | 不可重现 | 每次实验记录完整参数到 `results/` |
+8 项通用反模式（单模型验证/仅视觉判断/忽略退化面/编码/中点替代/法线缺失/索引基混淆/参数不记录）及后果与正确做法详见 [references/anti_patterns.md](references/anti_patterns.md)。
 
 ---
 
 ## QEM 验证反模式 / QEM-Specific Anti-Patterns
 
-（源自原始 C++ 实现的问题总结，供其他算法适配时参考）
-
-| # | 原始 C++ 问题 | 表现 | 本框架修复 |
-|---|--------------|------|-----------|
-| 1 | `initEdgeVector()` 索引排序 bug | 边向量构造错误，简化几何异常 | 独立 Edge 变量 + first<second 不变量 |
-| 2 | 中点代替最优位置 | 简化质量差于论文标准 | 解 `Ax = -b` 线性系统 (Eq.5) |
-| 3 | 全重建堆 `make_heap` | >10⁵ 面网格性能衰退 | `heapq` + 版本延迟删除 O(log n) |
-| 4 | `calcFaces` O(n²) + 迭代器失效 | 偶发崩溃 | mark-sweep + 单遍合并 |
-| 5 | 无法线输出 | 导出的模型着色异常 | 面法线加权平均重建 |
-| 6 | 无边界保护 | 轮廓塌缩 | 边界边约束优化 |
-| 7 | 硬编码 MAX_FACES / 路径 | 不可作为工具链使用 | CLI 参数 `--faces`/`--ratio`/`--input`/`--output` |
+7 项源自原始 C++ 实现的问题（索引排序 bug/中点替代/堆重建/迭代器失效/无法线/无边界保护/硬编码）及本框架修复详见 [references/anti_patterns.md](references/anti_patterns.md)。
 
 ---
 
@@ -196,20 +177,29 @@ math-read-do-obj/
 | 0.5 | 版本检测 + 锁定 | `env/version_spec.json` | G1: 版本一致 |
 | 1 | 算法理解 + 关键提取 | `analysis/algorithm_summary.json` | G01: 算法理解确认 |
 | 2 | 依赖环境构建 | `env/` | G2: 导入测试通过 |
-| 3 | 基线验证 | `results/baseline_metrics.json` | G3: 基线对齐 |
-| 4 | 增量模块实现 (DAG 拓扑序) | `implementation/delta_report.json` | G4: 每模块 delta 验证 |
-| 5 | 多模型统计验证 | `results/statistical_summary.json` | G5: 判决产出 |
-| 6 | 双语报告生成 | `实验复刻结果汇总/` | G6: 各子实验目录完整，OBJ模型归位 |
+| 3 | 基线验证 | `results/baseline_metrics.json` | G4: 基线对齐 |
+| 4 | 增量模块实现 (DAG 拓扑序) | `implementation/delta_report.json` | G5: 每模块 delta 验证 |
+| 5 | 多模型统计验证 | `results/statistical_summary.json` | G6: 判决产出 |
+| 6 | 双语报告生成 | `实验复刻结果汇总/` | G7: 各子实验目录完整，OBJ模型归位 |
 | **7** | **发布前交叉校验与收口** | 逐格核对记录（附于报告或 `results/`） | **G9**: 报告数字与验证产物零不一致 |
 
 ---
 
 ## 门禁总表 / Gate Map
 
-> **现状**：obj 分支目前仅引入 **G9**（发布前交叉校验门）。Phase 0–6 的检查点（GΔ、G0、G1、G01、G2、G3、G4、G5、G6）仍以各阶段详述中的 inline 定义为准，后续按需从 routine 分支逐条移植进本总表，避免大段照抄造成两分支维护漂移。
+> **说明**：obj 分支门禁编号已与 routine/main 分支统一。Phase 3–6 的门禁经重编号（原 G3→G4, G4→G5, G5→G6, G6→G7），使同一语义门禁跨分支编号一致。
 
 | Gate | 所属阶段 | 检查项摘要 | 失败动作 |
 |------|---------|-----------|---------|
+| GΔ | Phase Δ-1 自动更新 | 网络可达时同步至最新 | 静默跳过，不阻塞流程 |
+| G0 | Phase 0 宿主检测 | Python+NumPy 就绪 | 返回修复 manifest/环境 |
+| G1 | Phase 0.5 版本检测 | 版本一致性通过 | 修复版本冲突后继续 |
+| G01 | Phase 1 算法理解 | 算法理解确认 | 用户介入确认 |
+| G2 | Phase 2 依赖环境 | 导入测试通过 | 返回修复依赖/环境 |
+| G4 | Phase 3 基线验证 | 基线指标记录+容忍度设定 | 用户决策是否继续 |
+| G5 | Phase 4 增量实现 | 每模块 delta 验证通过 | 排查修复后重跑 |
+| G6 | Phase 5 统计判决 | 五态判决产出 | 补跑统计验证 |
+| G7 | Phase 6 双语报告 | 各子实验目录完整，OBJ模型归位 | 补缺文件/补译 |
 | **G9** | Phase 7（发布前交叉校验与收口） | ① 报告数字与验证产物逐格核对，零不一致方可交付；② 对比表格算法标签行列双重核对；③ 参数声称对账（CLI 实际 vs 报告声称 + 数据自洽） | 回到 Phase 6 修正报告，修正后重新走查 G9 |
 
 G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无配套脚本），并已适配 obj 分支产物体系（`verify_qem.py`/`benchmark_qem.py` 原始输出、`corpus/MANIFEST.json`、`corpus/golden/checksums.json`、双语对比表格模板）。完整检查清单与回归案例见 [Phase 7](#phase-7-发布前交叉校验与收口--pre-release-cross-check--wrap-up)。
@@ -306,49 +296,7 @@ G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无�
 
 ### 1.6 辅助架构图征询（可选但必须询问） / Auxiliary Architecture Diagram Offer
 
-**触发条件**: 1.5 完成后、无论 proceed / caution / discourage 均须征询。用户未主动要求时也必须主动提出。
-
-**步骤 1 — 主动征询**:
-
-> 基于这篇论文的内容，我可以帮您制作 Nature 级别的研究框架图或技术路线图，方便组会汇报或开题使用。这些图不需要等实验跑完。您想现在制作吗？
-
-- 用户拒绝 → 记录到 `review_manifest.json`（`diagram_offer: "declined"`），跳到后续流程
-- 用户同意 → 进入步骤 2
-
-**步骤 2 — 强制 6 项逐项询问**（不可合并、不可默认、不可跳过，直接复用 nature-archify 第 0 步）:
-
-| # | 询问项 | 候选项 | 说明 |
-|---|--------|--------|------|
-| 1 | **主题 / Subject** | — | 论文核心研究问题与方法路径 |
-| 2 | **图类型** | `architecture` / `workflow` / `sequence` / `dataflow` / `lifecycle` | 根据论文特征推荐 1-2 种 |
-| 3 | **图语言** | `zh-CN` / `en` | 中文论文必须 zh-CN |
-| 4 | **动画模式** | `trace` / `none` | 默认 none（静态）；交互式展示用 trace |
-| 5 | **视觉预设** | `classic` / 其他 12 种 | 默认 classic；共 13 种，含 paper / brutalism / apple 等 |
-| 6 | **输出格式** | `HTML` / `HTML + PNG` / `HTML + SVG` | 产物为自包含 HTML，导出在 Viewer 内完成 |
-
-- 用户已声明过的项可复用，不重复问
-- 多张图可共享一轮回答
-- 若用户要求推荐，按论文领域给出 1-2 种建议并说明理由
-
-**步骤 3 — 执行**:
-
-按 nature-archify SKILL.md 第 0 步→第 5 步执行：选类型→读 schema/examples→写 candidate JSON→validate→deliver。
-
-**图类型可用矩阵**（依据 nature-archify 硬规则）:
-
-| 图类型 | 用途 | 需要实验数据 | 当前阶段可产出 |
-|--------|------|:---:|------|
-| `architecture` | 系统架构、部署拓扑、云与安全边界 | ❌ | ✅ 终版 |
-| `workflow` | 技术流程：节点与连线表达的步骤 | ❌ | ✅ 终版 |
-| `sequence` | 调用时序：参与者之间的消息往返 | ❌ | ✅ 终版 |
-| `dataflow` | 数据管道与血缘：提取→转换→落库 | ❌ | ✅ 终版 |
-| `lifecycle` | 状态机：状态、迁移与触发条件 | ❌ | ✅ 终版 |
-
-**约束**:
-- 五类图都只描述结构与流程，不承载实验数值，Phase 1-6 均可交付终版
-- 论文的**方法/模型架构图**与**实验流程图**不在 nature-archify 图类型内（PRISMA/CONSORT 等必须写入真实样本量与排除数），需要时另行接入 paperfig 类渲染器
-- 输出到 `figures/` 目录；每张图产出 `.html`（PNG/SVG 在 Viewer 内导出）
-- 用户偏好（语言/预设/格式）写入 `review_manifest.json`，Phase 4/5/6 复用，不重复询问
+1.5 完成后必须主动征询是否制作 Nature 级研究框架图/技术路线图；用户同意后强制 6 项逐项询问（主题/图类型/图语言/动画模式/视觉预设/输出格式），再按 nature-archify 第 0→5 步执行。图类型可用矩阵（architecture/workflow/sequence/dataflow/lifecycle 五类，均不需实验数据）及完整约束详见 [references/archify_diagram_offer.md](references/archify_diagram_offer.md)。
 
 ---
 
@@ -404,7 +352,7 @@ G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无�
 
 3.5 **基线锁定**: commit `baseline_metrics.json`，确认容忍度设置
 
-**G3**: 基线指标记录，容忍度设定。基线不可建→用户决定是否继续 Phase 4
+**G4**: 基线指标记录，容忍度设定。基线不可建→用户决定是否继续 Phase 4
 
 ---
 
@@ -437,7 +385,7 @@ G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无�
     - 函数 docstring 标注 `Ref: Section X.Y, Eq.(Z)`
     - 按领域命名约定
 
-**G4**: 所有模块实现并通过 delta 验证，`delta_report.json` 完整
+**G5**: 所有模块实现并通过 delta 验证，`delta_report.json` 完整
 
 ---
 
@@ -456,13 +404,22 @@ G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无�
 | `bunny.obj` (Stanford) | 复杂形状 | 通用质量 |
 | user-provided | 用户输入 | 自定义 |
 
+> **外部测试网格获取**：`cube/tetrahedron/sphere` 已内置于 `tests/fixtures`。
+> `bunny.obj` 需从 Stanford 3D Scanning Repository 下载：
+> `wget http://graphics.stanford.edu/pub/3DScanpoint/bunny.tar.gz`（解压后取 `bun_zipper.res2`）。
+> **dragon 系列金样本矩阵**（9 个 `.spmat`，intrinsic-simplification 实验导出）未入库，
+> 仅校验和登记于 `corpus/golden/checksums.json`；获取后设置环境变量
+> `ICE_GOLDEN_DRAGON_DIR` 指向 `.spmat` 所在目录即可启用全量校验，详见
+> `corpus/golden/README.md`「dragon 系列获取与用法」。对应输入网格 `dragon_fat.obj`
+> 见 `corpus/MANIFEST.json`。
+
 5.2 **多参数测试**: 每个模型测试多个参数值（QEM: 50%, 20%, 10%, 5%, 1%）
 
 5.3 **输出指标**:
     - 面数精确度、Hausdorff 距离（归一化）、退化面率、重复面率
     - 处理速率 (faces/sec)、QEM 误差分布（最小/最大/均值/中位数）
 
-5.4 **五态判决**: `within_tolerance` → PASS / `close_outside` → APPROX / `outside` → FAIL
+5.4 **五态判决**（统一枚举）: `pass` → 通过 / `approx` → 近似通过 / `within_ci` → 置信区间内 / `fail` → 不通过 / `skip` → 跳过（旧 within_tolerance→pass, close_outside→approx, outside→fail）
 
 5.5 **图表导出**（可选，每图必须附带 Python + LaTeX 双版本生成代码）:
     - 简化前后对比图 (comparison.png + 可选 comparison.pdf)
@@ -471,7 +428,7 @@ G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无�
 
 5.6 **架构/流程图导出**（可选，走 nature-archify）: 数据图表走 nature-figure；系统架构/技术流程/调用时序/数据流/状态机图一律经 nature-archify 渲染。注意：`experiment` 实验流程图（PRISMA/CONSORT 等，需真实样本量与排除数）**不在 nature-archify 的五类图内**，需要时另行接入 paperfig 类渲染器。
 
-**G5**: 判决产出，所有验证通过
+**G6**: 判决产出，所有验证通过
 
 ---
 
@@ -482,43 +439,9 @@ G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无�
 
 **nature-archify 参与（报告插图）**: 报告中的系统架构图/技术流程图/时序图/数据流图/状态机图由 nature-archify 产出（self-contained inline-SVG HTML，可加 trace 动效；13 种视觉预设）；实验流程图不在其图类型内，另行接入 paperfig 类渲染器。
 
-```
-实验复刻结果汇总/                     # 根目录
-│
-├── <子实验1名称>/                   # 按参数/模型/配置拆分的小实验
-│   ├── OBJ模型/
-│   │   └── *.obj                    # 该子实验输出的 .obj 模型文件
-│   ├── 实验报告/
-│   │   ├── 复现报告.md              # 英文
-│   │   ├── 复现报告-CN.md           # 中文
-│   │   ├── 诊断分析.md              # 英文
-│   │   ├── 诊断分析-CN.md           # 中文
-│   │   └── 判决结果.json            # 双语 JSON
-│   ├── 实验结果对比表/
-│   │   ├── 实验结果对比表.md        # 英文
-│   │   └── 实验结果对比表-CN.md     # 中文
-│   └── 实验图表（含代码）/
-│       ├── comparison.png
-│       ├── error_distribution.png
-│       └── code/
-│           ├── plot_comparison.py
-│           ├── plot_comparison.tex          # LaTeX/TikZ 版本
-│           ├── plot_error_distribution.py
-│           └── plot_error_distribution.tex  # LaTeX/TikZ 版本
-│
-├── <子实验2名称>/                   # 第二个子实验，结构同上
-│   └── ...
-│
-└── 总览/                            # 跨子实验的汇总
-    ├── 汇总报告.md                  # 英文总体报告
-    ├── 汇总报告-CN.md               # 中文总体报告
-    ├── 对比总表.md                  # 所有子实验指标一览
-    └── 总判决结果.json              # 总体判决
-```
+报告输出到 `实验复刻结果汇总/`，按子实验（`<模型名>_<参数标记>`）拆分，每个子实验含 `OBJ模型/`/`实验报告/`（双语 + 判决 JSON）/`实验结果对比表/`/`实验图表（含代码）/`，根下 `总览/` 提供跨实验汇总。完整目录树与命名规范详见 [references/report_directory_layout.md](references/report_directory_layout.md)。
 
-**子实验命名规范**: `<模型名>_<参数标记>`，如 `bunny_50pct`、`sphere_200faces`、`用户输入_ratio0.1`
-
-**G6**: 每个子实验的目录结构完整，.obj 模型存放于各子实验的 `OBJ模型/` 文件夹内，`总览/` 提供跨实验汇总
+**G7**: 每个子实验的目录结构完整，.obj 模型存放于各子实验的 `OBJ模型/` 文件夹内，`总览/` 提供跨实验汇总
 
 ---
 
@@ -529,114 +452,25 @@ G9 检查项语义与 routine 分支 G9 保持一致（纯文档级门禁，无�
 
 Phase 6 产出报告后、对外交付前，必须走一遍 G9 交叉校验。这一步针对的是**同一类事故**：把脚本/日志里的数字手抄进报告时的错位、漏改与误读——手工转录永远是最脆弱的一环。
 
-7.1 **报告数字与验证产物逐格核对**:
-    - 报告中出现的每一个数字，都能在验证产物中找到**机械产出的原始出处**：
-      `scripts/verify_qem.py` / `scripts/benchmark_qem.py` 的原始输出、
-      `corpus/MANIFEST.json`（网格语料：vertices/faces/sha256）、
-      `corpus/golden/checksums.json`（金样本矩阵：dims/nnz/统计值/sha256）
-    - 核对方式：逐格比对，不做抽样；**零不一致**方可交付
-    - 严禁凭记忆或阅读印象填写数字——所有统计值必须由脚本实测产出后再转录
-
-7.2 **对比表格算法标签行列双重核对**:
-    - 对比总表/对比表格中，每行（子实验）与每列（指标）的算法标签都要核对
-    - 行向核对：该行的数字确实属于该算法/参数组合
-    - 列向核对：同一指标跨行语义一致（同一单位、同一归一化基准）
-    - 目的：捕获表格错位类错误（数字串行、列标题与数据错位）
-
-7.3 **参数声称对账**:
-    - CLI **实际**接受的参数值 vs 报告**声称**的参数值，逐一对照
-    - 数据自洽检查（含日志转抄场景）:
-      - "输入数 = 目标数 + 移除数"——进度行 `removed N / total_removal` 中的分母是**待移除总数**而非输入数
-      - "输入数 = `corpus/MANIFEST.json` 登记值"——报告中的模型规模必须与语料清单一致
-      - 收敛率/误差等推导值需从原始日志数值重新推算验证，不得只复述结论
-    - 报告内部交叉引用一致性：同一数字在正文、表格、图表说明中的多处出现必须一致
-
-7.4 **失败动作**:
-    - 任何一项核对不一致 → 回到 **Phase 6** 修正报告（含 Revision History 勘误登记）
-    - 修正后**重新完整走查 G9**，不允许只补查改动处
+G9 包含三项核对：7.1 报告数字与验证产物逐格核对（`verify_qem.py`/`benchmark_qem.py` 原始输出、`corpus/MANIFEST.json`、`corpus/golden/checksums.json` 为机械出处）、7.2 对比表格算法标签行列双重核对、7.3 参数声称对账（CLI 实际 vs 报告声称 + 数据自洽）；任一不一致则回 Phase 6 修正后重新完整走查。7.1-7.4 详述及 G9 回归案例（EXPERIMENT_REPORT.md 7 处数字错误）详见 [references/g9_cross_check_detail.md](references/g9_cross_check_detail.md)。
 
 **G9**: 报告数字与验证产物逐格核对零不一致、表格标签行列双重核对通过、参数声称对账通过。
-
-#### G9 回归案例（EXPERIMENT_REPORT.md 7 处数字错误）
-
-以下错误来自 obj_exp `ICE_Experiment_Logs/EXPERIMENT_REPORT.md` 勘误（2026-10，详见该文件 Revision History），共同根因是**把日志进度行的 `total_removal` 误读为输入顶点数**。若当时存在 G9，7.1 的"数字必须有机械产出出处"与 7.3 的"输入数=目标数+移除数"自洽检查均可逐一捕获：
-
-| # | 错误（对应修订记录） | 错误值 → 正确值 | G9 可捕获点 |
-|---|------|----------------|------------|
-| ① | Stage 00 输入/移除数（表格 + Observations 两处） | 输入 19,485、移除 18,985 → 输入 19,985、移除 19,485 | 7.3: 输入数=目标数+移除数；7.1: `bs_rest.obj` 的 19,985 个 `v` 行即机械出处 |
-| ② | Stage 01 dragon 输入/目标 | 输入 14,746、目标 500 → 输入 15,746、目标 1,000 | 7.1: 延拓矩阵维度 15,746×1,000 即机械出处 |
-| ③ | Stage 02 输入顶点数 | 10,158 → 10,658 | 7.3: 进度行分母 10,158 是 total_removal（=10,658−500）而非输入数 |
-| ④ | Stage 03 未标注数据矛盾 | 日志 `removed 2924` 与声称的 2,930→500（应移除 2,430）矛盾，未标注 → 加 Note 标注 | 7.3: 自洽检查暴露矛盾，强制标注而非择一 |
-| ⑤ | Stage 04 参数默认值与收敛率 | area_weight "0.5 (default)"、收敛率 "~0.1" → "0 (default)"（源码 `main.cpp:54`）、"≈0.28" | 7.3: CLI 实际 vs 报告声称；推导值从原始日志重算 |
-| ⑥ | Stage 05 输入顶点数 | 15,246 → 15,746 | 7.3: 输入数=目标数+移除数；`dragon_fat.obj` 与延拓矩阵维度互证 |
-| ⑦ | Stage 06 日志不完整未标注 | total_removal=16,011 但仅 5000 里程碑、缺完成行与 AFTER 段，无标注 → 加 Note 标注；Observations "15,246→500" → "15,746→500" | 7.3: 自洽检查；7.1: 与完整日志 `06_default_after.log` 比对 |
-
-> 教训：①③⑥⑦ 同根因（total_removal 误读为输入数），② 是手抄错位，④ 是未标注的数据矛盾，⑤ 是参数默认值想当然。全部属于"手抄数字"类事故——这正是 G9 设计要杜绝的类别。
 
 ---
 
 ## 文件结构 / Directory Structure
 
-```
-math-read-do-obj/
-├── SKILL.md                        # 本文件 — Skill 入口
-├── README.md                       # 快速开始
-│
-├── qem_tool/                       # 算法工具链（可整体替换适配新算法）
-│   ├── __init__.py
-│   ├── cli.py                      # [范本] QEM CLI 入口（替换以适配新算法）
-│   ├── qem_core.py                 # [范本] QEM 算法引擎（替换为核心算法）
-│   └── obj_io.py                   # [框架] 通用 .obj 解析/导出层（可复用）
-│
-├── tests/                          # 测试套件（适配新算法时替换）
-│   ├── __init__.py
-│   ├── test_obj_io.py              # [框架] OBJ I/O 通用测试
-│   ├── test_qem_core.py            # [范本] QEM 专用测试
-│   └── fixtures/                   # 内嵌测试模型
-│
-├── scripts/                        # 辅助脚本（通用，无需替换）
-│   ├── auto_update.sh              # [框架] 自动更新脚本 — 检测双源、选最快镜像拉取
-│   ├── verify_qem.py               # 验证脚本（通用 .obj 验证逻辑）
-│   └── benchmark_qem.py            # 性能基准（通用框架）
-│
-├── templates/                      # 报告模板（通用，无需替换）
-│   ├── reproduction_report.template.md
-│   ├── comparison_table.template.md
-│   └── diagnosis.template.md
-│
-├── results/                        # 运行结果
-├── analysis/                       # 算法分析产物
-├── implementation/                 # 增量实现日志
-├── memory/                         # 持久化记忆
-├── infra/                          # 基础设施 manifest
-└── env/                            # 环境锁定文件
-```
+框架由 `qem_tool/`（算法工具链）、`tests/`、`scripts/`、`templates/` 及产物目录（`results/`/`analysis/`/`implementation/`/`infra/`/`env/`）组成；`obj_io.py` 为通用 .obj 解析层，`qem_core.py`/`cli.py` 为可替换的范本。完整目录树详见 [references/directory_structure.md](references/directory_structure.md)。
 
 ## 适配新算法 / Adapting to a New Algorithm
 
-要适配一个新的 .obj 输出算法（如网格参数化、变形、布尔运算），只需替换三个**范本文件**：
-
-| 步骤 | 替换文件 | 说明 |
-|------|---------|------|
-| 1 | `qem_tool/qem_core.py` → `new_algo_core.py` | 用你的算法引擎替换 QEM 核心 |
-| 2 | `qem_tool/cli.py` → 更新 | 更新 CLI 参数和调用逻辑 |
-| 3 | `tests/test_qem_core.py` → `test_new_algo.py` | 写新测试，fixtures 可复用 |
-
-**框架层文件无需修改**：`obj_io.py`, `tests/test_obj_io.py`, `scripts/`, `templates/` 完全可复用。
+适配新 .obj 输出算法只需替换三个范本文件（`qem_core.py`/`cli.py`/`test_qem_core.py`），框架层无需改动。完整步骤表详见 [references/adaptation_and_relationship.md](references/adaptation_and_relationship.md)。
 
 ---
 
 ## 与 math-read-do 的关系 / Relationship to math-read-do
 
-| 维度 | math-read-do (通用数学实验复现) | math-read-do-obj (OBJ 图形学实验复现) |
-|------|-------------------------------|----------------------------------------|
-| 目标 | 任意数学论文复现（数值/符号/统计） | 任意输出 .obj 的图形学/几何算法复现 |
-| Phase 1 | PDF 解析 + MinerU + 三方审阅 | 直接算法理解 + 关键公式提取（无 PDF 解析） |
-| 输入 | PDF 论文 / arXiv 链接 | .obj 文件 + 算法规格 |
-| Phase 5 | 多随机种子统计验证 (N>=5) | 多模型 + 多参数交叉验证（确定性算法为主） |
-| 核心依赖 | mineru-open-sdk, pyyaml | numpy |
-| 输出 | 双语报告 + 判决 | 简化 .obj + 双语对比表 |
-| 典型用户 | 数学研究者 | 图形学/3D 开发者 |
+math-read-do-obj 是 math-read-do 在 OBJ 图形学实验方向的特化（目标/Phase 1/输入/Phase 5/核心依赖/输出/典型用户 7 个维度对比）。完整对比表详见 [references/adaptation_and_relationship.md](references/adaptation_and_relationship.md)。
 
 ---
 

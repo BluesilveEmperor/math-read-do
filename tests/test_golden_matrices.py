@@ -18,6 +18,28 @@
   复数行和模长 ≤ 1+1e-9（spot 有 30 行为上游跳过的空行，见 README 已知现象 2）
 - 连接 Laplacian(re,im): re 对角>0 且对称、im 对角==0 且反对称
 - 向量质量矩阵(re,im): re 纯对角且对角>0、im 全零
+
+dragon 系列获取（未入库，体积考虑）
+----------------------------------
+dragon 系列 9 个 .spmat 矩阵文件单文件最大 1.4 MB+，整体不入库，仅以校验和登记。
+数据来源: intrinsic-simplification (SIGGRAPH 2023) 实验导出，原始路径::
+
+    <obj_exp>/ICE_Experiment_Logs/matrices/01_dragon_{prolongation,laplace,mass}.spmat
+    <obj_exp>/ICE_Experiment_Logs/matrices/05_vector_{prolongation,mass}_{re,im}.spmat
+    <obj_exp>/ICE_Experiment_Logs/matrices/05_connection_laplace_{re,im}.spmat
+
+对应的输入网格为 dragon_fat.obj（15,746 顶点，见 corpus/MANIFEST.json）。
+获取后通过环境变量 ICE_GOLDEN_DRAGON_DIR 指向 .spmat 所在目录即可启用全量校验::
+
+    # pwsh
+    $env:ICE_GOLDEN_DRAGON_DIR = "<obj_exp>/ICE_Experiment_Logs/matrices"
+    python -m pytest tests/test_golden_matrices.py -v
+
+    # bash
+    export ICE_GOLDEN_DRAGON_DIR="<obj_exp>/ICE_Experiment_Logs/matrices"
+    python -m pytest tests/test_golden_matrices.py -v
+
+详见 corpus/golden/README.md「dragon 系列获取与用法」。
 """
 
 import hashlib
@@ -220,9 +242,16 @@ def _dragon_dir():
     d = os.environ.get(DRAGON_ENV)
     if not d:
         pytest.skip(
-            f"未设置 {DRAGON_ENV}: dragon 系列 9 个矩阵未入库（体积考虑，仅校验和登记）。"
-            f"如需全量校验，请将 {DRAGON_ENV} 指向包含 dragon .spmat 文件的目录"
-            f"（数据来源: obj_exp\\ICE_Experiment_Logs\\matrices）后重跑。"
+            f"未设置 {DRAGON_ENV}: dragon 系列 9 个 .spmat 矩阵未入库（单文件最大 "
+            f"1.4 MB+，体积考虑仅校验和登记）。\n"
+            f"  获取方式: 从 intrinsic-simplification 实验数据目录拷贝 9 个 dragon "
+            f".spmat 文件，来源路径:\n"
+            f"    <obj_exp>/ICE_Experiment_Logs/matrices/"
+            f"01_dragon_*.spmat, 05_vector_*.spmat, 05_connection_laplace_*.spmat\n"
+            f"  启用全量校验:\n"
+            f"    pwsh:  $env:{DRAGON_ENV} = '<obj_exp>\\ICE_Experiment_Logs\\matrices'\n"
+            f"    bash:  export {DRAGON_ENV}='<obj_exp>/ICE_Experiment_Logs/matrices'\n"
+            f"  详见 corpus/golden/README.md「dragon 系列获取与用法」。"
         )
     return Path(d)
 

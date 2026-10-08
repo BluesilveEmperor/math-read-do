@@ -13,19 +13,37 @@ QEM 性能基准测试
 
 import os
 import sys
+import copy
 import time
 import argparse
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from qem_tool.obj_io import load_obj
-from qem_tool.qem_core import simplify_obj
+from qem_tool.qem_core import simplify_obj, QEMSimplifier
 
 
-def benchmark(verts, faces, target_faces, name=""):
-    """单次基准测试"""
+def benchmark(verts, faces, target_faces, name="", simplifier_template=None):
+    """单次基准测试
+
+    Args:
+        verts: 顶点列表
+        faces: 面列表
+        target_faces: 目标面数
+        name: 测试名称标签
+        simplifier_template: 预构建的 QEMSimplifier 模板实例。传入时
+            用 deepcopy 复制该模板后直接 simplify，避免重复 O(F) 初始化
+            （邻接表/quadric/边界/边堆）。为 None 时回退到 simplify_obj
+            （每次重新构建）。
+    """
     t0 = time.time()
-    out_v, out_f = simplify_obj(verts, faces, target_faces)
+    if simplifier_template is not None:
+        # 复用模板：deepcopy 初始状态后简化，省去重复的 O(F) 初始化
+        simplifier = copy.deepcopy(simplifier_template)
+        simplifier.simplify(target_faces)
+        out_v, out_f = simplifier.get_result_compressed()
+    else:
+        out_v, out_f = simplify_obj(verts, faces, target_faces)
     elapsed = time.time() - t0
 
     reduction = (1 - len(out_f) / len(faces)) * 100
@@ -81,9 +99,16 @@ def main():
           f"{'Time':>9} {'Rate':>12}")
     print("-" * 70)
 
+    # 预构建 QEM simplifier 模板（一次性 O(F) 初始化：邻接/quadric/边界/边堆）。
+    # 后续每个 target ratio 从同一初始状态 deepcopy 后简化，避免重复初始化。
+    print("Building QEM simplifier template (one-time init)...")
+    template = QEMSimplifier(verts, faces)
+    print()
+
     results = []
     for i, target in enumerate(targets):
-        result = benchmark(verts, faces, target, name=f"Run {i+1}")
+        result = benchmark(verts, faces, target, name=f"Run {i+1}",
+                           simplifier_template=template)
         results.append(result)
 
     print()

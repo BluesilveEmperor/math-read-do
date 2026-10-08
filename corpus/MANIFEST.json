@@ -17,7 +17,9 @@
       "stages": [
         "06"
       ],
-      "notes": "高亏格测试网格（genus 8）；Stage 06 BEFORE 细化模式输入"
+      "status": "not_bundled",
+      "acquire": "从 intrinsic-simplification 实验数据目录拷贝: <obj_exp>/ICE_Experiment_Logs/meshes_copy/boxpart.obj",
+      "notes": "高亏格测试网格（genus 8）；Stage 06 BEFORE 细化模式输入。实验数据未入库（特定拓扑/UV，无法自动生成）"
     },
     {
       "filename": "bs_rest.obj",
@@ -34,7 +36,9 @@
       "stages": [
         "00"
       ],
-      "notes": "Stage 00 最大输入（19,985 顶点）；带边界开网格（112 条边界边）"
+      "status": "not_bundled",
+      "acquire": "从 intrinsic-simplification 实验数据目录拷贝: <obj_exp>/ICE_Experiment_Logs/meshes_copy/bs_rest.obj",
+      "notes": "Stage 00 最大输入（19,985 顶点）；带边界开网格（112 条边界边）。体积 3.7 MB 未入库"
     },
     {
       "filename": "capsule.obj",
@@ -51,7 +55,9 @@
       "stages": [
         "02"
       ],
-      "notes": "Stage 02 混合权重（curvature/area）实验输入"
+      "status": "not_bundled",
+      "acquire": "从 intrinsic-simplification 实验数据目录拷贝: <obj_exp>/ICE_Experiment_Logs/meshes_copy/capsule.obj",
+      "notes": "Stage 02 混合权重（curvature/area）实验输入。体积 1.7 MB 未入库"
     },
     {
       "filename": "dragon_fat.obj",
@@ -71,7 +77,9 @@
         "05",
         "06"
       ],
-      "notes": "dragon 系列金样本矩阵源（Stage 01/05 导出）；Stage 00/06 输入"
+      "status": "not_bundled",
+      "acquire": "从 intrinsic-simplification 实验数据目录拷贝: <obj_exp>/ICE_Experiment_Logs/meshes_copy/dragon_fat.obj（dragon 系列金样本矩阵源，见 corpus/golden/README.md）",
+      "notes": "dragon 系列金样本矩阵源（Stage 01/05 导出）；Stage 00/06 输入。体积 3.6 MB 未入库"
     },
     {
       "filename": "spot.obj",
@@ -93,7 +101,9 @@
         "05",
         "06"
       ],
-      "notes": "主语料网格；spot 系列金样本矩阵源（Stage 01/05 导出）；全阶段基准"
+      "status": "not_bundled",
+      "acquire": "从 intrinsic-simplification 实验数据目录拷贝: <obj_exp>/ICE_Experiment_Logs/meshes_copy/spot.obj（spot 系列金样本矩阵源）",
+      "notes": "主语料网格；spot 系列金样本矩阵源（Stage 01/05 导出）；全阶段基准。实验数据未入库"
     },
     {
       "filename": "spot_subdiv.obj",
@@ -108,7 +118,60 @@
       "uv": true,
       "source": "ICE_Experiment_Logs/meshes_copy/spot_subdiv.obj",
       "stages": [],
-      "notes": "实验未使用的备用网格（spot 细分版）"
+      "status": "not_bundled",
+      "acquire": "从 intrinsic-simplification 实验数据目录拷贝: <obj_exp>/ICE_Experiment_Logs/meshes_copy/spot_subdiv.obj",
+      "notes": "实验未使用的备用网格（spot 细分版）。体积 3.1 MB 未入库"
+    },
+    {
+      "filename": "tetrahedron.obj",
+      "bytes": 228,
+      "sha256": "85aa26eaf1392218f365cdb26433bc4e59cbb4132f219c4c0867675463fb5142",
+      "vertices": 4,
+      "faces": 4,
+      "euler": 2,
+      "boundary_edges": 0,
+      "topology": "closed_sphere",
+      "genus": 0,
+      "uv": false,
+      "source": "generated",
+      "stages": [],
+      "status": "bundled",
+      "acquire": null,
+      "notes": "正四面体（4 顶点 4 面），numpy 生成入库；极简网格最小退化测试"
+    },
+    {
+      "filename": "cube.obj",
+      "bytes": 412,
+      "sha256": "86c4d8b21f8fa9c4cd565fcf0a4e135f7e0e6fc01f761f621a565b131404414a",
+      "vertices": 8,
+      "faces": 12,
+      "euler": 2,
+      "boundary_edges": 0,
+      "topology": "closed_sphere",
+      "genus": 0,
+      "uv": false,
+      "source": "generated",
+      "stages": [],
+      "status": "bundled",
+      "acquire": null,
+      "notes": "立方体（8 顶点 12 三角面），numpy 生成入库；平面+尖锐边边界保持测试"
+    },
+    {
+      "filename": "sphere.obj",
+      "bytes": 10278,
+      "sha256": "39e0c0a3d003689a9b3403af9e481ea707f38a846ea93c96865349890ea3425a",
+      "vertices": 178,
+      "faces": 352,
+      "euler": 2,
+      "boundary_edges": 0,
+      "topology": "closed_sphere",
+      "genus": 0,
+      "uv": false,
+      "source": "generated",
+      "stages": [],
+      "status": "bundled",
+      "acquire": null,
+      "notes": "UV 球（16 经 × 12 纬，178 顶点 352 面），numpy 生成入库；曲面简化质量测试"
     }
   ]
 }

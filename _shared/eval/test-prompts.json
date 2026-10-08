@@ -1,0 +1,1339 @@
+[
+  {
+    "id": 1,
+    "branch": "obj",
+    "prompt": "简化 cube.obj 到 50% 面数",
+    "expected": "生成简化网格，面数减半，Hausdorff 距离 < 0.1",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/statistical_summary.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/statistical_summary.json",
+        "field": "verdict",
+        "in": [
+          "pass",
+          "approx"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "产物存在",
+        "weight": 1
+      },
+      {
+        "item": "判决合法",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "basic"
+  },
+  {
+    "id": 2,
+    "branch": "obj",
+    "prompt": "用 QEM 边收缩简化 dragon.obj，目标面数 5000，并计算 Hausdorff 距离验证几何误差",
+    "expected": "输出简化网格 + Hausdorff 距离报告，距离应 < 0.05",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/hausdorff.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/hausdorff.json",
+        "field": "hausdorff_distance"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "Hausdorff 产物存在",
+        "weight": 1
+      },
+      {
+        "item": "距离字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "verification"
+  },
+  {
+    "id": 3,
+    "branch": "obj",
+    "prompt": "对简化后的网格做退化面与重复面检测，生成诊断报告",
+    "expected": "输出 degeneracy_report.json，含退化面计数与重复面计数",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/degeneracy_report.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/degeneracy_report.json",
+        "field": "degenerate_count"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "诊断报告存在",
+        "weight": 1
+      },
+      {
+        "item": "计数字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "validation"
+  },
+  {
+    "id": 4,
+    "branch": "main",
+    "prompt": "帮我复现这篇 PINN 论文的实验：https://arxiv.org/abs/2301.00001。我用的是 Windows 11 + NVIDIA RTX 3060，有 Conda 环境。论文有 GitHub 仓库。我需要完整的复现报告，中英双语。",
+    "expected": "触发完整 8 阶段流水线，生成双语复现报告 reproduction_report.md",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/reproduction_report.md"
+      },
+      {
+        "type": "text_contains",
+        "path": "results/reproduction_report.md",
+        "needle": "复现报告"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "复现报告存在",
+        "weight": 2
+      },
+      {
+        "item": "报告内容含中文标题",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "full_pipeline"
+  },
+  {
+    "id": 5,
+    "branch": "main",
+    "prompt": "帮我从三方视角审阅这篇计量经济学论文：C:\\papers\\did_analysis.pdf。重点关注它的 DID 识别策略是否可信，以及复现难度有多大。",
+    "expected": "触发三方视角分析，输出 reproducibility_assessment.json 含 recommendation 字段",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/reproducibility_assessment.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/reproducibility_assessment.json",
+        "field": "recommendation",
+        "in": [
+          "follow",
+          "follow_with_caveats",
+          "do_not_follow"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "评估产物存在",
+        "weight": 1
+      },
+      {
+        "item": "建议字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "economics",
+    "complexity": "three_perspective"
+  },
+  {
+    "id": 6,
+    "branch": "routine",
+    "prompt": "复现这篇跨语言栈论文（Python+R+Julia 混合），生成统一复现报告",
+    "expected": "触发跨语言栈例行复现流水线，输出 reproduction_report.md",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/reproduction_report.md"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "复现报告存在",
+        "weight": 1
+      }
+    ],
+    "domain": "cross_stack",
+    "complexity": "routine"
+  },
+  {
+    "id": 7,
+    "branch": "routine",
+    "prompt": "我复现这篇 CFD 论文时基线验证失败，lift 系数 0.312 vs 论文 0.328，误差超 5%。帮我诊断并给出修复方案。",
+    "expected": "触发基线失败处理流程，输出 diagnosis_report.md 含诊断结论",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/diagnosis_report.md"
+      },
+      {
+        "type": "text_contains",
+        "path": "results/diagnosis_report.md",
+        "needle": "诊断"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "诊断报告存在",
+        "weight": 1
+      },
+      {
+        "item": "报告含诊断关键词",
+        "weight": 1
+      }
+    ],
+    "domain": "numerical_computing",
+    "complexity": "diagnosis"
+  },
+  {
+    "id": 8,
+    "branch": "financial",
+    "prompt": "对这只股票的日收益率序列做 bootstrap 置信区间估计，n=10000，置信水平 95%",
+    "expected": "输出 ci_report.json，含 method 字段标识 bootstrap/analytic",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/ci_report.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/ci_report.json",
+        "field": "method",
+        "in": [
+          "bootstrap",
+          "analytic"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "CI 报告存在",
+        "weight": 1
+      },
+      {
+        "item": "方法字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "statistical"
+  },
+  {
+    "id": 9,
+    "branch": "financial",
+    "prompt": "运行 cmd_metrics 统计命令性能，输出累积和复杂度指标",
+    "expected": "输出 metrics.json，含 cumsum_complexity 字段标识 O(n) 或 O(n^2)",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/metrics.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/metrics.json",
+        "field": "cumsum_complexity",
+        "in": [
+          "O(n)",
+          "O(n^2)"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "指标产物存在",
+        "weight": 1
+      },
+      {
+        "item": "复杂度字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "performance"
+  },
+  {
+    "id": 10,
+    "branch": "obj",
+    "prompt": "读取一个故意损坏的 .obj 文件（面索引越界），验证 obj_io 的错误路径校验是否抛出带行号的 ValueError",
+    "expected": "obj_io.load_obj 抛出 ValueError，消息含行号与越界索引信息，不静默产出错误网格",
+    "assertions": [
+      {
+        "type": "exit_code",
+        "eq": 1
+      },
+      {
+        "type": "command_output",
+        "contains": "ValueError"
+      }
+    ],
+    "rubric": [
+      {
+        "item": "非零退出码",
+        "weight": 1
+      },
+      {
+        "item": "错误信息含 ValueError",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "error_handling"
+  },
+  {
+    "id": 11,
+    "branch": "obj",
+    "prompt": "对 bunny.obj 跑 benchmark_qem.py，目标面数比例 50%/20%/10%/5%/1%，记录每档耗时与面数",
+    "expected": "输出 benchmark.json，含每档 target_ratio/time_seconds/actual_faces",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/benchmark.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/benchmark.json",
+        "field": "results"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "基准产物存在",
+        "weight": 1
+      },
+      {
+        "item": "结果数组合法",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "advanced"
+  },
+  {
+    "id": 12,
+    "branch": "obj",
+    "prompt": "用 preserve_boundary=True 简化 cube.obj 到 50%，验证边界顶点未被折叠",
+    "expected": "输出简化网格，边界边完整保留，非边界区域面数减半",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/simplified.obj"
+      },
+      {
+        "type": "json_field",
+        "path": "results/boundary_report.json",
+        "field": "preserve_boundary"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "简化产物存在",
+        "weight": 1
+      },
+      {
+        "item": "边界保护标记存在",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "verification"
+  },
+  {
+    "id": 13,
+    "branch": "obj",
+    "prompt": "对 sphere.obj 分别简化到 50%/20%/10%/5%/1% 面数，比较各档 Hausdorff 距离变化趋势",
+    "expected": "输出多档简化结果，Hausdorff 距离随面数减少单调递增",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/hausdorff_trend.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/hausdorff_trend.json",
+        "field": "ratios"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "趋势产物存在",
+        "weight": 1
+      },
+      {
+        "item": "比例数组合法",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 14,
+    "branch": "obj",
+    "prompt": "简化 dragon.obj 后导出，验证输出 .obj 含 vn 法线声明且法线已重计算",
+    "expected": "输出 .obj 文件含 vn 行，法线数量与顶点数一致",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/simplified.obj"
+      },
+      {
+        "type": "text_contains",
+        "path": "results/simplified.obj",
+        "needle": "vn "
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "导出文件存在",
+        "weight": 1
+      },
+      {
+        "item": "含法线声明",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "basic"
+  },
+  {
+    "id": 15,
+    "branch": "obj",
+    "prompt": "对 cube/tetrahedron/sphere/bunny 四个模型统一简化到 20% 面数，生成交叉验证汇总",
+    "expected": "输出 statistical_summary.json，含四模型判决结果",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/statistical_summary.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/statistical_summary.json",
+        "field": "verdict",
+        "in": [
+          "pass",
+          "approx",
+          "fail"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "汇总产物存在",
+        "weight": 1
+      },
+      {
+        "item": "判决字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "verification"
+  },
+  {
+    "id": 16,
+    "branch": "obj",
+    "prompt": "用 cli.py --input model.obj --ratio 0.1 --no-boundary --check-hausdorff 执行简化，验证 CLI 参数解析正确",
+    "expected": "输出简化网格，preserve_boundary=False 生效，Hausdorff 报告生成",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/simplified.obj"
+      },
+      {
+        "type": "file_exists",
+        "path": "results/hausdorff.json"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "简化产物存在",
+        "weight": 1
+      },
+      {
+        "item": "Hausdorff 报告生成",
+        "weight": 1
+      }
+    ],
+    "domain": "graphics",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 17,
+    "branch": "main",
+    "prompt": "帮我搭建这篇 PINN 论文的复现环境，Windows 11 + RTX 3060 + Conda，生成 environment.yml",
+    "expected": "输出 environment.yml 与 requirements-locked.txt，依赖锁定可复现",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "env/environment.yml"
+      },
+      {
+        "type": "file_exists",
+        "path": "env/requirements-locked.txt"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "environment.yml 存在",
+        "weight": 1
+      },
+      {
+        "item": "锁定依赖存在",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 18,
+    "branch": "main",
+    "prompt": "跑上游仓库原始代码验证基线，确认 lift 系数 0.328 可复现，输出 baseline_metrics.json",
+    "expected": "输出 baseline_metrics.json，lift 系数在容差内匹配论文值",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/baseline_metrics.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/baseline_metrics.json",
+        "field": "lift_coefficient"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "基线产物存在",
+        "weight": 1
+      },
+      {
+        "item": "lift 字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "verification"
+  },
+  {
+    "id": 19,
+    "branch": "main",
+    "prompt": "论文复现基线通过后，增量实现 AdamW 优化器替换，每模块独立 commit 并记录 implementation_log",
+    "expected": "输出 implementation/delta_report.json，记录模块变更与数值差异",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "implementation/delta_report.json"
+      },
+      {
+        "type": "json_field",
+        "path": "implementation/delta_report.json",
+        "field": "modules"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "增量报告存在",
+        "weight": 1
+      },
+      {
+        "item": "模块字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "advanced"
+  },
+  {
+    "id": 20,
+    "branch": "main",
+    "prompt": "对复现实验跑 5 种子多轮统计验证，输出均值/标准差/置信区间与五态判决",
+    "expected": "输出 statistical_summary.json，含 verdict 字段与统计量",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/statistical_summary.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/statistical_summary.json",
+        "field": "verdict",
+        "in": [
+          "pass",
+          "approx",
+          "fail"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "统计产物存在",
+        "weight": 1
+      },
+      {
+        "item": "判决字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "verification"
+  },
+  {
+    "id": 21,
+    "branch": "main",
+    "prompt": "生成复现报告的中英双语版本，英文 .md + 中文 -CN.md，内容对应一致",
+    "expected": "输出 reproduction_report.md 与 reproduction_report-CN.md",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "实验复刻结果汇总/reproduction_report.md"
+      },
+      {
+        "type": "file_exists",
+        "path": "实验复刻结果汇总/reproduction_report-CN.md"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "英文报告存在",
+        "weight": 1
+      },
+      {
+        "item": "中文报告存在",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "basic"
+  },
+  {
+    "id": 22,
+    "branch": "main",
+    "prompt": "用 plot_and_export.py 将实验结果导出为 matplotlib + LaTeX 双版本图表代码",
+    "expected": "输出 .py 图表脚本与 .tex 版本，二者数据一致",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "实验复刻结果汇总/figures/plot.py"
+      },
+      {
+        "type": "file_exists",
+        "path": "实验复刻结果汇总/figures/plot.tex"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "Python 图表存在",
+        "weight": 1
+      },
+      {
+        "item": "LaTeX 图表存在",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 23,
+    "branch": "main",
+    "prompt": "审阅这篇论文的复现可行性，评估数据/代码/环境可得性，给出 proceed/proceed_with_caution/discourage 建议",
+    "expected": "输出 reproducibility_assessment.json，含 recommendation 字段",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/reproducibility_assessment.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/reproducibility_assessment.json",
+        "field": "recommendation",
+        "in": [
+          "proceed",
+          "proceed_with_caution",
+          "needs_human_approval",
+          "discourage"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "评估产物存在",
+        "weight": 1
+      },
+      {
+        "item": "建议字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 24,
+    "branch": "main",
+    "prompt": "运行完整 Phase 流水线并检查所有门禁 G01/G1-G7 是否通过，输出门禁检查报告",
+    "expected": "输出 gate_report.json，记录每门禁状态 pass/fail/gray",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/gate_report.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/gate_report.json",
+        "field": "gates"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "门禁报告存在",
+        "weight": 1
+      },
+      {
+        "item": "门禁数组合法",
+        "weight": 1
+      }
+    ],
+    "domain": "AI4Math",
+    "complexity": "verification"
+  },
+  {
+    "id": 25,
+    "branch": "routine",
+    "prompt": "计算矩阵 A 的特征值与特征向量，A=[[2,1],[1,3]]，验证正交性",
+    "expected": "输出特征值/向量结果，验证 A@v = lambda*v",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/eigen.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/eigen.json",
+        "field": "eigenvalues"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "特征值产物存在",
+        "weight": 1
+      },
+      {
+        "item": "特征值字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "numerical_computing",
+    "complexity": "basic"
+  },
+  {
+    "id": 26,
+    "branch": "routine",
+    "prompt": "用 SymPy 对 f(x)=x^3-2x+1 求导与不定积分，输出符号表达式",
+    "expected": "输出导数 3x^2-2 与积分 x^4/4-x^2+x+C",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/symbolic.json"
+      },
+      {
+        "type": "text_contains",
+        "path": "results/symbolic.json",
+        "needle": "3*x**2"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "符号产物存在",
+        "weight": 1
+      },
+      {
+        "item": "导数表达式正确",
+        "weight": 1
+      }
+    ],
+    "domain": "symbolic_math",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 27,
+    "branch": "routine",
+    "prompt": "验证数值积分 ∫₀¹ sin(x)/x dx ≈ 0.946083，用 scipy.quad 与梯形法双方法交叉验证",
+    "expected": "输出两种方法结果，误差 < 1e-6",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/integral_check.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/integral_check.json",
+        "field": "error"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "积分产物存在",
+        "weight": 1
+      },
+      {
+        "item": "误差字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "numerical_computing",
+    "complexity": "verification"
+  },
+  {
+    "id": 28,
+    "branch": "routine",
+    "prompt": "批量复现 5 篇 CFD 论文的基线实验，统一环境配置，输出汇总对比表",
+    "expected": "输出 batch_summary.json，含每篇论文的基线指标与判决",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/batch_summary.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/batch_summary.json",
+        "field": "papers"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "批量产物存在",
+        "weight": 1
+      },
+      {
+        "item": "论文数组合法",
+        "weight": 1
+      }
+    ],
+    "domain": "cross_stack",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 29,
+    "branch": "routine",
+    "prompt": "从这篇 PDF 论文提取所有 display 公式，输出 LaTeX 格式公式清单",
+    "expected": "输出 formulas.json，含每条公式的 LaTeX 源码与页码定位",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "analysis/formulas.json"
+      },
+      {
+        "type": "json_field",
+        "path": "analysis/formulas.json",
+        "field": "formulas"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "公式产物存在",
+        "weight": 1
+      },
+      {
+        "item": "公式数组合法",
+        "weight": 1
+      }
+    ],
+    "domain": "document_parsing",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 30,
+    "branch": "routine",
+    "prompt": "用不动点迭代求解 x = cos(x)，初值 x0=0.5，精度 1e-12，记录每步迭代值",
+    "expected": "输出收敛解 ≈ 0.739085 与迭代历史",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/iteration.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/iteration.json",
+        "field": "solution"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "迭代产物存在",
+        "weight": 1
+      },
+      {
+        "item": "解字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "numerical_computing",
+    "complexity": "advanced"
+  },
+  {
+    "id": 31,
+    "branch": "routine",
+    "prompt": "比较 float32 vs float64 在大数相减时的精度损失，构造 catastrophic cancellation 场景",
+    "expected": "输出两种精度结果对比，相对误差分析与根因说明",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/precision_compare.json"
+      },
+      {
+        "type": "text_contains",
+        "path": "results/precision_compare.json",
+        "needle": "cancellation"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "精度产物存在",
+        "weight": 1
+      },
+      {
+        "item": "含 cancellation 分析",
+        "weight": 1
+      }
+    ],
+    "domain": "numerical_computing",
+    "complexity": "verification"
+  },
+  {
+    "id": 32,
+    "branch": "routine",
+    "prompt": "将复现实验结果导出为 CSV + JSON + HDF5 三种格式，验证数据一致性",
+    "expected": "输出三种格式文件，内容逐字段一致",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/export.csv"
+      },
+      {
+        "type": "file_exists",
+        "path": "results/export.json"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "CSV 导出存在",
+        "weight": 1
+      },
+      {
+        "item": "JSON 导出存在",
+        "weight": 1
+      }
+    ],
+    "domain": "data_engineering",
+    "complexity": "basic"
+  },
+  {
+    "id": 33,
+    "branch": "financial",
+    "prompt": "对日收益率序列计算 Sharpe ratio、Sortino ratio、最大回撤，年化 252",
+    "expected": "输出 metrics.json，含 sharpe/sortino/max_drawdown 字段",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/metrics.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/metrics.json",
+        "field": "sharpe"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "指标产物存在",
+        "weight": 1
+      },
+      {
+        "item": "Sharpe 字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "basic"
+  },
+  {
+    "id": 34,
+    "branch": "financial",
+    "prompt": "对目标论文的数据源做分诊：判定 CRSP/WRDS 属于 licensed，生成 GBM 合成替代方案",
+    "expected": "输出 data_triage.json，含 category=licensed 与合成方案",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "analysis/data_triage.json"
+      },
+      {
+        "type": "json_field",
+        "path": "analysis/data_triage.json",
+        "field": "category",
+        "in": [
+          "open",
+          "licensed",
+          "absent"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "分诊产物存在",
+        "weight": 1
+      },
+      {
+        "item": "类别字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 35,
+    "branch": "financial",
+    "prompt": "运行 fin_tool cli metrics --input returns.csv --annualize 252 --ci 95，验证 CLI 命令完整执行",
+    "expected": "输出指标报告，含年化指标与 95% CI",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/cli_metrics.json"
+      },
+      {
+        "type": "command_output",
+        "contains": "sharpe"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "CLI 产物存在",
+        "weight": 1
+      },
+      {
+        "item": "输出含 sharpe",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 36,
+    "branch": "financial",
+    "prompt": "对 10^6 长度收益率序列跑 bootstrap_ci，验证内存保护分块机制不 OOM",
+    "expected": "输出 CI 报告，分块计算完成，峰值内存 < 500MB",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/ci_report.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/ci_report.json",
+        "field": "method",
+        "in": [
+          "bootstrap",
+          "analytic"
+        ]
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "CI 报告存在",
+        "weight": 1
+      },
+      {
+        "item": "方法字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "error_handling"
+  },
+  {
+    "id": 37,
+    "branch": "financial",
+    "prompt": "用解析公式与 bootstrap 两种方法计算 95% CI，验证两种口径结果一致性",
+    "expected": "输出双口径 CI 对比，bootstrap 与 analytic 误差 < 0.01",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/ci_compare.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/ci_compare.json",
+        "field": "error"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "对比产物存在",
+        "weight": 1
+      },
+      {
+        "item": "误差字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "verification"
+  },
+  {
+    "id": 38,
+    "branch": "financial",
+    "prompt": "收益率序列含 NaN 与 Inf，验证 metrics 计算的 NaN 处理逻辑不崩溃且结果合理",
+    "expected": "输出指标报告，NaN 被跳过或插值，结果不含 NaN",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/metrics_clean.json"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "指标产物存在",
+        "weight": 1
+      },
+      {
+        "item": "零退出码",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "error_handling"
+  },
+  {
+    "id": 39,
+    "branch": "financial",
+    "prompt": "导入含日期/价格/成交量三列的 CSV，解析为时间序列，验证日期对齐与缺失值检测",
+    "expected": "输出 parsed_series.json，含日期范围/缺失标记/记录数",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "results/parsed_series.json"
+      },
+      {
+        "type": "json_field",
+        "path": "results/parsed_series.json",
+        "field": "record_count"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "解析产物存在",
+        "weight": 1
+      },
+      {
+        "item": "记录数字段合法",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "intermediate"
+  },
+  {
+    "id": 40,
+    "branch": "financial",
+    "prompt": "生成金融复现报告，含指标表/判决结果/合成数据声明/双语版本",
+    "expected": "输出 reproduction_report.md + -CN.md，含合成数据显著标注",
+    "assertions": [
+      {
+        "type": "file_exists",
+        "path": "实验复刻结果汇总/reproduction_report.md"
+      },
+      {
+        "type": "text_contains",
+        "path": "实验复刻结果汇总/reproduction_report.md",
+        "needle": "合成数据"
+      },
+      {
+        "type": "exit_code",
+        "eq": 0
+      }
+    ],
+    "rubric": [
+      {
+        "item": "报告存在",
+        "weight": 1
+      },
+      {
+        "item": "含合成数据声明",
+        "weight": 1
+      }
+    ],
+    "domain": "quant_finance",
+    "complexity": "basic"
+  }
+]

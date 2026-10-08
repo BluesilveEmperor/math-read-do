@@ -1,0 +1,37 @@
+{
+  "branch": "obj",
+  "first_token": {
+    "bytes": 33300,
+    "lines": 649,
+    "status": "ok"
+  },
+  "qem_throughput": {
+    "faces_per_sec": null,
+    "elapsed": null,
+    "raw_output": "usage: benchmark_qem.py [-h] -i INPUT [-r RATIOS [RATIOS ...]]\n                        [-f FACES_LIST [FACES_LIST ...]]\nbenchmark_qem.py: error: the following arguments are required: -i/--input",
+    "status": "解析失败"
+  },
+  "coverage": {
+    "line_rate": null,
+    "status": "coverage.json 未生成（可能无测试或 pytest 未安装）"
+  },
+  "cross_branch_consistency": {
+    "branches_checked": {
+      "obj": "33300 bytes",
+      "main": "34099 bytes",
+      "routine": "36537 bytes",
+      "financial": "27724 bytes"
+    },
+    "status": "ok",
+    "frontmatter_diff": {
+      "main": true,
+      "routine": true,
+      "financial": true
+    },
+    "trigger_diff": {
+      "main": true,
+      "routine": true,
+      "financial": true
+    }
+  }
+}

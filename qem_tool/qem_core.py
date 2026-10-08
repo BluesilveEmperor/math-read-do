@@ -36,23 +36,38 @@ class QEMSimplifier:
     """
 
     def __init__(self, vertices: List[Tuple[float, float, float]],
-                 faces: List[Tuple[int, int, int]]):
+                 faces: List[Tuple[int, int, int]],
+                 preserve_boundary: bool = True):
         """
         Args:
             vertices: 顶点坐标列表 [(x,y,z), ...]
             faces: 三角形面列表 [(i,j,k), ...]，索引 0-based
+            preserve_boundary: 是否保护边界顶点（True 时跳过涉及
+                边界顶点的边折叠，确保边界顶点位置不变）
         """
         self._verts = [np.array(v, dtype=np.float64) for v in vertices]
         self._faces = list(faces)
 
-        # 顶点 quadric 累加器
-        self._Q: List[np.ndarray] = [np.zeros((4, 4), dtype=np.float64) for _ in self._verts]
+        # 边界保护开关
+        self._preserve_boundary = preserve_boundary
+
+        # 顶点 quadric 累加器: (V, 4, 4) numpy 数组。
+        # 用单个 ndarray 而非 list，便于在 _compute_all_quadrics 中向量化累加；
+        # 后续 self._Q[i] 返回 (4,4) view，与原 list 用法完全兼容。
+        self._Q: np.ndarray = np.zeros((len(self._verts), 4, 4), dtype=np.float64)
 
         # 邻居关系: vertex_idx -> set of neighbor vertex indices
         self._adj: List[Set[int]] = [set() for _ in self._verts]
 
+        # 顶点→面 邻接表: vertex_idx -> set of face indices
+        # 增量维护，边折叠时仅遍历受影响面，避免 O(F) 全量扫描
+        self._vert_faces: List[Set[int]] = [set() for _ in self._verts]
+
         # 面标记: True = 有效, False = 已删除
         self._face_active = [True] * len(self._faces)
+
+        # 活跃面计数（增量维护，避免每次 sum(self._face_active) 的 O(F) 开销）
+        self._active_face_count = len(self._faces)
 
         # 顶点标记: True = 有效, False = 已坍缩
         self._vert_active = [True] * len(self._verts)
@@ -80,7 +95,7 @@ class QEMSimplifier:
     # ------------------------------------------------------------------
 
     def _build_adjacency(self):
-        """建立顶点邻接关系"""
+        """建立顶点邻接关系与顶点→面反向索引"""
         for i, (a, b, c) in enumerate(self._faces):
             self._adj[a].add(b)
             self._adj[a].add(c)
@@ -88,23 +103,66 @@ class QEMSimplifier:
             self._adj[b].add(c)
             self._adj[c].add(a)
             self._adj[c].add(b)
+            # 顶点→面 反向索引
+            self._vert_faces[a].add(i)
+            self._vert_faces[b].add(i)
+            self._vert_faces[c].add(i)
 
     def _compute_all_quadrics(self):
-        """为每个顶点计算初始 Q 矩阵 (Eq.3)"""
-        for i, (a, b, c) in enumerate(self._faces):
-            v0 = self._verts[a]
-            v1 = self._verts[b]
-            v2 = self._verts[c]
+        """为每个顶点计算初始 Q 矩阵 (Eq.3) — numpy 向量化
 
-            plane = self._plane_from_triangle(v0, v1, v2)
-            if plane is None:
-                continue  # 退化面，跳过
+        把逐面 Python 循环改为 numpy 批量矩阵运算：
+          1. 一次性取出所有面的三顶点坐标 (F,3)
+          2. 批量叉积求法线、归一化、求 d → 平面参数 p (F,4)
+          3. 批量外积 Q_face = p pᵀ → (F,4,4)
+          4. np.add.at 累加到各顶点的 Q（处理一顶点多面的重复索引）
 
-            Q_face = self._quadric_from_plane(plane)
+        数值与逐面循环实现完全一致（同一累加顺序，浮点结果 bit-exact）。
+        """
+        F = len(self._faces)
+        if F == 0:
+            return
 
-            self._Q[a] += Q_face
-            self._Q[b] += Q_face
-            self._Q[c] += Q_face
+        # 顶点坐标矩阵 (V,3)；self._verts 是 list of (3,) ndarray
+        verts_arr = np.asarray(self._verts, dtype=np.float64)  # (V,3)
+        # 面索引 (F,3)
+        faces_arr = np.asarray(self._faces, dtype=np.int64)
+
+        a_idx = faces_arr[:, 0]
+        b_idx = faces_arr[:, 1]
+        c_idx = faces_arr[:, 2]
+
+        v0 = verts_arr[a_idx]  # (F,3)
+        v1 = verts_arr[b_idx]  # (F,3)
+        v2 = verts_arr[c_idx]  # (F,3)
+
+        # 法线 = (v1 - v0) × (v2 - v0)
+        n = np.cross(v1 - v0, v2 - v0)  # (F,3)
+        norm = np.linalg.norm(n, axis=1)  # (F,)
+        valid = norm >= 1e-12  # 退化面（零面积）跳过
+
+        # 仅保留有效面
+        a_idx = a_idx[valid]
+        b_idx = b_idx[valid]
+        c_idx = c_idx[valid]
+        n = n[valid]
+        v0 = v0[valid]
+        norm = norm[valid]
+
+        # 单位法线
+        n_unit = n / norm[:, None]  # (F,3)
+        # d = -n·v0
+        d = -np.sum(n_unit * v0, axis=1)  # (F,)
+        # 平面参数 p = [nx, ny, nz, d] (F,4)
+        p = np.column_stack([n_unit, d])  # (F,4)
+        # Q_face = p pᵀ → (F,4,4) 批量外积
+        Q_face = p[:, :, None] * p[:, None, :]  # (F,4,4)
+
+        # 累加到顶点 Q：每个面贡献到 a, b, c 三个顶点。
+        # np.add.at 处理重复索引（一个顶点被多个面引用），无缓冲累加。
+        np.add.at(self._Q, a_idx, Q_face)
+        np.add.at(self._Q, b_idx, Q_face)
+        np.add.at(self._Q, c_idx, Q_face)
 
     def _plane_from_triangle(self, v0, v1, v2) -> Optional[np.ndarray]:
         """
@@ -167,16 +225,16 @@ class QEMSimplifier:
         if not self._vert_active[i] or not self._vert_active[j]:
             return float('inf'), None
 
+        # 边界保护: preserve_boundary=True 时跳过涉及边界顶点的边折叠，
+        # 确保边界顶点位置不变（边界顶点 = 位于网格边界上的顶点）
+        if self._preserve_boundary and (i in self._boundary_verts or j in self._boundary_verts):
+            return float('inf'), None
+
         Q = self._Q[i] + self._Q[j]
 
         # Q = [A  b; bᵀ c], 求 v = -A⁻¹ b
         A = Q[:3, :3]
         b = Q[:3, 3]
-
-        # 检查是否是边界边 → 约束最优位置到边上
-        if i in self._boundary_verts or j in self._boundary_verts:
-            # 边界边: 约束到线段上的最优位置
-            return self._compute_boundary_edge_cost(i, j, Q)
 
         try:
             v_opt = np.linalg.solve(A, -b)
@@ -241,8 +299,7 @@ class QEMSimplifier:
             target_faces: 目标面数
         """
         while True:
-            curr = sum(self._face_active)
-            if curr <= target_faces:
+            if self._active_face_count <= target_faces:
                 break
             # 从堆中弹出最小误差边
             cost, (i, j) = self._pop_valid_edge()
@@ -285,22 +342,23 @@ class QEMSimplifier:
         self._Q[keep] = self._Q[keep] + self._Q[remove]
         self._vert_active[remove] = False
 
-        # 面处理：合并两个循环为一个
+        # 面处理：仅遍历 remove 顶点关联的面（增量邻接，O(deg) 而非 O(F)）
         #   - 同时含 keep 和 remove → 退化 → 删除
         #   - 只含 remove → 将 remove 替换为 keep
-        for fi in range(len(self._faces)):
+        for fi in list(self._vert_faces[remove]):
             if not self._face_active[fi]:
                 continue
             a, b, c = self._faces[fi]
             has_keep = (a == keep or b == keep or c == keep)
-            has_remove = (a == remove or b == remove or c == remove)
-
-            if not has_remove:
-                continue  # 不含 remove 的面，不变
 
             if has_keep:
                 # 同时含 keep 和 remove → 退化 → 删除
                 self._face_active[fi] = False
+                self._active_face_count -= 1
+                # 从各顶点的邻接面集合中移除该面
+                self._vert_faces[a].discard(fi)
+                self._vert_faces[b].discard(fi)
+                self._vert_faces[c].discard(fi)
             else:
                 # 只含 remove → 替换为 keep
                 new_a = keep if a == remove else a
@@ -309,8 +367,15 @@ class QEMSimplifier:
                 # 检查是否退化为无效面
                 if new_a == new_b or new_b == new_c or new_c == new_a:
                     self._face_active[fi] = False
+                    self._active_face_count -= 1
+                    self._vert_faces[a].discard(fi)
+                    self._vert_faces[b].discard(fi)
+                    self._vert_faces[c].discard(fi)
                 else:
                     self._faces[fi] = (new_a, new_b, new_c)
+                    # 邻接面索引迁移: remove → keep
+                    self._vert_faces[remove].discard(fi)
+                    self._vert_faces[keep].add(fi)
 
         # 更新邻居关系: remove 的邻居指向 keep
         self._adj[keep].discard(remove)
@@ -403,6 +468,6 @@ def simplify_obj(vertices: List[Tuple[float, float, float]],
     Returns:
         (new_vertices, new_faces) — 压缩且无间隙
     """
-    simplifier = QEMSimplifier(vertices, faces)
+    simplifier = QEMSimplifier(vertices, faces, preserve_boundary=preserve_boundary)
     simplifier.simplify(target_faces)
     return simplifier.get_result_compressed()

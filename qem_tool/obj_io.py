@@ -76,8 +76,17 @@ def load_obj(path: str) -> OBJModel:
     model = OBJModel()
     base_dir = os.path.dirname(path)
 
+    def _to_float(token, lineno, what):
+        """把 token 转 float，失败时抛出带中文消息和行号的 ValueError。"""
+        try:
+            return float(token)
+        except (ValueError, TypeError):
+            raise ValueError(
+                f"第 {lineno} 行: {what} 字段不是合法数字: {token!r}"
+            )
+
     with open(path, 'r', encoding='utf-8') as f:
-        for line in f:
+        for lineno, line in enumerate(f, 1):
             line = line.strip()
             if not line or line.startswith('#'):
                 continue
@@ -89,21 +98,42 @@ def load_obj(path: str) -> OBJModel:
             keyword = parts[0]
 
             if keyword == 'v':
-                x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
+                # 顶点至少需要 x y z 三个坐标
+                if len(parts) < 4:
+                    raise ValueError(
+                        f"第 {lineno} 行: 顶点(v)缺少坐标分量，"
+                        f"期望 'v x y z'，实际只有 {len(parts) - 1} 个字段: {line!r}"
+                    )
+                x = _to_float(parts[1], lineno, "顶点 x")
+                y = _to_float(parts[2], lineno, "顶点 y")
+                z = _to_float(parts[3], lineno, "顶点 z")
                 model.vertices.append((x, y, z))
 
             elif keyword == 'vt':
-                u = float(parts[1])
-                v = float(parts[2]) if len(parts) > 2 else 0.0
+                # 纹理坐标至少需要 u
+                if len(parts) < 2:
+                    raise ValueError(
+                        f"第 {lineno} 行: 纹理坐标(vt)缺少 u 分量: {line!r}"
+                    )
+                u = _to_float(parts[1], lineno, "纹理 u")
+                v = _to_float(parts[2], lineno, "纹理 v") if len(parts) > 2 else 0.0
                 model.texcoords.append((u, v))
 
             elif keyword == 'vn':
-                x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
+                # 法线需要 x y z 三个分量
+                if len(parts) < 4:
+                    raise ValueError(
+                        f"第 {lineno} 行: 法线(vn)缺少分量，"
+                        f"期望 'vn x y z'，实际只有 {len(parts) - 1} 个字段: {line!r}"
+                    )
+                x = _to_float(parts[1], lineno, "法线 x")
+                y = _to_float(parts[2], lineno, "法线 y")
+                z = _to_float(parts[3], lineno, "法线 z")
                 model.normals.append((x, y, z))
 
             elif keyword == 'f':
                 # 解析面顶点索引 (1-based in file)
-                face_verts = _parse_face_vertices(parts[1:])
+                face_verts = _parse_face_vertices(parts[1:], lineno)
                 # 三角化: 如果 > 3 个顶点，拆成 triangle fan
                 for i in range(1, len(face_verts) - 1):
                     v = (face_verts[0][0], face_verts[i][0], face_verts[i + 1][0])
@@ -122,10 +152,45 @@ def load_obj(path: str) -> OBJModel:
             elif keyword == 'g':
                 model.groups = parts[1:]
 
+    # 统一校验面引用的顶点/纹理/法线索引是否越界。
+    # 放在末尾校验以兼容顶点定义在面之后的非标准但实际存在的 OBJ 文件。
+    _validate_indices(model, path)
+
     return model
 
 
-def _parse_face_vertices(tokens: List[str]) -> List[Tuple[int, Optional[int], Optional[int]]]:
+def _validate_indices(model: OBJModel, path: str) -> None:
+    """校验所有面引用的顶点/纹理/法线索引都在合法范围内，越界则抛出 ValueError。"""
+    n_v = len(model.vertices)
+    n_vt = len(model.texcoords)
+    n_vn = len(model.normals)
+    for fi, face in enumerate(model.faces):
+        for slot, idx in zip(('v[0]', 'v[1]', 'v[2]'), face.v):
+            if idx < 0 or idx >= n_v:
+                raise ValueError(
+                    f"文件 {os.path.basename(path)}: 第 {fi + 1} 个面引用了"
+                    f"不存在的顶点索引 {idx + 1}（1-based），"
+                    f"顶点总数为 {n_v}（合法范围 1..{n_v}），字段 {slot}"
+                )
+        if face.vt is not None:
+            for slot, idx in zip(('vt[0]', 'vt[1]', 'vt[2]'), face.vt):
+                if idx < 0 or idx >= n_vt:
+                    raise ValueError(
+                        f"文件 {os.path.basename(path)}: 第 {fi + 1} 个面引用了"
+                        f"不存在的纹理坐标索引 {idx + 1}（1-based），"
+                        f"纹理坐标总数为 {n_vt}（合法范围 1..{n_vt}），字段 {slot}"
+                    )
+        if face.vn is not None:
+            for slot, idx in zip(('vn[0]', 'vn[1]', 'vn[2]'), face.vn):
+                if idx < 0 or idx >= n_vn:
+                    raise ValueError(
+                        f"文件 {os.path.basename(path)}: 第 {fi + 1} 个面引用了"
+                        f"不存在的法线索引 {idx + 1}（1-based），"
+                        f"法线总数为 {n_vn}（合法范围 1..{n_vn}），字段 {slot}"
+                    )
+
+
+def _parse_face_vertices(tokens: List[str], lineno: int = 0) -> List[Tuple[int, Optional[int], Optional[int]]]:
     """
     解析面顶点, 返回 [(v, vt, vn), ...] (0-based)
 
@@ -134,13 +199,23 @@ def _parse_face_vertices(tokens: List[str]) -> List[Tuple[int, Optional[int], Op
       f v1/vt1 v2/vt2 v3/vt3
       f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
       f v1//vn1 v2//vn2 v3//vn3
+
+    非数字字段会抛出带中文消息和行号的 ValueError。
     """
+    def _to_int(token, what):
+        try:
+            return int(token)
+        except (ValueError, TypeError):
+            raise ValueError(
+                f"第 {lineno} 行: 面{what}索引不是合法整数: {token!r}"
+            )
+
     result = []
     for token in tokens:
         subs = token.split('/')
-        v = int(subs[0]) - 1  # OBJ 1-based → 0-based
-        vt = int(subs[1]) - 1 if len(subs) > 1 and subs[1] != '' else None
-        vn = int(subs[2]) - 1 if len(subs) > 2 and subs[2] != '' else None
+        v = _to_int(subs[0], "顶点") - 1  # OBJ 1-based → 0-based
+        vt = _to_int(subs[1], "纹理") - 1 if len(subs) > 1 and subs[1] != '' else None
+        vn = _to_int(subs[2], "法线") - 1 if len(subs) > 2 and subs[2] != '' else None
         result.append((v, vt, vn))
     return result
 

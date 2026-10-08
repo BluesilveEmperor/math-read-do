@@ -59,22 +59,25 @@ def check_manifold(faces):
     return bad_edges
 
 
-def hausdorff_distance(v1, f1, v2, f2, samples=1000):
+def _sample_surface_points(v1, f1, samples, rng=None):
     """
-    近似 Hausdorff 距离：在第一个网格表面采样，计算到第二个网格的最短距离。
-    Gar: max over all points on surface A of min distance to surface B
+    在第一个网格表面按随机重心坐标采样点。
+
+    与原实现保持相同的随机语义（默认使用 random 模块级函数），
+    以便向量化版本与朴素版本可共享同一组采样点做数值对比。
     """
     import random
+    if rng is None:
+        rng = random
 
-    # 在第一个网格面上采样
     sampled_points = []
     for _ in range(samples):
-        fi = random.randint(0, len(f1) - 1)
+        fi = rng.randint(0, len(f1) - 1)
         a, b, c = f1[fi]
         va, vb, vc = v1[a], v1[b], v1[c]
         # 随机重心坐标
-        u = random.random()
-        v = random.random()
+        u = rng.random()
+        v = rng.random()
         if u + v > 1:
             u, v = 1 - u, 1 - v
         w = 1 - u - v
@@ -82,8 +85,14 @@ def hausdorff_distance(v1, f1, v2, f2, samples=1000):
         py = u * va[1] + v * vb[1] + w * vc[1]
         pz = u * va[2] + v * vb[2] + w * vc[2]
         sampled_points.append((px, py, pz))
+    return sampled_points
 
-    # 简化版本：最近点距离（按顶点）
+
+def _max_min_dist_naive(sampled_points, v2):
+    """
+    朴素 O(N×|v2|) 最近邻：对每个采样点遍历 v2 取最短欧氏距离，再取最大值。
+    保留用于数值对比验证（不参与生产路径）。
+    """
     max_min_dist = 0.0
     for p in sampled_points:
         min_dist = float('inf')
@@ -91,8 +100,37 @@ def hausdorff_distance(v1, f1, v2, f2, samples=1000):
             d2 = (p[0]-vt[0])**2 + (p[1]-vt[1])**2 + (p[2]-vt[2])**2
             min_dist = min(min_dist, math.sqrt(d2))
         max_min_dist = max(max_min_dist, min_dist)
-
     return max_min_dist
+
+
+def _max_min_dist_vectorized(sampled_points, v2):
+    """
+    向量化最近邻：用 scipy.spatial.cKDTree 对 v2 建树，批量查询采样点的最近顶点距离。
+    数值结果与 _max_min_dist_naive 一致（同为欧氏距离最小值），浮点差异在机器精度量级。
+    """
+    import numpy as np
+    from scipy.spatial import cKDTree
+
+    if not v2:
+        return 0.0
+    pts = np.asarray(sampled_points, dtype=np.float64)
+    v2_arr = np.asarray(v2, dtype=np.float64)
+    # cKDTree + 批量 query 把 O(N×M) 的 Python 双重循环下沉到 C 层
+    tree = cKDTree(v2_arr)
+    dists, _ = tree.query(pts, k=1)
+    return float(dists.max())
+
+
+def hausdorff_distance(v1, f1, v2, f2, samples=1000):
+    """
+    近似 Hausdorff 距离：在第一个网格表面采样，计算到第二个网格顶点集的最短距离。
+    H(A,B) ≈ max over sampled points p on A of min distance to vertices of B
+
+    向量化实现：采样保持纯 Python（非瓶颈），最近邻用 scipy.cKDTree 批量查询，
+    相比原 O(1000×|v2|) 的纯 Python 双重循环有数量级提速，且数值结果不变。
+    """
+    sampled_points = _sample_surface_points(v1, f1, samples)
+    return _max_min_dist_vectorized(sampled_points, v2)
 
 
 def main():
