@@ -4,3 +4,7 @@ codedocs/
 
 # nature-archify：输出路径安全检查留下的零字节探针
 .archify-*
+# Python 缓存与字节码（不应入库）
+__pycache__/
+*.pyc
+*.pyo
