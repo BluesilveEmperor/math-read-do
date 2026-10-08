@@ -20,6 +20,7 @@ import os
 import sys
 import json
 import re
+import time
 import argparse
 from pathlib import Path
 from datetime import datetime
@@ -318,7 +319,11 @@ def extract_key_formulas(content: str) -> list:
 # ── LLM 调用 ──────────────────────────────────────────────────────
 
 def call_llm(system_prompt: str, paper_content: str, perspective_name: str) -> str:
-    """调用 LLM 进行分析。优先使用环境变量配置的 LLM 端点。"""
+    """调用 LLM 进行分析。优先使用环境变量配置的 LLM 端点。
+
+    带超时（30s）与指数退避重试（3 次，间隔 1s/2s/4s），
+    避免上游慢响应导致流程挂死。
+    """
     api_key = os.environ.get("LLM_API_KEY", "")
     api_base = os.environ.get("LLM_API_BASE", "https://api.openai.com/v1")
     model = os.environ.get("LLM_MODEL", "gpt-4o")
@@ -336,23 +341,6 @@ def call_llm(system_prompt: str, paper_content: str, perspective_name: str) -> s
 
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=api_key, base_url=api_base)
-
-        # 截断论文内容以防超过上下文窗口 (取前 80000 字符)
-        truncated = paper_content[:80000]
-        if len(paper_content) > 80000:
-            truncated += "\n\n[论文内容已截断，完整内容共 {} 字符]".format(len(paper_content))
-
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"请分析以下论文内容：\n\n{truncated}"}
-            ],
-            temperature=0.3,
-            max_tokens=4096,
-        )
-        return response.choices[0].message.content
     except ImportError:
         print(f"  ⚠ openai 库未安装，使用占位分析", file=sys.stderr)
         return (
@@ -360,12 +348,47 @@ def call_llm(system_prompt: str, paper_content: str, perspective_name: str) -> s
             f"> 需要安装 openai 库: pip install openai\n"
             f"论文内容长度: {len(paper_content)} 字符\n"
         )
-    except Exception as e:
-        print(f"  ❌ LLM 调用失败: {e}", file=sys.stderr)
-        return (
-            f"# [{perspective_name}] 审阅报告（错误）\n\n"
-            f"> LLM 调用出错: {e}\n"
-        )
+
+    client = OpenAI(api_key=api_key, base_url=api_base)
+
+    # 截断论文内容以防超过上下文窗口 (取前 80000 字符)
+    truncated = paper_content[:80000]
+    if len(paper_content) > 80000:
+        truncated += "\n\n[论文内容已截断，完整内容共 {} 字符]".format(len(paper_content))
+
+    # 超时与指数退避重试：3 次，间隔 1s/2s/4s，单次超时 30s
+    max_retries = 3
+    request_timeout = 30  # 秒
+    backoff_seconds = [1, 2, 4]
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"请分析以下论文内容：\n\n{truncated}"}
+                ],
+                temperature=0.3,
+                max_tokens=4096,
+                timeout=request_timeout,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            # 最后一次失败不再重试，直接返回错误占位
+            if attempt == max_retries:
+                print(f"  ❌ LLM 调用失败（第 {attempt} 次重试仍失败）: {e}", file=sys.stderr)
+                return (
+                    f"# [{perspective_name}] 审阅报告（错误）\n\n"
+                    f"> LLM 调用出错（已重试 {max_retries} 次）: {e}\n"
+                )
+            # 指数退避等待后重试
+            wait = backoff_seconds[attempt - 1]
+            print(f"  ⚠ LLM 调用第 {attempt}/{max_retries} 次失败，{wait}s 后重试: {e}", file=sys.stderr)
+            time.sleep(wait)
+
+    # 理论上不可达
+    return f"# [{perspective_name}] 审阅报告（错误）\n\n> LLM 调用未返回结果\n"
 
 
 # ── 可复现性评估 ──────────────────────────────────────────────────
@@ -439,8 +462,45 @@ def generate_reproducibility_assessment(advisor_report: str, paper_summary_path:
 
 # ── 模板渲染 ──────────────────────────────────────────────────────
 
+def _ask(prompt: str, default: str = None) -> str:
+    """TTY 安全的 input() 包装。
+
+    在有 TTY 的交互式终端中，正常调用 ``input()`` 等待用户输入。
+    在无 TTY 环境（agent/CI/管道）中，自动降级：
+      - 若 ``default`` 提供，打印提示并返回 default（不阻塞）；
+      - 若 ``default`` 为 None，返回空字符串（不阻塞）。
+
+    环境变量 ``LITERATURE_READER_TEMPLATE`` 可在无 TTY 时指定模板选择，
+    供 CI/agent 场景使用。
+
+    Parameters
+    ----------
+    prompt : str
+        提示文本。
+    default : str, optional
+        无 TTY 时的降级返回值。
+
+    Returns
+    -------
+    str
+        用户输入或降级值。
+    """
+    if not sys.stdin.isatty():
+        # 无 TTY：降级，不阻塞
+        fallback = default if default is not None else ""
+        print(f"{prompt} [无 TTY，自动选择: {fallback!r}]", file=sys.stderr)
+        return fallback
+    # 有 TTY：正常交互
+    return input(prompt)
+
+
 def select_template_interactive():
-    """交互式选择模板。返回选中的模板路径。"""
+    """交互式选择模板。返回选中的模板路径。
+
+    无 TTY 环境（agent/CI）下自动降级：优先使用环境变量
+    ``LITERATURE_READER_TEMPLATE`` 指定的模板，否则返回推荐首选
+    （markleaf / print / 第一个可用模板），不阻塞等待输入。
+    """
     # 模板目录：优先使用脚本所在目录的 templates/，其次当前目录
     script_dir = Path(__file__).parent.parent
     template_dir = script_dir / "templates"
@@ -454,6 +514,25 @@ def select_template_interactive():
     if not templates:
         print(f"  ❌ 未找到任何模板文件 (搜索路径: {template_dir})")
         return None
+
+    # ── 无 TTY 降级 ──────────────────────────────────────────────
+    if not sys.stdin.isatty():
+        # 优先从环境变量读取
+        env_template = os.environ.get("LITERATURE_READER_TEMPLATE", "")
+        if env_template:
+            env_path = Path(env_template)
+            if env_path.exists():
+                print(f"  ℹ️ 无 TTY，使用环境变量 LITERATURE_READER_TEMPLATE: {env_path}", file=sys.stderr)
+                return str(env_path)
+        # 降级到推荐首选：markleaf > print > 第一个
+        preferred = ["markleaf", "print", "sans", "serif"]
+        for pref in preferred:
+            for t in templates:
+                if t.stem.replace("literature_reader.", "") == pref:
+                    print(f"  ℹ️ 无 TTY，自动选择推荐模板: {pref}", file=sys.stderr)
+                    return str(t)
+        print(f"  ℹ️ 无 TTY，自动选择第一个模板: {templates[0].name}", file=sys.stderr)
+        return str(templates[0])
 
     print("\n" + "=" * 50)
     print("📋 可用模板列表")
@@ -496,7 +575,7 @@ def select_template_interactive():
 
     while True:
         try:
-            choice = input("\n请选择模板编号 (1-{}，默认 1): ".format(len(templates)))
+            choice = _ask("\n请选择模板编号 (1-{}，默认 1): ".format(len(templates)), default="")
             if choice.strip() == "":
                 idx = 0
             else:

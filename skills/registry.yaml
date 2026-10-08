@@ -1,6 +1,21 @@
 schema_version: 2.0
 default_entrypoint: math_reproduction_workflow_skill
 
+# ── 跨分支产物路径/命名约定 ──────────────────────────────────────
+# H8 统一声明：本分支 output_artifacts 使用中文目录（实验复刻结果汇总/），
+# main 分支使用英文目录（reports/）。path_aliases 提供中文→英文映射，
+# 供跨分支工具/脚本做路径归一化。下游引用中文路径的代码无需修改，
+# 通过 path_aliases 可解析到对应的英文路径。
+path_aliases:
+  "实验复刻结果汇总/实验报告/": "reports/"
+  "实验复刻结果汇总/实验结果对比表/": "reports/"
+  "实验复刻结果汇总/实验图表（含代码）/": "reports/figures/"
+  "实验复刻结果汇总/": "reports/"
+# 模板文件命名统一为 snake_case（Python 惯例）。
+# 注意：main 分支的 literature-reader.mpe.css 使用 kebab-case，本分支为
+# literature_reader.mpe.css（snake_case）。跨分支引用时以本声明为准。
+naming_convention: snake_case
+
 metadata:
   name: Math Paper Reproduction Workflow
   description: 数学文献实验复现标准化流程 / Standardized Math Paper Reproduction Pipeline

@@ -72,21 +72,7 @@ compatibility:
 
 ## 反例与黑名单 / Anti-Patterns & Blacklist
 
-| # | 反模式 | 后果 | 正确做法 |
-|---|--------|------|---------|
-| 1 | MinerU token 未配置就执行 Phase 1.1 | 脚本报 401 | 先检查 `~/.mineru/config.yaml`，未配置则引导用户获取 |
-| 2 | Windows 上直跑 Linux 路径脚本 | 换行符/路径分隔符不兼容 | 使用 WSL2 或 `scripts/enable_gpu.ps1` 等 Windows 原生脚本 |
-| 3 | 先装包再装语言运行时 | Conda/pip SAT 死锁 | 严格 运行时→版本管理器→锁定→包的顺序 |
-| 4 | 只跑一个种子就下判决 | 非确定性被忽略 | 至少 N=5 种子, 95% CI 统计判决 |
-| 5 | 只生成英文报告 | 中文用户无法阅读 | 每份报告同时生成 `.md`(英文) 和 `-CN.md`(中文) |
-| 6 | 跳过三方审阅直接进 Phase 2 | 论文理解不充分 | 必须跑完 Phase 1.4, 获得 reproducibility_assessment.json |
-| 7 | 导出图表时不导出生成代码 | 图表无法独立复现 | 每张图附带 `results/figures/code/plot_*.py` |
-| 8 | 跳过可行性预判直接建环境 | 遇到私有数据/硬件时大量浪费 | Phase 0 先快速可行性标记 |
-| 9 | 基线失败时不记录偏离 | 丢失诊断信息 | 基线失败必须写 `analysis/gray_areas.md` |
-| 10 | conda + pip 一次性混合安装 | SAT 求解器死锁 | 严格 conda→pip 顺序，单步验证 |
-| 11 | 单点均值比较忽略方差 | CI 很宽时判决虚假积极 | 用 95% CI 区间验证, 判决基准匹配论文口径 (中位数 CI / Wilson), 均值 x-bar ± CI 仅参考 |
-| 12 | 自动翻译不校对专业术语 | 术语混淆 (identification != 识别) | 术语先在 glossary.md 对齐, 翻译后人工校对 |
-| 13 | 增量实现时不标注论文出处 | 代码溯源断裂 | 每个函数 docstring 写 `Ref: Section X.Y, Eq.(Z)` |
+13 条反模式清单（MinerU token 未配置 / Windows 直跑 Linux 脚本 / 先装包后装运行时 / 单种子下判决 / 只生成英文报告 / 跳过三方审阅 / 图表不导出生成代码 / 跳过可行性预判 / 基线失败不记录偏离 / conda+pip 混装 / 单点均值忽略方差 / 翻译不校对术语 / 增量实现不标论文出处）见 [`references/anti_patterns.md`](references/anti_patterns.md)。
 
 ## 阶段速查 / Phase Quick-Ref
 
@@ -142,10 +128,10 @@ compatibility:
 
 ---
 
-### Phase 1: 论文解析与三方审阅 / Paper Parsing & 3-Perspective Review
+### Phase 1: 论文解析与文献阅读 / Paper Parsing & Literature Reading
 
 **输入**: PDF 文件路径 / arXiv 链接
-**输出**: `analysis/paper_summary.json` + 三方审阅报告 + `reproducibility_assessment.json`
+**输出**: `analysis/paper_summary.json` + `文献阅读.md` + `reproducibility_assessment.json` + `literature_reading.json`
 
 1.1 **PDF 解析**: 确认 MinerU token 已配置
     - 优先级: MinerU SDK (首选, 含公式/表格/图表) → LaTeXML → PyMuPDF → OCR
@@ -158,17 +144,48 @@ compatibility:
 
 1.3 **领域分类**: 关键词+依赖 → 路由到数值/符号/AI4Math/统计/优化/经济子策略
 
-1.4 **视角审阅**: 按用户指定视角输出审阅报告；未指定时默认**研究生视角**
-    - **用户未指定视角 → 默认研究生**: 直接以研究生视角执行审阅（学习理解导向）
-    - **研究生**: 深度理解 -- 摘要/文献综述/研究问题/方法/结果/讨论/关键公式
-      → 消费方: Phase 2 环境重建方法栈, Phase 4 增量实现的公式/算法参考
-    - **导师**: 可复现性评级 -- 方法评估/可复现性表/教学建议/reproducibility_assessment.json
-      → 消费方: G01 门禁 (决定是否进入复现流程)
-    - **审稿人**: 批判审查 -- 总体评价/方法论评估/修改意见(强制/建议/细节)/总结
-      → 消费方: Phase 5 判决引擎, Phase 6 诊断章节引用
-    - 执行: `python scripts/three_perspective_review.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json`
-    - 产出: `analysis/<paper>_{student,advisor,reviewer}_review.md`（仅输出指定视角）
-    - **严禁默认输出全部视角，仅输出用户指定的单一视角**
+1.4 **文献阅读报告生成**: 生成结构化的中文审阅分析报告
+    - 执行: `python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json`
+    - **交互流程**: 未指定 `--template` 时，脚本启动后会**先列出 9 种模板供用户选择**，用户输入编号后才会开始生成报告
+    - **模板选择**: 可选模板列表如下：
+      1. `markleaf` — **LaTeX 风格（推荐）**: CMU 字体 + tcolorbox 卡片 + 三线表，适合学术文献阅读
+      2. `print` — **印刷品**: Times New Roman + 两端对齐 + 首行缩进，适合长文阅读
+      3. `retro-print` — **铅字印刷**: KingHwaOldSong 复古字体，适合文学/历史类
+      4. `sans` — **无衬线**: SF Pro Display + 现代简洁，适合技术文档
+      5. `serif` — **衬线**: Source Han Serif，默认清晰易读
+      6. `magazine` — **杂志**: Georgia + 大标题，适合图文混排
+      7. `minimal` — **极简**: Segoe UI + 无多余装饰，适合快速浏览
+      8. `notebook` — **手记**: 霞鹜文楷 + 楷体，适合笔记风格
+      9. `print-double` — **双色印刷**: 蓝色强调，适合打印输出
+    - **视角控制**: 未指定 `--perspective` 时，**必须先向用户询问**（研究生 / 导师 / 审稿人 / 三方全出），禁止默认；`--perspective all` 输出三个视角 + 交叉对比
+    - 报告包含:
+      - **论文结构导航**: 章节/页码/论证功能(gap→contribution→result→limits)
+      - **术语表**: 专业术语 + 英文全称 + 中文译法 + 首次出现位置
+      - **关键图表索引**: 图表/表格的 ID、标题、页码、关联分析
+      - **关键公式索引**: 公式编号、LaTeX、描述、来源页码
+      - **视角分析**: 研究生/导师/审稿人(由用户指定视角决定，未指定时先询问，见 Phase 1.4 视角控制)
+      - **复现指导**: 核心算法、超参数、数据集、主要风险
+    - 产出:
+      - `analysis/文献阅读.md` -- 完整中文审阅报告 (自带嵌入式 CSS，MPE 打开即用)
+      - `analysis/literature_reading.json` -- 结构化数据 (供下游消费)
+      - `analysis/reproducibility_assessment.json` -- 可复现性评估 (G01 门禁)
+    - **MPE 兼容**: 报告 Markdown 自带嵌入式 CSS，可在 VS Code + Markdown Preview Enhanced 中直接预览
+    - **兼容入口**: `scripts/three_perspective_review.py` 仍保留在 `scripts/` 作为旧版三方审阅兼容入口（未移入 legacy/），新流程统一使用 `literature_reader.py`
+
+    **使用示例**:
+    ```bash
+    # 默认流程：询问模板 + 询问审阅视角后输出
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json
+
+    # 指定模板：跳过询问
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --template templates/literature_reader.print.md
+
+    # 全部视角
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --perspective all
+
+    # 指定模板 + 全部视角
+    python scripts/literature_reader.py analysis/parsed_text.md --output-dir analysis/ --paper-summary analysis/paper_summary.json --template templates/literature_reader.sans.md --perspective all
+    ```
 
 **G01 门禁**: 审查 `reproducibility_assessment.json`
     - `proceed` → 直接进 Phase 2
@@ -285,38 +302,13 @@ compatibility:
 **输出**: `results/raw_metrics.csv` + `实验复刻结果汇总/实验报告/判决结果.json` + `实验复刻结果汇总/实验报告/口径B通过率矩阵.md` + `实验复刻结果汇总/实验图表（含代码）/` (图 + 生成代码)
 
 5.0 **输入数据预检** (基准/基线运行前; Phase 3 基线运行前同样适用):
-    - **二进制数据文件** (msgpack/pickle 等): schema 完整性 + 叶子类型抽检 (数值键下不得混入 str/序列化数值)
-    - **CSV BOM/编码检查**: 显式 utf-8-sig 处理, 编码异常行计数报告 (跳行计数不静默)
-    - **空值预检**: 与 5.1 空值普查衔接, 空值语义显式登记, 含断点续传半完成单元的空值语义 (见 5.1 断点续传)
-    - **修复后验证须分类**: "目标缺陷已修复"与"无关既有缺陷仍在"分开陈述——不得以修复后仍有异常反推修复无效, 也不得掩报
-    - 预检发现登记到 `analysis/gray_areas.md` (不新增产物类型)
-
-    **两口径语义声明** (口径 A / 口径 B):
-    - **口径 A** = 求解器自身成功判据; **口径 B** = 独立 checker 判据——两套判据语义不同, 数字不得混用
-    - 边界案例须**计数报告**: 口径 A 判失败但产出了解文件、被 checker 照跑的试验
-    - 中间产物判据 (逐中间文件检查输出) 与最终判据语义不同时登记, **不做行级等同**
+    - 输入数据预检细则（二进制 schema 完整性 / CSV BOM 编码 / 空值预检 / 修复后验证分类）+ 两口径语义声明（口径 A = 求解器自身判据，口径 B = 独立 checker 判据，数字不得混用）详见 [`references/phase5_audit_spec.md`](references/phase5_audit_spec.md)。
 
 5.1 **多轮运行**: 确认参数 (基线可行? N=5 种子? 运行时间? GPU 启用?) → 每轮独立执行 → `raw_metrics.csv`
 
-    **运行审计** (与多轮运行同步执行):
-    - **硬超时执行**: 每试验墙钟对标称预算强制执行并记录; 超时试验清单化 (实例 × 算法 × 试验号 × 实测墙钟); 标称预算不得只在内部迭代间生效
-    - **异常分类计数**: traceback 之外, 增加被捕获异常 (NaN 捕获、C++/Python 边界异常) 与非零退出码 (含信号类, 如 SIGABRT=134) 的分类计数——只数 traceback 会漏掉全部被捕获异常
-    - **退出码审计**: 非零退出码试验清单输出
-    - **计时指标语义登记**: 计时指标须登记覆盖环节 (全流程墙钟 / 规划器子环节 / 求解器内部计时) 并做语义校验: Σtst 与 (总墙钟 × 并行度) 之比 ≈ 并行度 → 全流程; 比值 ≈ 1 → 子环节。语义不明或仅覆盖子环节时, **禁止与论文全流程数字直接对比判决** (可报告不可判决)
-    - **空值普查**: raw_metrics 逐列空值/NaN 普查 (计数 + 行号清单落盘); 空值语义 (如"失败试验未记录墙钟") 显式登记; 空值不得静默存在, 后续统计须声明空值处理方式
-
-    **过程数据留痕**:
-    - 逐试验时间戳与 worker/进程标识写入运行日志
-    - 日志时间戳可信度校验 (wrapper stale 检测, 必要时以文件 mtime 链佐证)
-    - 全量日志归档义务 (含最终段/排序段, 禁止只留中间段)
-    - 无法事后补留痕的关键环节 (如逐次成败标记) 须在日志规范中**前置设计**
-
-    **断点续传** (长时运行脚本强制义务; 适用对象 = 多轮实验 runner、数据/基元生成等所有长时运行脚本; Phase 3 长时基线运行同样适用, 见 3.1):
-    - **可行时 MUST**: 逐试验/逐单元结果**立即落盘** (每完成一个单元即持久化, 不积压至批次结束); 重启时**跳过已完成单元** (幂等重入, 重跑安全); 断点粒度与状态文件位置**显式声明**
-    - **不可行时 MUST** (如有状态长任务无法序列化中间状态): 在 `analysis/gray_areas.md` 偏差登记表 (见 3.3) 登记理由与中断损失评估 (如"中断后须全量重跑, 预计损失 X 小时")
-    - **证据回执**: resume 行为 (跳过单元数、续传起点) 写入运行日志; 断点状态文件与半完成单元纳入上方过程数据留痕范围, 半完成单元的空值语义按 5.0 空值预检登记 (不新增产物类型)
+    **运行审计 / 过程数据留痕 / 断点续传**（详细规范）: 硬超时执行、异常分类计数、退出码审计、计时指标语义登记、空值普查；逐试验时间戳与 worker 标识、日志可信度校验、全量归档；断点续传可行/不可行 MUST、证据回执——详见 [`references/phase5_audit_spec.md`](references/phase5_audit_spec.md)。
 5.2 **统计计算**: 判决基准匹配论文报告口径——连续指标 = 成功试验**中位数** + percentile bootstrap 95% CI (≥20,000 重采样、固定种子、有放回抽 N 点), 比例指标 = Wilson score 区间; 容差判定双侧语义 (|Δ| 超容差即判); 均值 x-bar ± t-CI 仅作**参考输出** (论文明确报告均值时可切换 t-CI 判决, 登记 ci_method) → `statistical_summary.json`
-5.3 **五态判决**: `within_ci`→OK / `close_outside_ci`→approx / `outside_tolerance`→FAIL / `not_testable`→WARN / `static_check_failed`→FAIL (口径 A)
+5.3 **五态判决**（统一枚举）: `pass`→通过 / `approx`→近似 / `within_ci`→置信区间内 / `fail`→不通过 / `skip`→跳过（口径 A; 旧 within_ci→within_ci, close_outside_ci→approx, outside_tolerance→fail, not_testable→skip, static_check_failed→fail）
     - 口径 B (独立 checker) 通过率矩阵 (实例 × 算法) 作为标准产物与口径 A 并列报告 → `实验复刻结果汇总/实验报告/口径B通过率矩阵.md` / `-CN.md`
     - **拒绝归因证据分级**: 每个被拒试验的归因 (真实越界 / 终点容差不匹配 / 未知) 须附诊断证据并标注分级 (实证/推断/估计), **禁止无证据的容差归因**
 5.4 **诊断输出**: >=2 条诊断假说 + Top-12 失败模式 + 引用审稿人视角发现 → `实验复刻结果汇总/实验报告/诊断分析.md` / `诊断分析-CN.md`
@@ -395,72 +387,33 @@ compatibility:
 
 | Gate | 位置 | 条件 | 违反动作 |
 |------|------|------|---------|
-| G0 | Phase 0 -> 0.5 | infra_manifest.json + GPU 就绪 | 返回修复 |
-| G00 | Phase 0.9 | GPU 框架检测通过或 CPU 降级 | 检查驱动 |
-| G01 | Phase 1.4 -> 2 | reproducibility_assessment 决策 proceed | 用户介入 |
-| G1 | Phase 0.5 -> 1 | 版本一致性通过 | 修复版本冲突 |
-| G3 | Phase 2 -> 3 | 导入测试+锁定+GPU | 返回 2.4 |
-| G4 | Phase 3 -> 4 | 基线指标记录+tolerance | 用户决策 |
-| G5 | Phase 4 | 每个模块 delta 在预期内 | 排查修复 |
-| G6 | Phase 5 | 五态判决产出 | 补跑统计 |
-| G66 | Phase 5.5 | 有图表时每图有独立源码 | 补导出 |
-| G7 | Phase 6 | 所有报告中英双语 (`.md` + `-CN.md`) | 补译 |
+| GΔ | Phase Δ-1 自动更新 | 网络可达时同步至最新 | 静默跳过，不阻塞流程 |
+| G0 | Phase 0 -> 0.5 | infra_manifest.json + GPU 就绪 | 返回修复 manifest/环境 |
+| G00 | Phase 0.9 | GPU 框架检测通过或 CPU 降级 | 检查驱动，降级 CPU |
+| G1 | Phase 0.5 -> 1 | 版本一致性通过 | 修复版本冲突后继续 |
+| G01 | Phase 1.4 -> 2 | reproducibility_assessment 决策 proceed | 用户介入决策 |
+| G2 | Phase 2 依赖扫描 | 依赖清单完整+导入测试通过 | 返回修复依赖/环境 |
+| G3 | Phase 2 -> 3 | 导入测试+锁定+GPU | 返回 2.4 修复 |
+| G4 | Phase 3 -> 4 | 基线指标记录+tolerance | 用户决策是否继续 |
+| G5 | Phase 4 | 每个模块 delta 在预期内 | 排查修复后重跑 |
+| G6 | Phase 5 | 五态判决产出 | 补跑统计验证 |
+| G66 | Phase 5.5 | 有图表时每图有独立源码 | 补导出生成代码 |
+| G7 | Phase 6 | 所有报告中英双语 (`.md` + `-CN.md`) | 补译缺失语言版本 |
 | G8 | Phase 7 | `实验复刻结果汇总/` 下所有文件就位 | 补缺文件 |
-| G9 | Phase 7.2 | 报告数字与判决 JSON 零不一致 + 算法标签行列核对通过 | 回到 Phase 6 修正 |
+| G9 | Phase 7.2 交叉校验 | 报告数字与判决 JSON 零不一致+标签核对 | 回到 Phase 6 修正报告 |
 
 ---
 
 ## 文件结构 / Directory Structure
 
-```
-math-read-do/
-├── SKILL.md                     # 主 skill 入口
-├── nature-reader/               # 子技能：论文阅读与结构化提取
-│   ├── SKILL.md
-│   ├── README.md
-│   ├── manifest.yaml
-│   ├── static/
-│   │   ├── core/                # 核心原则、工作流、输出协议
-│   │   └── fragments/source/    # 来源格式路由 (pdf-text/scanned-pdf/html/doi-arxiv/pasted-text)
-│   └── references/              # 图提取、接地规则、输出规范、论文解剖
-├── nature-figure/               # 子技能：出版级图表生成
-│   ├── SKILL.md
-│   ├── README.md
-│   ├── manifest.yaml
-│   ├── static/
-│   │   ├── core/                # 核心契约、立场声明
-│   │   └── fragments/backend/   # 后端选择 (python/r)
-│   └── references/              # 图表契约、后端选择、设计理论、通用模式等
-├── nature-paper2ppt/            # 子技能：论文→PPTX
-│   ├── SKILL.md
-│   ├── README.md
-│   ├── manifest.yaml
-│   ├── static/
-│   │   ├── core/                # 原则、工具链、工作流、输出质量
-│   │   └── fragments/paper_type/# 论文类型叙事弧 (discovery/methods/resource/clinical/materials/review)
-│   └── references/              # 设计与布局、图表资产、自审校
-├── _shared/                     # 共享层
-│   ├── README.md
-│   ├── core/                    # 伦理、论文类型分类、阅读工作流、术语账本
-│   └── journal-formats/         # 期刊格式参考 (nat-comms)
-├── skills/registry.yaml
-├── scripts/            # 脚本 (PDF提取/三方审阅/图表导出等)
-├── templates/          # 双语报告模板 (Jinja2)
-├── schemas/            # 校验 JSON Schema
-├── tests/              # 测试
-├── infra/              # 基础设施 (manifest/Vagrantfile/Dockerfile/apptainer)
-├── provisioning/       # 配置脚本 (ansible/版本管理器/CUDA/HPC)
-├── env/                # 环境锁定 (version_spec/conda-lock/requirements/Manifest)
-├── analysis/           # 论文分析 (summary/parsed/formulas/gray_areas/三视角审阅)
-├── code/               # 代码 (Git repo)
-├── logs/               # 运行日志
-├── results/            # 实验 (baseline/tolerance/raw/stat)
-├── implementation/     # 增量实现 (log/delta)
-└── 实验复刻结果汇总/   # 最终输出 (在论文所在目录创建, 非本目录)
-    ├── 实验报告/       # 双语复现报告 + 诊断 + 运行摘要 + 判决 JSON
-    ├── 实验图表（含代码）/# 图表 PNG/PDF + 独立可运行源码
-    └── 实验结果对比表/  # 双语实验结果对比表
-```
+完整目录树（含 nature-reader/nature-figure/nature-paper2ppt/_shared/scripts/templates/schemas/infra/provisioning/env/analysis/code/logs/results/implementation/实验复刻结果汇总 等子树注释）见 [`references/directory_structure.md`](references/directory_structure.md)。
+
+**顶层速查**:
+- `SKILL.md` — 主 skill 入口
+- `scripts/` — PDF 提取 / 三方审阅 / 图表导出等脚本
+- `templates/` — 双语报告模板（Jinja2）
+- `analysis/` — 论文分析产物（summary/parsed/formulas/gray_areas/三视角审阅）
+- `实验复刻结果汇总/` — 最终输出（在论文所在目录创建，非本目录）
 
 ## 依赖与配置 / Dependencies & Configuration
 
@@ -491,40 +444,14 @@ pip install mineru-open-sdk pyyaml
 
 ## 集成 Nature 子技能 / Integrated Nature Skills
 
-本 skill 集成了四个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`, `nature-archify`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
+本 skill 集成四个独立 Nature 子技能（`nature-reader` / `nature-figure` / `nature-paper2ppt` / `nature-archify`）+ 共享层 `_shared/`，位于 `math-read-do/` 下，可独立调用或作为 Phase 1-6 增强工具。子技能路由表、与主流程协同细节、调用方式见 [`references/nature_skills_integration.md`](references/nature_skills_integration.md)。
 
-### 子技能路由
-
-| 子技能 | 目录 | 入口文件 | 主要用途 |
-|--------|------|---------|---------|
-| nature-reader | `nature-reader/` | `SKILL.md` + `manifest.yaml` | 科研论文智能阅读、结构化提取、6种来源格式路由 |
-| nature-figure | `nature-figure/` | `SKILL.md` + `manifest.yaml` | 出版级图表生成，Python/R 双后端，含 QA 循环 |
-| nature-paper2ppt | `nature-paper2ppt/` | `SKILL.md` + `manifest.yaml` | 论文→中文 PPTX，6类论文叙事弧，自审校循环 |
-| nature-archify | `nature-archify/` | `SKILL.md` | 系统架构图渲染器：5 类图 architecture/workflow/sequence/dataflow/lifecycle，13 视觉预设，9 项 showcase 校验 |
-| _shared | `_shared/` | 无入口，被子技能引用 | 术语账本、论文类型分类法、伦理规范、Nat Communs 格式 |
-
-### 与主流程的协同
-
-- **nature-reader** 可增强 Phase 1 (论文解析与视角审阅)，提供替代 PDF 解析策略和结构化输出格式。用户未指定审阅视角时，主动询问。
-- **nature-figure** 可增强 Phase 5 (图表导出)，提供出版级图表样式和质量门禁。
-- **nature-archify** 参与文献阅读与实验复现全程：Phase 2（论文理解后：系统架构图 / 技术流程图 / 调用时序图 / 数据流图 / 状态机图预计版）、Phase 6（报告插图），作为"系统架构 / 流程 / 时序 / 数据流 / 状态机渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证，13 种视觉预设 + 深/浅双主题；适用于论文 float / 开题报告 / 组会汇报里的系统与流程图。Node CLI（`nature-archify/bin/archify.mjs`）零外部依赖，Python 侧通过 `scripts/nature_archify_bridge.py` 调用。论文的方法/模型架构图与实验流程图不在本模块图类型内，需要时另行接入 paperfig 类渲染器。
-- **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
-
-### 调用方式
-
-每个子技能有独立的 `SKILL.md` + `manifest.yaml`，通过 load_skill 加载后自动读取对应的 static/fragments/references。子技能之间的共享内容通过 `_shared/` 目录引用，无需重复加载。
+**要点摘要**:
+- **nature-reader** → 增强 Phase 1（论文解析与视角审阅），未指定视角时主动询问
+- **nature-figure** → 增强 Phase 5（出版级图表生成，Python/R 双后端，含 QA 循环）
+- **nature-archify** → Phase 1/2/6 系统架构/流程/时序/数据流/状态机图（JSON→inline-SVG HTML）
+- **nature-paper2ppt** → Phase 6 后生成汇报 PPTX
 
 ## 参考文献 / References
 
-- MaRDI Mathematical Research Data Initiative. https://www.mardi4nfdi.de/
-- ICERM Workshop on Reproducibility in Computational and Experimental Mathematics (2012)
-- ConanXu-math/Scientific-Computing-Reproduction---Auto-Tuning
-- OpenResearch. https://github.com/armaanamatya/openresearch
-- paper-replay. https://github.com/bettyguo/paper-replay
-- repro-agent. https://github.com/hqygtr-prog/repro-agent
-- MaRDIFlow: A Workflow Framework for Documentation and Integration of FAIR Computational Experiments
-- repo2docker. https://repo2docker.readthedocs.io/
-- Apptainer. https://apptainer.org/
-- nature-reader. https://github.com/Yuan1z0825/nature-skills
-- nature-figure. https://github.com/Yuan1z0825/nature-skills
-- nature-paper2ppt. https://github.com/Yuan1z0825/nature-skills
+完整参考文献列表（MaRDI / ICERM / OpenResearch / paper-replay / repro-agent / MaRDIFlow / repo2docker / Apptainer / nature-* 等 12 条）见 [`references/references_list.md`](references/references_list.md)。

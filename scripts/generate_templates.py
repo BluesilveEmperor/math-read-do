@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
-"""Generate all literature reader template variants."""
+"""Generate all literature reader template variants.
+
+用法:
+    python generate_templates.py          # 在脚本所在项目根目录下运行
+    python -m generate_templates           # 作为模块运行（无副作用，仅定义数据）
+
+设计:
+    - variants / CSS_TEMPLATE 为纯数据定义，模块级可见，import 无副作用。
+    - 文件 I/O（读取 base template、写入变体）仅在 ``if __name__ == '__main__'`` 时执行。
+    - 路径以 ``Path(__file__).resolve().parent`` 锚定，不依赖 CWD。
+"""
 
 import os
+from pathlib import Path
 
-# Read the base template (latex version)
-with open('templates/literature_reader.markleaf.md', 'r', encoding='utf-8') as f:
-    base = f.read()
+# 路径锚定：脚本位于 <project_root>/scripts/，templates 在 <project_root>/templates/
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent
+_TEMPLATES_DIR = _PROJECT_ROOT / "templates"
 
-# Extract the content part (after the style block)
-style_end = base.find('</style>')
-if style_end != -1:
-    content_part = base[style_end + 8:]
-else:
-    content_part = base
 
-# Define all typography variants
+# Define all typography variants (纯数据，import 无副作用)
 variants = {
     'print': {
         'font_main': '"Times New Roman", "宋体-简", "方正书宋_GBK", "宋体", serif',
@@ -178,7 +184,7 @@ variants = {
     },
 }
 
-# CSS template
+# CSS template (纯数据，import 无副作用)
 CSS_TEMPLATE = """<style>
 :root {{
   --bg-primary: #ffffff;
@@ -385,14 +391,45 @@ CSS_TEMPLATE = """<style>
 }}
 </style>"""
 
-# Generate each variant
-os.makedirs('templates', exist_ok=True)
-for name, v in variants.items():
-    css = CSS_TEMPLATE.format(**v)
-    full_template = css + '\n' + content_part
-    filename = f'templates/literature_reader.{name}.md'
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(full_template)
-    print(f'Created: {filename}')
 
-print(f'\nDone! Generated {len(variants)} templates.')
+def generate(templates_dir: Path = _TEMPLATES_DIR) -> int:
+    """生成所有模板变体到指定目录，返回生成的数量。
+
+    Parameters
+    ----------
+    templates_dir : Path
+        模板输出目录，默认为 <project_root>/templates/。
+
+    Returns
+    -------
+    int
+        生成的模板文件数量。
+    """
+    # Read the base template (latex version)
+    base_path = templates_dir / "literature_reader.markleaf.md"
+    with open(base_path, "r", encoding="utf-8") as f:
+        base = f.read()
+
+    # Extract the content part (after the style block)
+    style_end = base.find("</style>")
+    if style_end != -1:
+        content_part = base[style_end + 8:]
+    else:
+        content_part = base
+
+    # Generate each variant
+    templates_dir.mkdir(parents=True, exist_ok=True)
+    for name, v in variants.items():
+        css = CSS_TEMPLATE.format(**v)
+        full_template = css + "\n" + content_part
+        filename = templates_dir / f"literature_reader.{name}.md"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(full_template)
+        print(f"Created: {filename}")
+
+    print(f"\nDone! Generated {len(variants)} templates.")
+    return len(variants)
+
+
+if __name__ == "__main__":
+    generate()

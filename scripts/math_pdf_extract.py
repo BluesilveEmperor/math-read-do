@@ -14,6 +14,7 @@ import os
 import sys
 import json
 import argparse
+import concurrent.futures
 from pathlib import Path
 from datetime import date, timedelta
 
@@ -142,6 +143,37 @@ def estimate_pdf_pages(pdf_path: str) -> int:
         return 0
 
 
+# ── MinerU 超时降级路径 ─────────────────────────────────────────────
+
+def extract_with_pymupdf(pdf_path: Path, output_dir: Path) -> int:
+    """MinerU 不可用/超时时的降级路径：用 PyMuPDF(fitz) 直接抽取纯文本 Markdown。
+
+    不含公式/表格/图表结构识别，仅保证文本可读，供下游文献阅读流程兜底。
+    """
+    try:
+        import fitz  # PyMuPDF
+    except ImportError:
+        print("❌ 降级失败：PyMuPDF(fitz) 未安装，请执行 pip install pymupdf", file=sys.stderr)
+        return 1
+
+    print(f"📄 PyMuPDF 降级提取: {pdf_path.name}")
+    doc = fitz.open(str(pdf_path))
+    parts = [
+        f"# {pdf_path.stem}\n\n",
+        "> 由 PyMuPDF 降级提取（MinerU 超时/不可用），不含公式/表格结构。\n\n",
+    ]
+    for i, page in enumerate(doc, 1):
+        text = page.get_text("text")
+        if text.strip():
+            parts.append(f"\n## 第 {i} 页\n\n{text}\n")
+    doc.close()
+
+    md_path = output_dir / f"{pdf_path.stem}.md"
+    md_path.write_text("".join(parts), encoding="utf-8")
+    print(f"✅ 降级转换完成: {md_path}")
+    return 0
+
+
 # ── 主函数 ──────────────────────────────────────────────────────────
 
 def main():
@@ -203,16 +235,25 @@ def main():
 
     client = MinerU(token=token)
     try:
-        print(f"📤 正在上传并解析: {pdf_path.name}")
-        result = client.extract(
-            source=str(pdf_path),
-            model=args.model,
-            ocr=args.ocr or None,
-            formula=args.formula,
-            table=args.table,
-            language=args.language,
-            pages=args.pages,
-        )
+        print(f"📤 正在上传并解析: {pdf_path.name}（超时 60s，超时降级 PyMuPDF）")
+        # 用线程池给 SDK 同步调用加超时，避免首响过长挂死
+        mineru_timeout = 60  # 秒
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(
+                client.extract,
+                source=str(pdf_path),
+                model=args.model,
+                ocr=args.ocr or None,
+                formula=args.formula,
+                table=args.table,
+                language=args.language,
+                pages=args.pages,
+            )
+            try:
+                result = future.result(timeout=mineru_timeout)
+            except concurrent.futures.TimeoutError:
+                print(f"⚠️  MinerU 超时（{mineru_timeout}s），降级到 PyMuPDF 提取", file=sys.stderr)
+                return extract_with_pymupdf(pdf_path, output_dir)
 
         if result.state != "done":
             error_msg = result.error or "未知错误"
