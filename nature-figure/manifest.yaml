@@ -1,0 +1,45 @@
+name: nature-figure
+version: 1.0.0
+description: >
+  科研数据可视化顾问（scipilot-figure-skill）。先思考再画：理解数据 → 选图 →
+  查期刊规范 → 配环境 → 绘制 → 三层自检（语义/形式/视觉）→ 导出。只覆盖纯数据图
+  （折线、柱状、散点、箱线/小提琴、热力图、误差棒、分布图、相关性矩阵、多面板组合），
+  不做示意图/流程图/架构图。
+
+entry: SKILL.md
+dependencies: []
+
+triggers:
+  - keyword: "图表"
+  - keyword: "figure"
+  - keyword: "画图"
+  - keyword: "可视化"
+  - keyword: "matplotlib"
+  - keyword: "seaborn"
+  - keyword: "误差棒"
+  - keyword: "投稿图"
+  - keyword: "Nature 期刊图"
+
+always_load:
+  - ../_shared/core/terminology-ledger.md
+
+assets:
+  - path: references/
+  - path: scripts/
+
+references:
+  on_demand:
+    - condition: 选图决策树、同一数据不同论点对照表
+      path: references/chart_selection.md
+    - condition: 调用 profile_data.py 后解读数据剖析报告
+      path: references/data_profiling.md
+    - condition: 确定目标期刊的尺寸/DPI/字体/矢量格式规范
+      path: references/journal_specs.md
+    - condition: 第 5 步绘制时查各图型的可复制配方与常见坑
+      path: references/plot_recipes.md
+    - condition: 第 6 步形式层自检（尺寸、DPI、字号、误差交代）
+      path: references/publication_checklist.md
+    - condition: 第 6 步视觉层 AI 读图复核的 8 项清单与回改表
+      path: references/visual_review.md
+    - condition: 第 6 步语义层 18 条科研画图禁忌
+      path: references/viz_pitfalls.md

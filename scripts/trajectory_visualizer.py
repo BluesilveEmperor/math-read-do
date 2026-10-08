@@ -25,7 +25,53 @@ import sys
 import json
 import argparse
 import math
+import base64
 from pathlib import Path
+
+
+# ── Three.js 本地化（P2 优化：离线可用）──
+# 优先使用本地 vendor/three.module.js + vendor/OrbitControls.js（内联为 data URI，
+# 完全自包含离线可用）；本地缺失时 fallback 到 CDN 并在 HTML 中加离线使用说明。
+_VENDOR_DIR = Path(__file__).resolve().parent / "vendor"
+_THREE_LOCAL = _VENDOR_DIR / "three.module.js"
+_ORBIT_LOCAL = _VENDOR_DIR / "OrbitControls.js"
+_THREE_CDN = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+_THREE_ADDONS_CDN = "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+_ORBIT_CDN = _THREE_ADDONS_CDN + "controls/OrbitControls.js"
+
+
+def _resolve_threejs_urls():
+    """检测本地 three.js 资源，返回 (three_url, orbit_url, is_local, offline_note)。
+
+    本地存在时把源码内联为 data URI，使生成的 HTML 完全离线自包含；
+    本地缺失时 fallback CDN，并返回离线使用说明供 HTML 注释展示。
+    """
+    if _THREE_LOCAL.is_file() and _ORBIT_LOCAL.is_file():
+        try:
+            three_b64 = base64.b64encode(_THREE_LOCAL.read_bytes()).decode("ascii")
+            orbit_b64 = base64.b64encode(_ORBIT_LOCAL.read_bytes()).decode("ascii")
+            three_uri = f"data:text/javascript;base64,{three_b64}"
+            orbit_uri = f"data:text/javascript;base64,{orbit_b64}"
+            return (
+                three_uri,
+                orbit_uri,
+                True,
+                "Three.js loaded from local vendor/ (inlined as data URI, offline-ready).",
+            )
+        except Exception as exc:
+            # 读取失败时退回 CDN
+            sys.stderr.write(
+                f"[trajectory_visualizer] 读取本地 three.js 失败 ({exc})，回退 CDN。\n"
+            )
+    return (
+        _THREE_CDN,
+        _ORBIT_CDN,
+        False,
+        "Three.js loaded from CDN. 离线使用：下载 "
+        "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js "
+        "和 .../examples/jsm/controls/OrbitControls.js "
+        f"到 {_VENDOR_DIR}/ 目录后重新生成即可内联离线版。",
+    )
 
 
 def generate_demo_trajectory(demo_type="maze", n_points=500):
@@ -109,6 +155,9 @@ def generate_html(data, title="Trajectory Visualization",
     
     path_color_hex = '#%02x%02x%02x' % path_color
     bg_color_hex = '#%02x%02x%02x' % background_color
+    
+    # Three.js 资源 URL 解析（本地优先，CDN fallback）
+    three_url, orbit_url, three_is_local, offline_note = _resolve_threejs_urls()
     
     # Compute orbit parameters
     max_dist = 0
@@ -225,12 +274,13 @@ def generate_html(data, title="Trajectory Visualization",
 <!-- 帮助 -->
 <div class="help-tip" id="help-tip">🖱️ 拖拽: 旋转 | 滚轮: 缩放 | 双击: 重置视角</div>
 
-<!-- Three.js + OrbitControls (CDN) -->
+<!-- Three.js + OrbitControls ({'本地内联 / local inlined' if three_is_local else 'CDN'}) -->
+<!-- {offline_note} -->
 <script type="importmap">
 {{
     "imports": {{
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        "three": "{three_url}",
+        "three/addons/controls/OrbitControls.js": "{orbit_url}"
     }}
 }}
 </script>
@@ -657,7 +707,9 @@ def main():
     print(f"  ✅ HTML 已生成: {output_path.absolute()}")
     print(f"  📐 模式: {args.mode} | 轨迹点: {len(data['positions'])} | 速度: {args.orbit_speed} rad/s")
     print(f"  💡 双击文件即可在浏览器中打开查看实时轨迹")
-    print(f"  🌐 基于 Three.js (CDN) | 支持 orbit-start / free 两种相机模式")
+    _t_url, _o_url, _is_local, _note = _resolve_threejs_urls()
+    _src = "本地内联(离线可用)" if _is_local else "CDN"
+    print(f"  🌐 基于 Three.js ({_src}) | 支持 orbit-start / free 两种相机模式")
 
 
 if __name__ == "__main__":

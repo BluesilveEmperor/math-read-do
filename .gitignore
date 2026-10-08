@@ -43,3 +43,4 @@ codedocs/
 
 # 本地工具会话配置（claude 的允许规则等），不入库
 .claude/
+.coverage

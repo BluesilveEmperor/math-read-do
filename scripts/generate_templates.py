@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-"""Generate all literature reader template variants."""
+"""Generate all literature reader template variants.
+
+直接运行（python scripts/generate_templates.py）会读取基础模板并生成 8 个排版变体。
+import 本模块无副作用——所有执行逻辑在 ``main()`` 中，由 ``__main__`` guard 保护。
+路径以 ``__file__`` 锚定，从任意 cwd 运行均正确。
+"""
 
 import os
+from pathlib import Path
 
-# Read the base template (latex version)
-with open('templates/literature_reader.markleaf.md', 'r', encoding='utf-8') as f:
-    base = f.read()
+# 路径锚定：本脚本在 scripts/ 下，templates/ 在仓库根下。
+_ROOT = Path(__file__).resolve().parent.parent
+_TEMPLATES_DIR = _ROOT / "templates"
+_BASE_TEMPLATE = _TEMPLATES_DIR / "literature_reader.markleaf.md"
 
-# Extract the content part (after the style block)
-style_end = base.find('</style>')
-if style_end != -1:
-    content_part = base[style_end + 8:]
-else:
-    content_part = base
 
 # Define all typography variants
 variants = {
@@ -386,13 +387,34 @@ CSS_TEMPLATE = """<style>
 </style>"""
 
 # Generate each variant
-os.makedirs('templates', exist_ok=True)
-for name, v in variants.items():
-    css = CSS_TEMPLATE.format(**v)
-    full_template = css + '\n' + content_part
-    filename = f'templates/literature_reader.{name}.md'
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(full_template)
-    print(f'Created: {filename}')
+def main():
+    """读取基础模板并生成全部排版变体。
 
-print(f'\nDone! Generated {len(variants)} templates.')
+    路径以 ``__file__`` 锚定（``_TEMPLATES_DIR``），从任意 cwd 运行均正确。
+    仅在直接运行本脚本时执行；import 本模块无副作用。
+    """
+    # Read the base template (latex version)
+    with open(_BASE_TEMPLATE, 'r', encoding='utf-8') as f:
+        base = f.read()
+
+    # Extract the content part (after the style block)
+    style_end = base.find('</style>')
+    if style_end != -1:
+        content_part = base[style_end + 8:]
+    else:
+        content_part = base
+
+    os.makedirs(_TEMPLATES_DIR, exist_ok=True)
+    for name, v in variants.items():
+        css = CSS_TEMPLATE.format(**v)
+        full_template = css + '\n' + content_part
+        filename = _TEMPLATES_DIR / f'literature_reader.{name}.md'
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(full_template)
+        print(f'Created: {filename}')
+
+    print(f'\nDone! Generated {len(variants)} templates.')
+
+
+if __name__ == '__main__':
+    main()

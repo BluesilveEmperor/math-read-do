@@ -1,0 +1,46 @@
+name: nature-archify
+version: 1.0.0
+description: >
+  Archify —— 从小型类型化 JSON 规范生成自包含交互式 HTML 架构图。默认静态输出，
+  仅在用户要求 demo/演示时启用动画。支持五种图型：architecture（组件/服务/云边界）、
+  workflow（流程/审批门/CI-CD）、sequence（API 调用链/请求生命周期）、
+  dataflow（管道/ETL/血缘）、lifecycle（状态/状态机迁移）。含 validate/deliver
+  闭环与 visual-check 浏览器证据收集。
+
+entry: SKILL.md
+dependencies: []
+
+triggers:
+  - keyword: "架构图"
+  - keyword: "archify"
+  - keyword: "architecture"
+  - keyword: "workflow"
+  - keyword: "sequence"
+  - keyword: "dataflow"
+  - keyword: "lifecycle"
+  - keyword: "流程图"
+  - keyword: "时序图"
+  - keyword: "状态图"
+
+always_load:
+  - ../_shared/core/terminology-ledger.md
+
+assets:
+  - path: references/
+  - path: schemas/
+  - path: examples/
+  - path: recipes/
+  - path: renderers/
+  - path: bin/
+  - path: brand-marks/
+
+references:
+  on_demand:
+    - condition: 字段枚举、间距数学、几何修复规则、仓库证据、模式特定放置
+      path: references/authoring-contract.md
+    - condition: 品牌标识未知且用户提供官方 URL 时查品牌标记
+      path: references/brand-marks.md
+    - condition: canonical 接收字段、覆盖范围、sidecar、退出行为、补充手动记录
+      path: references/delivery-contract.md
+    - condition: Share Cards、Route/Reach cards、动画、引导故事、深链、演示、搜索/聚焦等 Viewer Runtime 特性
+      path: references/viewer-runtime.md

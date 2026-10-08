@@ -186,6 +186,28 @@ node nature-archify/bin/archify.mjs compare architecture base.json head.json del
 
 > **实验流程图（PRISMA / CONSORT 等）不在本模块的图类型内**：这类图要求写入真实初始样本量、排除数与原因、分组人数、失访/剔除、最终分析人数，必须基于真实实验记录，不能靠想象编。原先承载 `model` / `experiment` 两类 ML 图形的 `nature-framework`（paperfig）已被本模块替换；如需模型架构图或实验流程图，请另行接入 paperfig 类渲染器。
 
+## 性能优化记录（2026-10-09）
+
+### P0（关键修复）
+- **E2/E3**: 门禁统一 + 五态判决枚举统一
+- **F2**: auto_update 加超时 + TTL 缓存
+
+### P1（高价值优化）
+- **E4**: Phase 1 统一（literature_reader.py 9 模板）
+- **E6**: registry 清理 6 条悬空注册
+- **F4**: auto_update.ps1 增量更新（compare API）
+- **G6/G7**: call_llm 超时+重试 / MinerU 超时+降级
+- **H4**: test_templates.py 改 pytest（23 assert）
+- **F1**: SKILL.md 外移低频道（-22.7%）
+
+### P2（一致性收敛）
+- **F3**: nature-figure/archify 补 manifest.yaml
+- **G8**: detect_gpu 按需探测
+- **G9**: three.js 本地化（data URI 内联）
+- **H10/H11**: __main__ guard + 无 TTY 降级
+
+### 测试：87 passed
+
 ## 许可 / License
 
 MIT

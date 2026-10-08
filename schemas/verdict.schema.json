@@ -7,8 +7,8 @@
   "properties": {
     "overall_verdict": {
       "type": "string",
-      "description": "Overall verdict / 整体判决",
-      "enum": ["within_ci", "close_outside_ci", "outside_tolerance", "not_testable", "static_check_failed"]
+      "description": "Overall verdict / 整体判决。统一五态枚举: pass/approx/within_ci/fail/skip。旧值别名(废弃): within_ci→within_ci, close_outside_ci→approx, outside_tolerance→fail, not_testable→skip, static_check_failed→fail",
+      "enum": ["pass", "approx", "within_ci", "fail", "skip", "close_outside_ci", "outside_tolerance", "not_testable", "static_check_failed"]
     },
     "overall_verdict_en": {
       "type": "string",
@@ -37,7 +37,8 @@
           "tolerance_rel": { "type": "number", "description": "Relative tolerance / 相对容忍度" },
           "verdict": {
             "type": "string",
-            "enum": ["within_ci", "close_outside_ci", "outside_tolerance", "not_testable", "static_check_failed"]
+            "description": "统一五态枚举: pass/approx/within_ci/fail/skip。旧值别名(废弃)见 overall_verdict 说明",
+            "enum": ["pass", "approx", "within_ci", "fail", "skip", "close_outside_ci", "outside_tolerance", "not_testable", "static_check_failed"]
           },
           "verdict_en": { "type": "string", "description": "Verdict in English / 判决英文" },
           "verdict_zh": { "type": "string", "description": "Verdict in Chinese / 判决中文" }

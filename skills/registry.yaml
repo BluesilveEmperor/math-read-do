@@ -34,70 +34,11 @@ skills:
       - env/conda-lock.yml
     requires_skills: [infrastructure_orchestration_skill]
 
-  - name: paper_parsing_skill
-    phase: analysis
-    path: skills/paper_parsing_skill
-    description: 论文解析与三方视角深度分析 / Paper parsing with three-perspective deep analysis
-    enhance_by: [nature-reader, nature-archify]
-    risk_level: low
-    requires_approval_for: [llm_api_call]
-    output_artifacts:
-      - analysis/paper_summary.json
-      - analysis/parsed_text.md
-      - analysis/formulas.tex
-      - analysis/gray_areas.md
-      - analysis/*_student_review.md
-      - analysis/*_advisor_review.md
-      - analysis/*_reviewer_review.md
-      - analysis/reproducibility_assessment.json
-      - analysis/review_manifest.json
-    requires_skills: []
-
-  - name: environment_setup_skill
-    phase: environment
-    path: skills/environment_setup_skill
-    description: 依赖管理与环境构建 / Dependency management and environment building
-    risk_level: medium
-    requires_approval_for: [dependency_change, system_package_install]
-    output_artifacts:
-      - env/environment.yml
-      - env/requirements-locked.txt
-    requires_skills: [version_management_skill]
-
-  - name: baseline_verification_skill
-    phase: verification
-    path: skills/baseline_verification_skill
-    description: 基线验证 / Baseline verification
-    risk_level: medium
-    requires_approval_for: [modify_source_code, run_experiment]
-    output_artifacts:
-      - results/baseline_metrics.json
-      - results/tolerance_spec.json
-    requires_skills: [environment_setup_skill, paper_parsing_skill]
-
-  - name: incremental_implementation_skill
-    phase: implementation
-    path: skills/incremental_implementation_skill
-    description: 增量实现 / Incremental implementation
-    risk_level: high
-    requires_approval_for: [write_code, modify_source, add_dependency]
-    output_artifacts:
-      - implementation/implementation_log.md
-      - implementation/delta_report.json
-    requires_skills: [baseline_verification_skill]
-
-  - name: experiment_execution_skill
-    phase: execution
-    path: skills/experiment_execution_skill
-    description: 实验运行与结果收集 / Experiment execution and result collection
-    risk_level: medium
-    requires_approval_for: [run_multi_seed, extend_budget]
-    output_artifacts:
-      - results/raw_metrics.csv
-      - logs/run.log
-      - results/figures/*.png
-      - results/figures/code/plot_*.py
-    requires_skills: [incremental_implementation_skill]
+  # 2026-10-09 悬空注册清理：移除 6 条指向不存在 skills/ 子目录的注册
+  # （paper_parsing / environment_setup / baseline_verification / incremental_implementation /
+  #   experiment_execution / artifact_packaging）——对应阶段动作均由主 SKILL.md 直接承载；
+  #   artifact_packaging 的 dist/ 产物属未实现设想，待实现后再注册。
+  # 与 routine 分支保持一致。
 
   - name: statistical_verification_skill
     phase: verification
@@ -109,7 +50,7 @@ skills:
       - reports/verdict.json
       - reports/reproduction_report.md
       - reports/reproduction_report.zh.md
-    requires_skills: [experiment_execution_skill]
+    requires_skills: []  # 多轮运行产出由主流程 Phase 5.1 承载（原 experiment_execution_skill 注册已随悬空清理移除）
 
   - name: bilingual_report_skill
     phase: reporting
@@ -139,13 +80,4 @@ skills:
     runtime: Node.js >= 18 (zero external dependencies)
     python_bridge: scripts/nature_archify_bridge.py
 
-  - name: artifact_packaging_skill
-    phase: packaging
-    path: skills/artifact_packaging_skill
-    description: 制品打包与溯源 / Artifact packaging and provenance
-    risk_level: low
-    requires_approval_for: [publish_artifact, sign_attestation]
-    output_artifacts:
-      - dist/artifact_bundle.zip
-      - dist/provenance_chain.json
-    requires_skills: [bilingual_report_skill]
+
