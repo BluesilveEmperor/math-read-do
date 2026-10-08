@@ -67,14 +67,14 @@ compatibility:
 
 | 特点 | 含义 | 框架对策 |
 |------|------|---------|
-| **数据常为商业授权** | CRSP/WRDS、Bloomberg、ICAP 数据不可公开获取 | Phase 1 数据分诊：先判可得性，再决定合成替代或标记 `not_testable` |
+| **数据常为商业授权** | CRSP/WRDS、Bloomberg、ICAP 数据不可公开获取 | Phase 1 数据分诊：先判可得性，再决定合成替代或标记 `skip` |
 | **环境高度分裂** | signatory 只支持 torch 1.9，与 TF 2.15 不可共存 | 强制双 conda 环境（`financial` / `sigtorch39`），每个实验声明所属环境 |
 | **结果是随机量** | GAN、蒙特卡洛的输出天然带方差 | 多种子 + bootstrap 95% CI，而非单点比对 |
-| **上游代码常残缺** | 论文仓库漏提交核心模块 | 五态判决含 `blocked`，允许诚实地"复现不了" |
+| **上游代码常残缺** | 论文仓库漏提交核心模块 | 五态判决含 `skip`，允许诚实地"复现不了" |
 | **内存是硬约束** | 3.7 GB RAM 下 notebook 会 kernel died | Phase 0 记录内存上限，串行化重实验 |
 
 因此本框架的核心不是"跑通"，而是 **"分清跑不通的三种原因"**：
-数据缺失（`not_testable`）／上游代码缺失（`blocked`）／实现有偏差（`fail`）。
+数据缺失（`skip`）／上游代码缺失（`skip`）／实现有偏差（`fail`）。
 
 ---
 
@@ -122,20 +122,9 @@ compatibility:
 
 ## 反模式 / Anti-Patterns & Blacklist
 
-| # | 反模式 | 后果 | 正确做法 |
-|---|--------|------|---------|
-| 1 | 合成数据结果直接与论文数值对比 | 结论无效 | 标记 `not_testable`，只做"方法可运行性"验证 |
-| 2 | 单次运行结果与论文比对 | GAN/MC 方差被当成偏差 | N≥5 种子 + bootstrap 95% CI |
-| 3 | 在一个 conda 环境里同时装 TF 2.15 和 signatory | 依赖地狱，numpy 版本互斥 | 双环境，`conda run -n <env>` 调用 |
-| 4 | `pip install signatory` | 必然失败 | 从源码编译（需 g++），且只支持 torch 1.9 |
-| 5 | torch 1.9 环境装 numpy>=2 | 导入即崩 | 锁 `numpy<2`；esig 需 0.9.8.3 |
-| 6 | notebook 里留 `plt.show()` 跑批处理 | 进程 0% CPU 永久挂起（实验 04 原因） | 批处理一律 `matplotlib.use("Agg")` + `savefig` |
-| 7 | 直接 load TF1 时代的 SavedModel | `keras_metadata.pb` 与 TF 2.15 不兼容 | 代码里重建架构 + 逐层拷权重（实验 10 修复） |
-| 8 | 3.7 GB RAM 下并行 6 个训练 | kernel died，全部白跑 | 最多并行 4–5 个轻量任务，重实验串行 |
-| 9 | 假定 `n_lags` 等于真实时间步数 | discriminator 维度不匹配（实验 02 bug） | 用 `x_real.shape[1]` 取真实步数 |
-| 10 | 不记录随机种子与超参 | 结果不可重现 | 每次运行落 `results/<exp>/run_config.json` |
-| 11 | 年化 Sharpe 时用 365 天 | 数值系统性偏高 | 交易日 252（`fin_tool.metrics.TRADING_DAYS`） |
-| 12 | 训练日志只打屏不落盘 | 挂起后无法定位 | 一律 `> logs/<exp>/<run>.log 2>&1` |
+12 条量化金融复现常见反模式（合成数据对比/单次运行/环境混装/signatory 编译/numpy 版本/plt.show 挂起/SavedModel 兼容/内存并行/n_lags/种子记录/年化天数/日志落盘）及对应正确做法。
+
+> 完整 12 条反模式表格见 [`references/anti_patterns.md`](references/anti_patterns.md)。
 
 ---
 
@@ -147,11 +136,29 @@ compatibility:
 | 0 | 宿主检测 + 资源上限 | `infra/infra_manifest.json` | G0: CPU/RAM/磁盘记录在案 |
 | 0.5 | 双环境构建 + 版本锁定 | `env/version_spec.json` | G1: 两环境导入测试通过 |
 | 1 | **数据可得性分诊** | `analysis/data_triage.json` | G01: 每个数据源标记 open/licensed/absent |
-| 2 | 论文理解 + 指标提取 | `analysis/paper_summary.json` | G2: 目标数值清单确认 |
-| 3 | 基线验证 | `results/baseline_metrics.json` | G3: 基线对齐或记录灰区 |
-| 4 | 增量实现 + 修复 | `implementation/delta_report.json` | G4: 每模块 delta 验证 |
-| 5 | 多种子统计验证 | `results/statistical_summary.json` | G5: 五态判决 + 95% CI |
-| 6 | 中英双语报告 | `实验复现结果汇总/` | G6: 各子实验目录完整 |
+| 2 | 论文理解 + 指标提取 | `analysis/paper_summary.json` | G02: 目标数值清单确认 |
+| 3 | 基线验证 | `results/baseline_metrics.json` | G4: 基线对齐或记录灰区 |
+| 4 | 增量实现 + 修复 | `implementation/delta_report.json` | G5: 每模块 delta 验证 |
+| 5 | 多种子统计验证 | `results/statistical_summary.json` | G6: 五态判决 + 95% CI |
+| 6 | 中英双语报告 | `实验复现结果汇总/` | G7: 各子实验目录完整 |
+
+---
+
+## 门禁总表 / Gate Map
+
+> **说明**：financial 分支门禁编号已与 routine/main/obj 分支统一。原 G3→G4, G4→G5, G5→G6, G6→G7；原 G2（目标数值清单确认）重编号为 G02（financial 特有，论文理解阶段）。
+
+| Gate | 所属阶段 | 检查项摘要 | 失败动作 |
+|------|---------|-----------|---------|
+| GΔ | Phase Δ-1 自动更新 | 网络可达时同步至最新 | 静默跳过，不阻塞流程 |
+| G0 | Phase 0 宿主检测 | CPU/RAM/磁盘记录在案 | 返回修复 manifest/环境 |
+| G1 | Phase 0.5 版本检测 | 两环境导入测试通过 | 修复版本冲突后继续 |
+| G01 | Phase 1 数据分诊 | 每个数据源标记 open/licensed/absent | 用户介入决策处置方式 |
+| G02 | Phase 2 论文理解 | 目标数值清单确认 | 用户介入确认目标数值 |
+| G4 | Phase 3 基线验证 | 基线对齐或灰区记录完整 | 用户决策是否继续 |
+| G5 | Phase 4 增量实现 | 每模块 delta 验证通过 | 排查修复后重跑 |
+| G6 | Phase 5 统计判决 | 五态判决 + 95% CI 产出 | 补跑统计验证 |
+| G7 | Phase 6 双语报告 | 各子实验目录完整 | 补缺文件/补译 |
 
 ---
 
@@ -208,13 +215,37 @@ compatibility:
 | 类别 | 判定 | 处置 |
 |------|------|------|
 | `open` | 公开可下载（Yahoo Finance、Stanford 数据集等） | 正常复现，可与论文数值直接比对 |
-| `licensed` | 商业授权（CRSP/WRDS、Bloomberg、ICAP） | 生成合成替代（GBM/Heston），**判决降级为 `not_testable`** |
-| `absent` | 论文和仓库均未提供，也无法合成 | 标记 `blocked`，不启动训练 |
+| `licensed` | 商业授权（CRSP/WRDS、Bloomberg、ICAP） | 生成合成替代（GBM/Heston），**判决降级为 `skip`** |
+| `absent` | 论文和仓库均未提供，也无法合成 | 标记 `skip`，不启动训练 |
 
 **合成替代规范**：
 - 必须与原数据同维度、同频率（否则出现实验 06 的 7 vs 9 维度不匹配）
 - 生成脚本落盘并记录种子
 - 报告中显著标注"合成数据，不构成对论文数值的验证"
+
+**分诊脚本**（`scripts/data_triage.py`，将上述流程代码化，可执行可回归）:
+
+```bash
+# 输入论文元数据 JSON，输出 results/triage_report.json
+python scripts/data_triage.py --paper paper.json
+python scripts/data_triage.py --paper paper.json --output results/triage_report.json
+```
+
+`paper.json` 格式：
+```json
+{
+  "title": "Robust Deep Hedging",
+  "url": "https://arxiv.org/abs/...",
+  "data_sources": [
+    {"name": "Yahoo Finance", "type": "url", "location": "https://..."},
+    {"name": "CRSP", "type": "licensed", "location": "WRDS"},
+    {"name": "local.csv", "type": "file", "location": "data/local.csv"},
+    {"name": "Bloomberg SPX", "type": "absent", "location": ""}
+  ]
+}
+```
+
+输出 `results/triage_report.json`：每个数据源标记 `available` / `needs_auth` / `missing` + 处置建议 + 汇总计数。URL 探测超时 5 秒，网络不可达时降级为 `missing`，不阻塞流程。
 
 **G01**: 每个数据源均已分类；`licensed`/`absent` 的实验已确定处置方式
 
@@ -229,55 +260,15 @@ compatibility:
 2.3 提取训练超参（epochs、lr、batch、种子）
 2.4 标记论文中未交代的细节 → `analysis/gray_areas.md`
 
-**G2**: 目标数值清单确认
+**G02**: 目标数值清单确认
 
-**nature-archify 参与（论文理解阶段）**: 理解确认后可用 nature-archify 绘制不依赖实验数据的系统与流程图——`architecture` 系统架构图、`workflow` 技术流程图、`sequence` 调用时序图、`dataflow` 数据流图、`lifecycle` 状态机图（预计版；五类图都不承载实验数值）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 G5 判决后（硬规则见 nature-archify/SKILL.md）。执行前遵守 nature-archify 第 0 步必问。
+**nature-archify 参与（论文理解阶段）**: 理解确认后可用 nature-archify 绘制不依赖实验数据的系统与流程图——`architecture` 系统架构图、`workflow` 技术流程图、`sequence` 调用时序图、`dataflow` 数据流图、`lifecycle` 状态机图（预计版；五类图都不承载实验数值）；`experiment` 实验流程图此阶段仅允许 `"status": "draft"` 的 predicted flow 草案，最终版必须等 G6 判决后（硬规则见 nature-archify/SKILL.md）。执行前遵守 nature-archify 第 0 步必问。
 
 ### 1.5 辅助架构图征询（可选但必须询问） / Auxiliary Architecture Diagram Offer
 
-**触发条件**: 论文理解阶段完成后、G01 门禁判决后，无论 proceed / caution / discourage 均须征询。用户未主动要求时也必须主动提出。
+论文理解阶段完成后须主动征询用户是否制作系统/流程架构图（nature-archify），同意后强制 6 项逐项询问（主题/图类型/图语言/动画/视觉预设/输出格式）。五类图（architecture/workflow/sequence/dataflow/lifecycle）均不承载实验数值，Phase 1-6 均可交付终版。
 
-**步骤 1 — 主动征询**:
-
-> 基于这篇论文的内容，我可以帮您制作 Nature 级别的研究框架图或技术路线图，方便组会汇报或开题使用。这些图不需要等实验跑完。您想现在制作吗？
-
-- 用户拒绝 → 记录到 `review_manifest.json`（`diagram_offer: "declined"`），跳到 G01 后的流程
-- 用户同意 → 进入步骤 2
-
-**步骤 2 — 强制 6 项逐项询问**（不可合并、不可默认、不可跳过，直接复用 nature-archify 第 0 步）:
-
-| # | 询问项 | 候选项 | 说明 |
-|---|--------|--------|------|
-| 1 | **主题 / Subject** | — | 论文核心研究问题与方法路径 |
-| 2 | **图类型** | `architecture` / `workflow` / `sequence` / `dataflow` / `lifecycle` | 根据论文特征推荐 1-2 种 |
-| 3 | **图语言** | `zh-CN` / `en` | 中文论文必须 zh-CN |
-| 4 | **动画模式** | `trace` / `none` | 默认 none（静态）；交互式展示用 trace |
-| 5 | **视觉预设** | `classic` / 其他 12 种 | 默认 classic；共 13 种，含 paper / brutalism / apple 等 |
-| 6 | **输出格式** | `HTML` / `HTML + PNG` / `HTML + SVG` | 产物为自包含 HTML，导出在 Viewer 内完成 |
-
-- 用户已声明过的项可复用，不重复问
-- 多张图可共享一轮回答
-- 若用户要求推荐，按论文领域给出 1-2 种建议并说明理由
-
-**步骤 3 — 执行**:
-
-按 nature-archify SKILL.md 第 0 步→第 5 步执行：选类型→读 schema/examples→写 candidate JSON→validate→deliver。
-
-**图类型可用矩阵**（依据 nature-archify 硬规则）:
-
-| 图类型 | 用途 | 需要实验数据 | 当前阶段可产出 |
-|--------|------|:---:|------|
-| `architecture` | 系统架构、部署拓扑、云与安全边界 | ❌ | ✅ 终版 |
-| `workflow` | 技术流程：节点与连线表达的步骤 | ❌ | ✅ 终版 |
-| `sequence` | 调用时序：参与者之间的消息往返 | ❌ | ✅ 终版 |
-| `dataflow` | 数据管道与血缘：提取→转换→落库 | ❌ | ✅ 终版 |
-| `lifecycle` | 状态机：状态、迁移与触发条件 | ❌ | ✅ 终版 |
-
-**约束**:
-- 五类图都只描述结构与流程，不承载实验数值，Phase 1-6 均可交付终版
-- 论文的**方法/模型架构图**与**实验流程图**不在 nature-archify 图类型内（PRISMA/CONSORT 等必须写入真实样本量与排除数），需要时另行接入 paperfig 类渲染器
-- 输出到 `figures/` 目录；每张图产出 `.html`（PNG/SVG 在 Viewer 内导出）
-- 用户偏好（语言/预设/格式）写入 `review_manifest.json`，Phase 4/5/6 复用，不重复询问
+> 完整流程、6 项询问表与图类型可用矩阵见 [`references/auxiliary_diagram_offer.md`](references/auxiliary_diagram_offer.md)。
 
 ---
 
@@ -290,7 +281,7 @@ compatibility:
 3.3 单点数值比对，容差取论文精度位数（确定性实验可用 1e-4）
 3.4 跑不通 → 定位是环境、数据还是代码缺失，写入 `analysis/gray_areas.md`
 
-**G3**: 基线对齐，或灰区记录完整
+**G4**: 基线对齐，或灰区记录完整
 
 ---
 
@@ -302,15 +293,15 @@ compatibility:
 4.2 每个修复独立 commit，注明论文 Eq. 编号或 bug 现象
 4.3 每次修复后重跑最小规模验证，delta 超容差则回退
 
-**已验证的修复补丁**（`fin_tool/registry.py` 中 `fixes` 字段）：
+**已验证的修复补丁**：具体修复内容见 `fin_tool/registry.py` 中各实验的 `fixes` 字段（当前含实验 02/04/10）。查看完整修复详情：
 
-| 实验 | 症状 | 修复 |
-|------|------|------|
-| 02 | WGAN discriminator shape mismatch | `train.py:93` 的 `input_dim` 由 `x_real_dim * n_lags`(16) 改为 `x_real_dim * x_real.shape[1]`(17) |
-| 10 | `keras_metadata.pb` 与 TF 2.15 不兼容 | 代码内重建 weight_decoder 架构，逐层拷贝权重 |
-| 04 | BCVA 第二阶段 0% CPU 挂起 | 改 `Agg` 后端 + 去掉 `plt.show()`；仍 OOM 则拆分两阶段 |
+```bash
+python -m fin_tool.cli show 02    # WGAN discriminator shape mismatch
+python -m fin_tool.cli show 04    # BCVA 第二阶段 0% CPU 挂起
+python -m fin_tool.cli show 10    # keras_metadata.pb 与 TF 2.15 不兼容
+```
 
-**G4**: 所有模块通过 delta 验证
+**G5**: 所有模块通过 delta 验证
 
 ---
 
@@ -322,19 +313,19 @@ compatibility:
 5.2 **指标**（`fin_tool.metrics`）:
     年化 Sharpe（252 交易日）、Sortino、最大回撤、对冲概率、相对误差
 5.3 **区间估计**: `bootstrap_ci()` 给出均值的 95% 置信区间
-5.4 **五态判决**（`fin_tool.metrics.verdict`）:
+5.4 **五态判决**（`fin_tool.metrics.verdict`，统一枚举）:
 
 | 判决 | 条件 |
 |------|------|
 | `pass` | 相对误差 ≤ tol |
 | `approx` | tol < 相对误差 ≤ 3·tol |
+| `within_ci` | 论文值落在复现 95% CI 内 |
 | `fail` | 相对误差 > 3·tol |
-| `not_testable` | 无参考值（合成数据替代了授权数据） |
-| `blocked` | 实验根本跑不起来（缺代码/缺数据/内存不足） |
+| `skip` | 跳过（无参考值/实验不可运行；旧 not_testable, blocked → skip） |
 
-**G5**: 每个目标数值均有判决 + CI
+**G6**: 每个目标数值均有判决 + CI
 
-**nature-archify 参与（报告插图）**: G5 判决产出后，系统架构/技术流程/调用时序/数据流/状态机图一律经 nature-archify 渲染，数据可视化图走 nature-figure。注意：`experiment` 实验流程图（PRISMA/CONSORT 等，需真实样本量与排除数）**不在 nature-archify 的五类图内**，需要时另行接入 paperfig 类渲染器。
+**nature-archify 参与（报告插图）**: G6 判决产出后，系统架构/技术流程/调用时序/数据流/状态机图一律经 nature-archify 渲染，数据可视化图走 nature-figure。注意：`experiment` 实验流程图（PRISMA/CONSORT 等，需真实样本量与排除数）**不在 nature-archify 的五类图内**，需要时另行接入 paperfig 类渲染器。
 
 ---
 
@@ -370,39 +361,15 @@ compatibility:
     └── 总判决结果.json
 ```
 
-**G6**: 每个子实验目录结构完整，`总览/` 提供跨实验汇总
+**G7**: 每个子实验目录结构完整，`总览/` 提供跨实验汇总
 
 ---
 
 ## 内建实验档案 / Built-in Experiment Registry
 
-10 篇论文的真实复现结果（WSL2 Ubuntu, 8 核 CPU, 3.7 GB RAM, 无 GPU）：
+10 篇论文的真实复现结果（WSL2 Ubuntu, 8 核 CPU, 3.7 GB RAM, 无 GPU）：完全复现 5 / 部分复现 3 / 无法复现 2。实验 07 是唯一达到 0.01% 容差内逐项匹配的实验，可作为框架正确性基准。
 
-| 编号 | 实验 | 期刊 | 环境 | 状态 | 关键结果 / 阻塞原因 |
-|------|------|------|------|------|--------------------|
-| 01 | Robust Deep Hedging | Quantitative Finance 2022 | financial | ✅ 完成 | 4/4 notebooks 执行成功 |
-| 02 | Sig-Wasserstein GANs | Mathematical Finance 2023 | sigtorch39 | ✅ 完成 | 4/4 组实验（需 discriminator 维度修复） |
-| 03 | Joint Calibration SPX/VIX | Mathematical Finance 2024 | sigtorch39 | ⚠️ 部分 | configs 2–5 输出 `Rho_d=4.npy`；6–8 空目录 |
-| 04 | Deep xVA Solver | SIAM J. Fin. Math 2023 | financial | ⚠️ 部分 | callOption Y0≈1.9673, fvaForward Y0≈1.98；BCVA 挂起 |
-| 05 | Fin-GAN | Quantitative Finance 2024 | financial | ✅ 完成 | SR_w(test)=0.88, SR_w(val)=2.19（合成数据） |
-| 06 | Signature-Based Models | SIAM J. Fin. Math 2023 | sigtorch39 | ❌ 阻塞 | 缺 Bloomberg SPX 到期日/行权价数据 |
-| 07 | Network Superhedging | Mathematical Finance 2022 | sigtorch39 | ✅ 完成 | λ=200: 1.3274/0.4072；λ=1e5: 2.0952/0.9966 |
-| 08 | Signature Volatility Models | SIAM J. Fin. Math 2025 | sigtorch39 | ❌ 阻塞 | 上游仓库缺 fourier.py 等核心模块 |
-| 09 | Optimal Stopping Randomized NN | Frontiers Math Fin. 2023 | financial | ✅ 完成 | 全部 configs 通过，NLSM price ≈ 10.9–21.7 |
-| 10 | Deep Weighted Monte Carlo | Quantitative Finance 2023 | financial | ⚠️ 部分 | 模型已修复，完整 notebook 内存不足 |
-
-**统计**: 完全复现 5 / 部分复现 3 / 无法复现 2
-
-实验 07 是唯一达到 0.01% 容差内逐项匹配的实验，可作为框架的正确性基准：
-
-| 配置 | 指标 | 复现值 | 论文值 | 判决 |
-|------|------|--------|--------|------|
-| λ=200 | 价格 | 1.3274 | 1.3274 | pass |
-| λ=200 | 对冲概率 | 0.4072 | 0.4072 | pass |
-| λ=1e5 | 价格 | 2.0952 | 2.0952 | pass |
-| λ=1e5 | 对冲概率 | 0.9966 | 0.9966 | pass |
-| — | 参数总量 | 11,191 | 11,191 | pass |
-
+> 实验档案的**单一真相源**为 `fin_tool/registry.py`（`REGISTRY` 字典）。完整状态表、阻塞原因与实验 07 基准数值见 [`references/experiment_registry_detail.md`](references/experiment_registry_detail.md)（人类可读视图，数据与 registry.py 同步）。
 ---
 
 ## 快速开始 / Quick Start
@@ -454,28 +421,9 @@ R.by_status(R.BLOCKED)                   # 哪些实验跑不了、为什么
 
 ## 集成 Nature 子技能 / Integrated Nature Skills
 
-本 skill 集成了四个独立的 Nature 子技能 (`nature-reader`, `nature-figure`, `nature-paper2ppt`, `nature-archify`) 和一个共享层 (`_shared/`)，它们位于 `math-read-do/` 目录下，可作为独立 skill 被调用，也可作为 Phase 1-6 的增强工具。
+本 skill 集成四个独立 Nature 子技能（`nature-reader`/`nature-figure`/`nature-paper2ppt`/`nature-archify`）和共享层 `_shared/`，位于 `math-read-do/` 目录下，可独立调用，也可增强 Phase 1-6。nature-archify 参与 Phase 2（系统/流程/时序/数据流/状态机图）与 Phase 6（报告插图）；nature-figure 增强 Phase 5 图表导出；nature-paper2ppt 在 Phase 6 后生成汇报 PPTX。
 
-### 子技能路由
-
-| 子技能 | 目录 | 入口文件 | 主要用途 |
-|--------|------|---------|---------|
-| nature-reader | `nature-reader/` | `SKILL.md` + `manifest.yaml` | 科研论文智能阅读、结构化提取、6种来源格式路由 |
-| nature-figure | `nature-figure/` | `SKILL.md` | 科研数据可视化顾问：8 步工作流，matplotlib+seaborn+SciencePlots+plotly，视觉自检闭环 |
-| nature-paper2ppt | `nature-paper2ppt/` | `SKILL.md` + `manifest.yaml` | 论文→中文 PPTX，6类论文叙事弧，自审校循环 |
-| nature-archify | `nature-archify/` | `SKILL.md` | 系统架构图渲染器：5 类图 architecture/workflow/sequence/dataflow/lifecycle，13 视觉预设，9 项 showcase 校验 |
-| _shared | `_shared/` | 无入口，被子技能引用 | 术语账本、论文类型分类法、伦理规范、Nat Communs 格式 |
-
-### 与主流程的协同
-
-- **nature-reader** 可增强文献阅读阶段（若需逐段中英对照阅读），提供替代 PDF 解析策略和结构化输出格式。未指定审阅视角时主动询问。
-- **nature-figure** 可增强 Phase 5（图表导出），提供出版级图表样式和质量门禁。
-- **nature-archify** 参与文献阅读与实验复现全程：Phase 2（论文理解后：系统架构图 / 技术流程图 / 调用时序图 / 数据流图 / 状态机图预计版）、Phase 6（报告插图），作为"系统架构 / 流程 / 时序 / 数据流 / 状态机渲染器"：从 JSON 规格产出 self-contained inline-SVG HTML，内嵌中文字体、几何自证，13 种视觉预设 + 深/浅双主题；适用于论文 float / 开题报告 / 组会汇报里的系统与流程图。Node CLI（`nature-archify/bin/archify.mjs`）零外部依赖，Python 侧通过 `scripts/nature_archify_bridge.py` 调用。论文的方法/模型架构图与实验流程图不在本模块图类型内，需要时另行接入 paperfig 类渲染器。
-- **nature-paper2ppt** 在 Phase 6 之后生成汇报 PPTX，将复现结果呈现为学术演示。
-
-### 调用方式
-
-每个子技能有独立的 `SKILL.md` + `manifest.yaml`，通过 load_skill 加载后自动读取对应的 static/fragments/references。子技能之间的共享内容通过 `_shared/` 目录引用，无需重复加载。
+> 子技能路由表、入口文件与主流程协同详情见 [`references/nature_skills_integration.md`](references/nature_skills_integration.md)。
 
 ---
 
@@ -495,13 +443,4 @@ R.by_status(R.BLOCKED)                   # 哪些实验跑不了、为什么
 
 ## 参考文献 / References
 
-- Robust Deep Hedging — *Quantitative Finance*, 2022
-- Sig-Wasserstein GANs for Time Series Generation — *Mathematical Finance*, 2023
-- Joint Calibration to SPX and VIX Options — *Mathematical Finance*, 2024
-- Deep xVA Solver — *SIAM Journal on Financial Mathematics*, 2023
-- Fin-GAN: Forecasting and Classifying Financial Time Series — *Quantitative Finance*, 2024
-- Signature-Based Models for Option Pricing — *SIAM J. Financial Mathematics*, 2023
-- Superhedging with Neural Networks — *Mathematical Finance*, 2022
-- Signature Volatility Models — *SIAM J. Financial Mathematics*, 2025
-- Optimal Stopping with Randomized Neural Networks — *Frontiers of Mathematical Finance*, 2023
-- Deep Weighted Monte Carlo — *Quantitative Finance*, 2023
+> 10 篇量化金融顶刊论文完整列表见 [`references/references.md`](references/references.md)。

@@ -13,6 +13,8 @@ import csv
 import json
 import sys
 
+import numpy as np
+
 from . import metrics as M
 from . import registry as R
 
@@ -100,7 +102,8 @@ def cmd_metrics(args) -> int:
     if not series:
         print(f"no numeric data found in {args.pnl}", file=sys.stderr)
         return 1
-    cum = [sum(series[:i + 1]) for i in range(len(series))]
+    # 用 np.cumsum 以 O(n) 计算累积收益，替代原先 O(n²) 的逐项切片求和
+    cum = np.cumsum(series)
     lo, hi = M.bootstrap_ci(series, seed=args.seed)
     print(json.dumps({
         "n": len(series),

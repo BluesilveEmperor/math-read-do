@@ -69,3 +69,48 @@ def test_verdict_table_shape():
     rows = [("price", 1.3274, 1.3274, 1e-4), ("prob", 0.41, 0.4072, 1e-4)]
     t = M.verdict_table(rows)
     assert [r["verdict"] for r in t] == [M.PASS, M.FAIL]
+
+# --- bootstrap_ci 内存保护（G5）---
+
+
+def test_bootstrap_ci_small_sample_unchanged():
+    """小样本（不触发降级）时数值与无保护参数完全一致。"""
+    rng = np.random.RandomState(1)
+    x = rng.normal(1.0, 0.1, 300)
+    # 默认参数（含内存保护）vs 显式大上限（等价于原算法）
+    a = M.bootstrap_ci(x, seed=42)
+    b = M.bootstrap_ci(x, seed=42, max_samples=10**9, max_memory_mb=10**9)
+    assert a == b
+
+
+def test_bootstrap_ci_large_sample_no_oom():
+    """大样本（n=10^5）不 OOM，正常返回有限区间。"""
+    rng = np.random.RandomState(0)
+    x = rng.normal(0.0, 1.0, 100_000)
+    lo, hi = M.bootstrap_ci(x, seed=7)
+    assert np.isfinite(lo) and np.isfinite(hi)
+    assert lo < hi
+
+
+def test_bootstrap_ci_downsample_is_deterministic():
+    """触发下采样时结果仍确定性（同 seed 可复现）。"""
+    rng = np.random.RandomState(0)
+    x = rng.normal(0.0, 1.0, 50_000)
+    a = M.bootstrap_ci(x, seed=99, max_samples=2000)
+    b = M.bootstrap_ci(x, seed=99, max_samples=2000)
+    assert a == b
+
+
+def test_bootstrap_ci_chunking_matches_full_when_no_downsample():
+    """仅触发分块（不触发下采样）时，结果与不分块完全一致。
+
+    构造 x.size <= max_samples 但 estimated_mb > max_memory_mb 的场景，
+    验证分块计算的随机数流与一次性生成一致。
+    """
+    rng = np.random.RandomState(3)
+    x = rng.normal(2.0, 0.5, 4000)  # 4000 <= max_samples(10000)
+    # estimated_mb = 2000 * 4000 * 16 / 1MiB ≈ 122 MB
+    # 设 max_memory_mb=50 触发分块，但不触发下采样
+    chunked = M.bootstrap_ci(x, seed=11, max_memory_mb=50.0)
+    full = M.bootstrap_ci(x, seed=11, max_memory_mb=10**9)
+    assert chunked == full
