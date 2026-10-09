@@ -173,6 +173,13 @@ WSL2 Ubuntu, 8 核 CPU, 3.7 GB RAM, 纯 CPU 无 GPU）
 
 ### 测试：63 passed
 
+## WSL 环境自动检测 + 评测框架同步
+
+- **新增 `scripts/detect_wsl.sh`**: 实验复现时自动检测用户是否已有 WSL 且 Linux 环境已配置好（Python3 + numpy + scipy）。若已配置好 → 使用 WSL Linux 进行复现；否则 → 在当前系统直接运行。不强制安装 WSL。
+- **环境管理工具检测**: 优先检测 UV（`uv venv` + `uv pip install`），UV 不好处理的情况检测 conda 兜底。输出 `env_manager` 字段（`uv`/`conda`/`none`）。
+- **SKILL.md Phase 0.0**: 新增"环境选择 / Environment Selection"步骤，在 Phase 0 之前执行平台选择。
+- **`_shared/eval/` 同步**: 评测框架（grader.py + metrics_collector.py + test-prompts.json + __init__.py）已同步到所有分支。
+
 ## 许可
 
 MIT
