@@ -194,6 +194,31 @@ compatibility:
     - 环境创建: `uv venv .venv && source .venv/bin/activate && uv pip install -r requirements.txt`
     - conda 兜底: `conda env create -f environment.yml`
 
+0.0.4 **实验复现规范**（全平台适用: WSL/Linux/Windows/macOS）:
+
+    a) **目录结构**:
+       - 初次使用: `mkdir -p ~/projects`（Windows 下 `~` = `C:\Users\<username>\`）
+       - 每个实验单独一个文件夹: `~/projects/<experiment-name>/`
+       - 后续所有实验均放在 `~/projects/` 目录下
+       - 建议命名: 论文姓氏+年份 或 项目简称（如 `~/projects/smith2023-qem/`）
+
+    b) **环境隔离**（每个实验单独一个环境，以实验名命名）:
+       - UV: `uv venv ~/projects/<experiment-name>/.venv`
+             `source ~/projects/<experiment-name>/.venv/bin/activate`
+             `uv pip install -r requirements.txt`
+       - conda: `conda create -n <experiment-name> python=3.x`
+                `conda activate <experiment-name>`
+       - 环境名 = 实验名，确保隔离且可辨识
+
+    c) **全程留痕**（实验目录下保留所有记录）:
+       ~/projects/<experiment-name>/
+       ├── code/           # 所用代码脚本（含修改过的官方代码）
+       ├── logs/           # 实验日志（stdout/stderr 完整捕获）
+       │   └── errors/     # 报错记录（含堆栈、环境信息、复现命令）
+       ├── results/        # 实验结果（metrics、图表）
+       ├── env/            # 环境锁定文件（requirements-locked.txt / conda-lock.yml）
+       └── README.md       # 实验说明（论文出处、复现命令、结果摘要）
+
 **设计原则**: 优先使用已配置好的 Linux 环境（WSL）进行复现，以保证与论文原始实验环境的一致性；若用户未配置 WSL，则在当前系统直接运行，降低使用门槛。
 
 **实现文件**: `scripts/detect_wsl.sh`

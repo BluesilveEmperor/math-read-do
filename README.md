@@ -180,6 +180,13 @@ WSL2 Ubuntu, 8 核 CPU, 3.7 GB RAM, 纯 CPU 无 GPU）
 - **SKILL.md Phase 0.0**: 新增"环境选择 / Environment Selection"步骤，在 Phase 0 之前执行平台选择。
 - **`_shared/eval/` 同步**: 评测框架（grader.py + metrics_collector.py + test-prompts.json + __init__.py）已同步到所有分支。
 
+## 实验复现规范（全平台适用）
+
+- **目录结构**: 初次使用 `mkdir -p ~/projects`（Windows 下 `~` = `C:\Users\<username>\`），每个实验单独一个文件夹 `~/projects/<experiment-name>/`，后续所有实验均放在 `~/projects/` 目录下
+- **环境隔离**: 每个实验单独一个环境，以实验名命名。UV: `uv venv ~/projects/<exp>/.venv`；conda: `conda create -n <exp> python=3.x`
+- **全程留痕**: 实验目录下保留 `code/`（代码脚本）、`logs/`（实验日志）、`logs/errors/`（报错记录）、`results/`（结果）、`env/`（环境锁定）、`README.md`（实验说明）
+- **detect_wsl.sh 增强**: 新增 `projects_dir` 和 `projects_exists` 字段，检测 `~/projects` 目录是否已存在
+
 ## 许可
 
 MIT

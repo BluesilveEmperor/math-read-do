@@ -52,6 +52,24 @@ if command -v wsl &>/dev/null; then
     fi
 fi
 
+# 检测 ~/projects 目录（全平台适用）
+PROJECTS_DIR=""
+PROJECTS_EXISTS="false"
+if [[ "$WSL_AVAILABLE" == "true" && -n "$DISTRO" ]]; then
+    PROJECTS_DIR=$(wsl -d "$DISTRO" -- bash -c 'echo ~/projects' 2>/dev/null | tr -d '\r\n' || echo "")
+    if [[ -n "$PROJECTS_DIR" ]]; then
+        PROJECTS_CHECK=$(wsl -d "$DISTRO" -- bash -c "test -d ~/projects && echo 'exists'" 2>/dev/null | tr -d '\r\n' || echo "")
+        if [[ "$PROJECTS_CHECK" == "exists" ]]; then
+            PROJECTS_EXISTS="true"
+        fi
+    fi
+else
+    PROJECTS_DIR="$HOME/projects"
+    if [[ -d "$PROJECTS_DIR" ]]; then
+        PROJECTS_EXISTS="true"
+    fi
+fi
+
 # 输出 JSON
 mkdir -p "$(dirname "$OUTPUT_FILE")" 2>/dev/null || true
 cat > "$OUTPUT_FILE" <<EOF
@@ -63,7 +81,9 @@ cat > "$OUTPUT_FILE" <<EOF
   "uv_available": $UV_AVAILABLE,
   "conda_available": $CONDA_AVAILABLE,
   "env_manager": "$ENV_MANAGER",
-  "recommend": "$RECOMMEND"
+  "recommend": "$RECOMMEND",
+  "projects_dir": "$PROJECTS_DIR",
+  "projects_exists": $PROJECTS_EXISTS
 }
 EOF
 
@@ -76,3 +96,5 @@ echo "  uv_available:    $UV_AVAILABLE"
 echo "  conda_available: $CONDA_AVAILABLE"
 echo "  env_manager:     $ENV_MANAGER"
 echo "  recommend:       $RECOMMEND"
+echo "  projects_dir:   $PROJECTS_DIR"
+echo "  projects_exists: $PROJECTS_EXISTS"
