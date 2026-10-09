@@ -92,6 +92,37 @@ compatibility:
 
 ## 阶段详述 / Phase Detail
 
+### Phase 0.0: 环境选择 / Environment Selection
+
+**目的**: 检测用户是否已有 WSL 且 Linux 环境已配置好，据此选择实验复现的执行平台。
+
+**流程**:
+0.0.1 **WSL 环境检测**: 运行 `scripts/detect_wsl.sh` → 输出 `infra/wsl_detection.json`
+    - 检测 `wsl` 命令是否可用
+    - 若可用，检测默认 WSL 发行版中 Python3 + numpy + scipy 是否就绪
+    - 输出 `recommend` 字段: `"wsl"` 或 `"native"`
+
+0.0.2 **平台选择**:
+    - `recommend == "wsl"` → 后续所有实验复现命令通过 `wsl -d <distro> --` 执行，Windows 路径用 `wslpath` 自动转换
+    - `recommend == "native"` → 在用户当前所在系统直接执行（Windows/macOS/Linux 原生）
+    - **不强制安装 WSL**——仅检测已有环境并选择，未配置则在当前系统运行
+
+0.0.3 **Linux 环境配置策略**（当 recommend == "wsl" 时适用）:
+    - **优先使用 UV** (`uv venv` + `uv pip install`) 进行 Python 环境配置——UV 极快且兼容 pip 生态
+    - **UV 不好处理的情况** → 启用 conda 配置：
+      - 需要特定 conda 频道（如 `conda-forge`）的二进制包
+      - 依赖非 Python 的系统级库（如 CUDA toolkit、MKL、特定 BLAS）
+      - UV 安装失败的包（如需要编译且缺少系统头文件的 C 扩展）
+    - 检测顺序: `detect_wsl.sh` 先检测 `uv` → 再检测 `conda`，输出 `env_manager` 字段
+    - 环境创建: `uv venv .venv && source .venv/bin/activate && uv pip install -r requirements.txt`
+    - conda 兜底: `conda env create -f environment.yml`
+
+**设计原则**: 优先使用已配置好的 Linux 环境（WSL）进行复现，以保证与论文原始实验环境的一致性；若用户未配置 WSL，则在当前系统直接运行，降低使用门槛。
+
+**实现文件**: `scripts/detect_wsl.sh`
+
+---
+
 ### Phase 0: 基础设施检测与配置 / Infrastructure Detection & Setup
 
 **输入**: 宿主操作系统信息
